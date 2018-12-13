@@ -1,21 +1,13 @@
-from pykrx.core import *
+from pykrx.market import *
+from pykrx.shorting import *
 from pandas import DataFrame
+import re
 
 class Krx :
     def __init__(self):
-        self.stock_codes = self._stock_codes()
-
-    def _stock_codes(self):
-        result = KrxStockFinder().post(mktsel="ALL")
-        # DataFrame으로 저장
-        df = DataFrame(result['block1'])
-        # - ISIN, 시장, 티커 column으로 구성
-        df.columns = ['종목', 'ISIN', '시장', '티커']
-        # - 종목이름을 index로 설정
-        df.set_index('종목', inplace=True)
-        # - 티커 축약 (A037440 -> 037440)
-        df['티커'] = df['티커'].apply(lambda x: x[1:])
-        return df
+        self.stock_codes = get_stock_codes()
+        self.re_ticker = re.compile("^[0-9]{6}$")
+        self.re_isin = re.compile("^KR[0-9]{10}$")
 
     def get_tickers(self):
         return list(self.stock_codes['티커'].values)
@@ -26,6 +18,13 @@ class Krx :
     def get_isin_by_ticker(self, ticker):
         try:
             cond = self.stock_codes['티커'] == ticker
+            return self.stock_codes['ISIN'][cond].values[0]
+        except IndexError:
+            return None
+
+    def get_isin_by_stock_name(self, stock_name):
+        try:
+            cond = self.stock_codes.index == stock_name
             return self.stock_codes['ISIN'][cond].values[0]
         except IndexError:
             return None
@@ -44,33 +43,45 @@ class Krx :
         except IndexError:
             return None
 
-    def get_ohlcv(self, ticker, fromdate, todate):
-        if len(ticker) == 6:
+    def _get_isin_and_name(self, ticker):
+        if self.re_ticker.match(ticker):
             isin = self.get_isin_by_ticker(ticker)
-        else:
+            name = self.get_stock_name_by_isin(isin)
+        elif self.re_isin.match(ticker):
             isin = ticker
-        result = KrxDailiyPrice().post(isu_cd=isin, fromdate=fromdate, todate=todate)
+            name = self.get_stock_name_by_ticker(isin)
+        else:
+            print("잘못된 Ticker를 입력했습니다. ")
+            print(" - 올바른 예: 000660")
+            raise RuntimeError
+        return isin, name
 
-        # DataFrame으로 저장
-        df = DataFrame(result['block1'])
-        df = df[['trd_dd', 'tdd_opnprc', 'tdd_hgprc', 'tdd_lwprc', 'tdd_clsprc', 'acc_trdvol']]
-        df.columns = ['날짜', '시가', '고가', '저가', '종가', '거래량']
-        df.set_index('날짜', inplace=True)
+    def _get_market_ohlcv(self, ticker, fromdate, todate):
+        isin, name = self._get_isin_and_name(ticker)
+        return get_market_ohlcv(isin, name, fromdate, todate)
 
-        # 숫자를 문자로 변경하자.
-        return df
+    def get_shorting_status(self, ticker, fromdate, todate):
+        isin, name = self._get_isin_and_name(ticker)
+        return get_shorting_comprehensive_status(isin, name, fromdate, todate)
+
+    def get_shorting_investor(self, ticker, fromdate, todate):
+        isin, name = self._get_isin_and_name(ticker)
+        return get_shorting_investor_status(isin, name, fromdate, todate)
 
 
 if __name__ == "__main__":
     import pandas as pd
-    pd.set_option('max_colwidth', 800)
+    pd.set_option('display.width', None)
 
     k = Krx()
-    print(k.get_tickers())
-    print(k.get_isins())
-    print(k.get_stock_name_by_ticker("060310"))
-    print(k.get_stock_name_by_ticker("0603100"))
-    print(k.get_stock_name_by_isin("KR7054620000"))
-    print(k.get_stock_name_by_isin("##054620000"))
+    # print(k.get_tickers())
+    # print(k.get_isins())
+    # print(k.get_stock_name_by_ticker("060310"))
+    # print(k.get_stock_name_by_ticker("0603100"))
+    # print(k.get_stock_name_by_isin("KR7054620000"))
+    # print(k.get_stock_name_by_isin("##054620000"))
 
-    print(k.get_ohlcv("000660", "20181201", "20181212"))
+    # print(k._get_market_ohlcv("005930", "20181201", "20181213"))
+
+    #print(k.get_shorting_status("005930", "20181101", "20181213"))
+    print(k.get_shorting_investor("005930", "20181101", "20181213"))
