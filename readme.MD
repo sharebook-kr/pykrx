@@ -1,22 +1,23 @@
-#PyKrx
+# PyKrx
+
 본 모듈은 KRX (<http://marketdata.krx.co.kr>) 웹 싸이트를 스크래핑 (scraping) 합니다. 
 API 사용에 대한 KRX 관리자의 허락을 받지 않은 상태로, API 사용에 대한 책임은 사용자 본인에게 있습니다. 웹싸이트의 스크래핑으로 자신의 영업에 무단 사용하는 것은 불법이기 때문에 개인적인 용도로 사용하셔야 합니다. 또한 도의적으로도 무분별한 API 호출은 자제해 주시기 부탁드립니다.    
 결과물은 참고용으로만 사용해야하며, 투자의 결과에 대한 책임은 사용자에게 있습니다. 개인 Study를 진행하며 정리한 내용으로 잘못된 내용이 있을 수 있습니다.  
 
-##1. 환경설정
+## 1 환경설정
 
-###1.1 Installation
+### 1.1 Installation
 pykrx는 pip을 사용해서 쉽게 설치할 수 있습니다. 
 
 ```
 pip install pykrx
 ```
 
-###1.2 Import
+### 1.2 Import
 모듈의 사용은 import 부터 시작합니다.
 <code>from pykrx import *</code>
 
-###1.3 객체 생성
+### 1.3 객체 생성
 클래스로 구현되어 있으며, 클래스 객체를 통해 모든 API에 접근할 수있습니다.
 ```python
 krx = Krx()
@@ -33,7 +34,7 @@ krx.get_tickers()
 
 <br/>
 
-##2. API 설명
+## 2. API 설명
 
 ### 2.1 MarketData API
 
