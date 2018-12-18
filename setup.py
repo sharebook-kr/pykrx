@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name            = 'pykrx',
-    version         = '0.0.1',
+    version         = '0.0.2',
     description     = 'KRX scraping',
     url             = 'https://github.com/sharebook-kr/pykrx',
     author          = 'Lukas Yoo',
