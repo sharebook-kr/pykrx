@@ -29,7 +29,7 @@ class KrxHttp(ABC):
                 self.session.headers.update(self.header)
             uri = "{}{}".format(self.contents_url, self.uri)
             kwargs.update({"code":self.otp})
-            return self.session.post(url=uri, data=kwargs, timeout=5).json()
+            return self.session.post(url=uri, data=kwargs, timeout=10).json()
         except Exception as x:
             print("It failed", x.__class__.__name__)
             return None
@@ -73,9 +73,17 @@ class KrxHttp(ABC):
         return None
 
 
-class Singleton(object):
-    _instance = None
-    def __new__(class_, *args, **kwargs):
-        if not isinstance(class_._instance, class_):
-            class_._instance = object.__new__(class_, *args, **kwargs)
-        return class_._instance
+class MarketDataHttp(KrxHttp):
+    @property
+    def otp_url(self):
+        return "http://marketdata.krx.co.kr/contents/COM/GenerateOTP.jspx"
+
+    @property
+    def contents_url(self):
+        return "http://marketdata.krx.co.kr/contents"
+
+    @property
+    def uri(self):
+        return "/MKD/99/MKD99000001.jspx"
+
+

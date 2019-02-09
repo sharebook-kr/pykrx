@@ -1,4 +1,4 @@
-from pykrx.core import *
+from pykrx.krx_http import KrxHttp
 from pandas import DataFrame
 from datetime import datetime
 import numpy as np
@@ -19,7 +19,7 @@ class ShortHttp(KrxHttp):
         return "/SRT/99/SRT99000001.jspx"
 
 
-class SRT02010100(ShortHttp, Singleton):
+class SRT02010100(ShortHttp):
     # @Brief : 공매도 종합 현황
     # - http://short.krx.co.kr/contents/SRT/02/02010100/SRT02010100.jsp
 
@@ -58,7 +58,7 @@ class SRT02010100(ShortHttp, Singleton):
             return None
 
 
-class SRT02020100(ShortHttp, Singleton):
+class SRT02020100(ShortHttp):
     # @Brief : 공매도 거래 현황 - 종목별 공매도 거래 현황
     # - http://short.krx.co.kr/contents/SRT/02/02020100/SRT02020100.jsp
 
@@ -107,7 +107,7 @@ class SRT02020100(ShortHttp, Singleton):
             return None
 
 
-class SRT02020300(ShortHttp, Singleton):
+class SRT02020300(ShortHttp):
     # @Brief : 공매도 거래 현황 - 투자자별 공매도 거래 현황
     # - http://short.krx.co.kr/contents/SRT/02/02020300/SRT02020300.jsp
 
@@ -137,7 +137,7 @@ class SRT02020300(ShortHttp, Singleton):
             return None
 
 
-class SRT02020400(ShortHttp, Singleton):
+class SRT02020400(ShortHttp):
     # @Brief : 공매도 거래 현황 - 공매도 거래비중 상위 50 종목
     #  - http://short.krx.co.kr/contents/SRT/02/02010100/SRT02010100.jsp
 
@@ -171,7 +171,7 @@ class SRT02020400(ShortHttp, Singleton):
             return None
 
 
-class SRT02030100(ShortHttp, Singleton):
+class SRT02030100(ShortHttp):
     # @Brief : 공매도 잔고 현황 - 종목별 공매도 잔고 현황
     #  - http://short.krx.co.kr/contents/SRT/02/02010100/SRT02010100.jsp
 
@@ -220,7 +220,7 @@ class SRT02030100(ShortHttp, Singleton):
             return None
 
 
-class SRT02030400(ShortHttp, Singleton):
+class SRT02030400(ShortHttp):
     # @Brief : 공매도 잔고 현황 - 잔고 비중 상위 50
     # - http://short.krx.co.kr/contents/SRT/02/02020300/SRT02020300.jsp
 
