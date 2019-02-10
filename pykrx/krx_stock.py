@@ -102,7 +102,7 @@ class MKD30040(MarketDataHttp):
             df = df[['trd_dd', 'tdd_opnprc', 'tdd_hgprc', 'tdd_lwprc', 'tdd_clsprc', 'acc_trdvol']]
             df.columns = ['날짜', '시가', '고가', '저가', '종가', '거래량']
             df.set_index('날짜', inplace=True)
-            df = df.replace({',': ''}, regex=True).astype(np.int64)
+            df = df.replace(',', '', regex=True).astype(np.int64)
             df.index.name = isin
             return df
         except (TypeError, IndexError, KeyError) as e:
@@ -181,13 +181,4 @@ class MKD20011(MarketDataHttp):
 
 
 if __name__ == "__main__":
-    import pandas as pd
-    import matplotlib.pyplot as plt
-    import matplotlib.pyplot as plt
-    from matplotlib import font_manager
-
-    font_fname = 'C:/Windows/Fonts/malgunsl.ttf'
-    font_family = font_manager.FontProperties(fname=font_fname).get_name()
-    plt.rcParams["font.family"] = font_family
-    pd.set_option('display.expand_frame_repr', False)
     print(MKD30009().scraping("19990221"))

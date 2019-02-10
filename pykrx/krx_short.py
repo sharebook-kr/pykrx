@@ -44,7 +44,7 @@ class SRT02010100(ShortHttp):
             # Index 설정
             df.set_index('날짜', inplace=True)
             df.index.name = result['block1'][0]['isu_abbrv']
-            df = df.replace({',': ''}, regex=True).astype(np.int64)
+            df = df.replace(',', '', regex=True).astype(np.int64)
 
             # 상환량 추가
             repay = df['잔고'].shift(-1) + df['공매도'] - df['잔고']
@@ -98,7 +98,7 @@ class SRT02020100(ShortHttp):
             df.index.name = "{} ({}-{})".format(market, fromdate, todate)
 
             for key in df.columns[1:3]:
-                df[key] = df[key].replace({',': ''}, regex=True).astype(np.int64)
+                df[key] = df[key].replace(',', '', regex=True).astype(np.int64)
             df['거래량비중'] = df['거래량비중'].astype(np.float)
 
             return df
@@ -129,7 +129,7 @@ class SRT02020300(ShortHttp):
             df.columns = ['기관', '개인', '외국인', '기타', '합계', '날짜']
 
             df.set_index('날짜', inplace=True)
-            df = df.replace({',': ''}, regex=True).astype(np.int64)
+            df = df.replace(',', '', regex=True).astype(np.int64)
             df.index.name = index_name
             return df
         except (TypeError, IndexError, KeyError) as e:
@@ -161,9 +161,9 @@ class SRT02020400(ShortHttp):
             df.index.name = "{}({})".format(market, date)
 
             for key in ["순위", "공매도거래대금", "총거래대금", "직전40일거래대금평균"]:
-                df[key] = df[key].replace({',': ''}, regex=True).astype(np.int64)
+                df[key] = df[key].replace(',', '', regex=True).astype(np.int64)
             for key in ["공매도비중", "공매도거래대금증가율", "직전40일공매도평균비중", "공매도비중증가율", "주가수익률"]:
-                df[key] = df[key].replace({',': ''}, regex=True).astype(np.float)
+                df[key] = df[key].replace(',', '', regex=True).astype(np.float)
 
             return df
         except (TypeError, IndexError, KeyError) as e:
@@ -210,8 +210,8 @@ class SRT02030100(ShortHttp):
             df.index.name = "{} ({}-{})".format(market, fromdate, todate)
 
             for key in df.columns[1:-1]:
-                df[key] = df[key].replace({',': ''}, regex=True).astype(np.int64)
-            df["비중"] = df["비중"].replace({',': ''}, regex=True).astype(np.float)
+                df[key] = df[key].replace(',', '', regex=True).astype(np.int64)
+            df["비중"] = df["비중"].replace(',', '', regex=True).astype(np.float)
 
             return df
 
@@ -243,8 +243,8 @@ class SRT02030400(ShortHttp):
             df.index.name = market
 
             for key in df.columns[1:-1]:
-                df[key] = df[key].replace({',': ''}, regex=True).astype(np.int64)
-            df["비중"] = df["비중"].replace({',': ''}, regex=True).astype(np.float)
+                df[key] = df[key].replace(',', '', regex=True).astype(np.int64)
+            df["비중"] = df["비중"].replace(',', '', regex=True).astype(np.float)
 
             return df
         except (TypeError, IndexError, KeyError) as e:
