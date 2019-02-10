@@ -7,14 +7,14 @@ from pykrx.krx_short import SRT02030100, SRT02030400
 import datetime
 import pandas as pd
 import re
+import calendar
 
 
-class Krx :
+class Krx:
     def __init__(self):
         self.stock_finder = StockFinder.scraping()
         self.re_ticker = re.compile("^[0-9]{6}$")
         self.re_isin = re.compile("^KR[0-9]{10}$")
-        self.business_days = {}
 
     def get_tickers(self, date=None):
         if date is None:
@@ -45,44 +45,18 @@ class Krx :
         return isin
 
     def get_business_days(self, year, month):
+        '''영업일의 리스트를 구하는 함수
+        :param year: 조회년도
+        :param month: 조회월
+        :return: business day list
         '''
-        :param year:
-        :param month:
-        :return:
-        '''
-        if self.business_days.get(year, None) is None:
-            self.business_days[year] = {month: self._fetch_business_days(year, month)}
 
-        elif self.business_days[year].get(month, None) is None:
-            self.business_days[year][month] = self._fetch_business_days(year, month)
+        first_day, last_day = calendar.monthrange(year, month)
+        first_day_in_string = "{}{:02d}{:02d}".format(year, month, first_day)
+        last_day_in_string = "{}{:02d}{:02d}".format(year, month, last_day)
 
-        business_day_taht_krx_does_not_notify = ['{}0501'.format(year), '20070301']
-        for business_day_missed in business_day_taht_krx_does_not_notify:
-            if business_day_missed in self.business_days[year][month]:
-                self.business_days[year][month].remove(business_day_missed)
-
-        return self.business_days[year][month]
-
-    @staticmethod
-    def _fetch_business_days(year, month):
-        # 시작일 = (year)-(month)-(01)
-        curr_month_first_day_in_string = "{}-{}-01".format(year, month)
-        # 종료일 = (year)-(month + 1)-(01) - 1 day
-        if int(month) == 12:
-            year = int(year) + 1
-        else:
-            month = int(month) + 1
-        next_month_first_day_in_string = "{}-{}-01".format(year, month)
-
-        curr_month_last_day_in_df = datetime.datetime.strptime(next_month_first_day_in_string,
-                                                               "%Y-%m-%d") - datetime.timedelta(days=1)
-        curr_month_last_day_in_string = curr_month_last_day_in_df.strftime("%Y-%m-%d")
-        business_days = pd.date_range(curr_month_first_day_in_string, curr_month_last_day_in_string, freq='B')
-        # KRX에서 휴장일 (01023)을 조회한다
-        holidays = MKD01023().scraping(year)
-        # 평일에서 휴장일을 제거해서 최종 영업일을 반환한다
-        return [x.strftime("%Y%m%d") for x in business_days if x.strftime("%Y%m%d") not in holidays.index.tolist()]
-
+        df = self.get_market_ohlcv(first_day_in_string, last_day_in_string, "066570")
+        return df.index.tolist()
 
     @staticmethod
     def get_treasury_yields_in_kerb_market(date):
@@ -132,7 +106,7 @@ class Krx :
         :return        : OHLCV DataFrame
         '''
         isin = self._get_isin(ticker)
-        return MKD30040().scraping(fromdate, todate, isin)
+        return MKD30040().scraping(fromdate, todate, isin).sort_index()
 
     def get_shorting_status_by_date(self, fromdate, todate, ticker):
         '''일자별 공매도 종합 현황
@@ -196,11 +170,7 @@ class Krx :
 
 
 if __name__ == "__main__":
-    import time
     pd.set_option('display.width', None)
-
     krx = Krx()
-    df = krx.get_treasury_yields_in_kerb_market("20190208")
-    print(df)
+    print(krx.get_business_days(2019, 1))
 
-    pass
