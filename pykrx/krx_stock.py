@@ -1,6 +1,5 @@
 from pykrx.krx_http import MarketDataHttp
 from pandas import DataFrame
-import numpy as np
 
 
 class StockFinder(MarketDataHttp):
@@ -10,7 +9,7 @@ class StockFinder(MarketDataHttp):
 
     @staticmethod
     def scraping(market="전체", name=""):
-        '''30040 일자별 시세 스크래핑에서 종목 검색기
+        """30040 일자별 시세 스크래핑에서 종목 검색기
         http://marketdata.krx.co.kr/mdi#document=040204
         :param name  : 검색할 종목명 -  입력하지 않을 경우 전체
         :param market: 전체/코스피/코스닥 - 입력하지 않을 경우 전체
@@ -22,7 +21,7 @@ class StockFinder(MarketDataHttp):
             AK홀딩스     KR7006840003   KOSPI  006840
             APS홀딩스    KR7054620000  KOSDAQ  054620
             AP시스템     KR7265520007  KOSDAQ  265520
-        '''
+        """
         try:
             market_idx = {"코스피": "STK", "코스닥": "KSQ", "전체": "ALL"}.get(market, "ALL")
             result = StockFinder().post(mktsel=market_idx, searchText=name)
@@ -46,7 +45,7 @@ class DelistingFinder(MarketDataHttp):
 
     @staticmethod
     def scraping(market="전체", name=""):
-        '''30031 상장 폐지 종목에서 종목 검색기
+        """30031 상장 폐지 종목에서 종목 검색기
         http://marketdata.krx.co.kr/mdi#document=040603
         :param name  : 검색할 종목명 -  입력하지 않을 경우 전체
         :param market: 전체/코스피/코스닥 - 입력하지 않을 경우 전체
@@ -56,7 +55,7 @@ class DelistingFinder(MarketDataHttp):
             AP우주통신           KR7015670003  KOSPI    A015670  20070912
             AP우주통신(1우B)     KR7015671001  KOSPI    A015675  20070912
             BHK보통주            KR7003990009  KOSPI    A003990  20090430
-        '''
+        """
         try:
             market_idx = {"코스피": "STK", "코스닥": "KSQ", "전체": "ALL"}.get(market, "ALL")
             result = DelistingFinder().post(mktsel=market_idx, searchText=name)                        
@@ -82,57 +81,47 @@ class MKD30040(MarketDataHttp):
 
     @staticmethod
     def scraping(fromdate, todate, isin):
-        '''30040 일자별 시세 조회
+        """30040 일자별 시세 조회
         :param fromdate: 조회 시작 일자
         :param todate: 조회 마지막 일자
         :param isin: 조회할 종목의 ISIN 번호
         :return: 일자별 시세 조회 결과 DataFrame
-        .                  시가     고가    저가    종가   거래량
-            2018/02/08     97200   99700   97100   99300   813467
-            2018/02/07     98000  100500   96000   96500  1082264
-            2018/02/06     94900   96700   93400   96100  1094871
-            2018/02/05     99400   99600   97200   97700   745562
-        '''
+            acc_trdval     acc_trdvol  fluc_tp  list_shrs    mktcap     tdd_clsprc tdd_cmpr tdd_hgprc tdd_lwprc  tdd_opnprc  trd_dd
+        0   80,437,317,800    813,467       1  163,647,814  16,250,228     99,300    2,800    99,700    97,100     97,200  2018/02/08
+        1  106,022,586,600  1,082,264       1  163,647,814  15,792,014     96,500      400   100,500    96,000     98,000  2018/02/07
+        2  104,081,455,600  1,094,871       2  163,647,814  15,726,555     96,100    1,600    96,700    93,400     94,900  2018/02/06
+        3   73,279,645,300    745,562       2  163,647,814  15,988,391     97,700    3,300    99,600    97,200     99,400  2018/02/05
+        4   98,290,649,100    975,164       2  163,647,814  16,528,429    101,000    2,500   103,500    99,900    103,000  2018/02/02
+        """
         try:
             result = MKD30040().post(isu_cd=isin, fromdate=fromdate, todate=todate)
-            df = DataFrame(result['block1'])
-            if df.empty:
-                return None
+            return DataFrame(result['block1'])
 
-            df = df[['trd_dd', 'tdd_opnprc', 'tdd_hgprc', 'tdd_lwprc', 'tdd_clsprc', 'acc_trdvol']]
-            df.columns = ['날짜', '시가', '고가', '저가', '종가', '거래량']
-            df.set_index('날짜', inplace=True)
-            df = df.replace(',', '', regex=True).astype(np.int64)
-            df.index.name = isin
-            return df
         except (TypeError, IndexError, KeyError) as e:
-
             print(e)
             return None
+
 
 class MKD30009(MarketDataHttp):
     @property
     def bld(self):
         return "MKD/13/1302/13020401/mkd13020401"
 
-    def scraping(self, date, market="전체"):
-        try:
-            market_idx = {"코스피": "STK", "코스닥": "KSQ", "전체": "ALL"}.get(market, "ALL")
-            result = self.post(market_gubun=market_idx, gubun=1, schdate=date)
-            if len(result['result']) == 0:
-                return None
-            df = DataFrame(result['result'])
-            df = df[['isu_nm', 'isu_cd', 'dvd_yld', 'bps', 'per', 'prv_eps']]
-            df.columns = ['종목명', '티커', 'DIV', 'BPS', 'PER', 'EPS']
-            df.set_index('티커', inplace=True)
+    def scraping(self, date, market):
+        """
+        :param date: 조회 일자 (YYMMDD)
+        :param market: 조회 시장 (STK/KSQ/ALL)
+        :return:
+                          bps dvd_yld  end_pr iisu_code  isu_cd      pbr     per prv_eps rn stk_dvd totCnt     work_dt
+            0   5,689    0.27  18,650      -  000250   삼천당제약   3.28   44.19     422  1      50   2157  2018/01/03
+            1  37,029    2.82  28,350      -  000440  중앙에너비스  0.77   24.98   1,135  2     800         2018/01/03
+            2     563       0   2,720      -  001000    신라섬유    4.83  247.27      11  3       0         2018/01/03
+            3  10,036    1.75  12,600      -  001540    안국약품    1.26      84     150  4     220         2018/01/03
+            4   8,266    1.07   2,815      -  001810    무림SP      0.34   24.06     117  5      30         2018/01/03
+        """
+        result = self.post(market_gubun=market, gubun=1, schdate=date)
+        return DataFrame(result['result'])
 
-            df = df.replace({',':'', '-':'0'}, regex=True)
-            df = df.astype({"종목명": str, "DIV": str, "BPS": int, "PER": float, "EPS": int}, )
-            df.index.name = date
-            return df
-        except (TypeError, IndexError, KeyError) as e:
-            print(e)
-            return None
 
 class MKD01023(MarketDataHttp):
     @property
