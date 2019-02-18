@@ -3,6 +3,24 @@ from pykrx import Krx
 import numpy as np
 
 
+class KrxStockBasicTest(unittest.TestCase):
+    def setUp(self):
+        self.krx = Krx()
+
+    def test_not_empty_result(self):
+        df = self.krx.get_market_index("20190211")
+        self.assertNotEqual(df.empty, True)
+
+        df = self.krx.get_market_status_by_date("20190211")
+        self.assertNotEqual(df.empty, True)
+
+        df = self.krx.get_market_price_change("20190211", "20190215")
+        self.assertNotEqual(df.empty, True)
+
+        df = self.krx.get_market_ohlcv("20190211", "20190215", "000660")
+        self.assertNotEqual(df.empty, True)
+
+
 class StockOhlcvTest(unittest.TestCase):
     def setUp(self):
         self.krx = Krx()
@@ -23,12 +41,12 @@ class StockOhlcvTest(unittest.TestCase):
     def test_ohlcv_format(self):
         target = "20180208"
         df = self.krx.get_market_ohlcv(target, target, "066570")
-        self.assertEqual(df.index, target)
-        self.assertEqual(type(df['시가'][0]), np.int32)
-        self.assertEqual(type(df['고가'][0]), np.int32)
-        self.assertEqual(type(df['저가'][0]), np.int32)
-        self.assertEqual(type(df['종가'][0]), np.int32)
-        self.assertEqual(type(df['거래량'][0]), np.int32)
+        self.assertEqual(type(df.index[0]), str)
+        self.assertEqual(type(df['시가'].iloc[0]), np.int32)
+        self.assertEqual(type(df['고가'].iloc[0]), np.int32)
+        self.assertEqual(type(df['저가'].iloc[0]), np.int32)
+        self.assertEqual(type(df['종가'].iloc[0]), np.int32)
+        self.assertEqual(type(df['거래량'].iloc[0]), np.int32)
 
 
 class StockStatusTest(unittest.TestCase):
@@ -38,12 +56,11 @@ class StockStatusTest(unittest.TestCase):
     def test_market_status_format(self):
         df = self.krx.get_market_status_by_date("20180212")
         self.assertEqual(type(df.index[0]), str)
-        self.assertEqual(type(df['종목명'][0]), str)
-        self.assertEqual(type(df['DIV'][0]), np.float32)
-        self.assertEqual(type(df['BPS'][0]), np.int32)
-        self.assertEqual(type(df['PER'][0]), np.float32)
-        self.assertEqual(type(df['EPS'][0]), np.int32)
-
+        self.assertEqual(type(df['종목명'].iloc[0]), str)
+        self.assertEqual(type(df['DIV'].iloc[0]), np.float32)
+        self.assertEqual(type(df['BPS'].iloc[0]), np.int32)
+        self.assertEqual(type(df['PER'].iloc[0]), np.float32)
+        self.assertEqual(type(df['EPS'].iloc[0]), np.int32)
 
 
 if __name__ == '__main__':

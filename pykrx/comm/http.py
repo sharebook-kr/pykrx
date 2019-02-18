@@ -87,3 +87,16 @@ class MarketDataHttp(KrxHttp):
         return "/MKD/99/MKD99000001.jspx"
 
 
+class ShortHttp(KrxHttp):
+    @property
+    def otp_url(self):
+        return "http://short.krx.co.kr/contents/COM/GenerateOTP.jspx"
+
+    @property
+    def contents_url(self):
+        return "http://short.krx.co.kr/contents"
+
+    @property
+    def uri(self):
+        return "/SRT/99/SRT99000001.jspx"
+

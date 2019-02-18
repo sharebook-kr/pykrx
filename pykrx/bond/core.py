@@ -1,4 +1,4 @@
-from pykrx.krx_http import MarketDataHttp
+from pykrx.comm.http import MarketDataHttp
 from pandas import DataFrame
 
 
@@ -28,6 +28,7 @@ class MKD40038(MarketDataHttp):
             print(e)
             return None
 
+
 class MKD40013(MarketDataHttp):
     # 장외 일자별 채권수익률
     # - http://marketdata.krx.co.kr/mdi#document=05030401
@@ -35,8 +36,8 @@ class MKD40013(MarketDataHttp):
     def bld(self):
         return "MKD/05/0503/05030401/mkd05030401"
 
-    def scraping(self, date):
-        '''
+    def read(self, date):
+        """
         :param date:
         :return:
                             수익률    등락폭
@@ -46,22 +47,9 @@ class MKD40013(MarketDataHttp):
             국고채 10년       1.965   -0.030
             국고채 20년       2.039   -0.022
             국고채 30년       2.034   -0.021
-        '''
-        try:
-            result = self.post(schdate=date)
-            if len(result['block1']) == 0:
-                return None
-
-            df = DataFrame(result['block1'])
-            df = df[['str_const_val', 'lst_ord_bas_yd', 'fluc_chgrng']]
-            df.columns = ['채권종류', '수익률', '등락폭']
-            df = df.astype({"수익률": float, "등락폭": float})
-            df.set_index('채권종류', inplace=True)
-            df.index.name = "장외 일자별 채권수익률"
-            return df
-        except (TypeError, IndexError, KeyError) as e:
-            print(e)
-            return None
+        """
+        result = self.post(schdate=date)
+        return DataFrame(result['block1'])
 
 
 if __name__ == "__main__":

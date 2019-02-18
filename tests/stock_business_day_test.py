@@ -23,6 +23,11 @@ class BusinessDaysResultTest(unittest.TestCase):
                 self.assertGreater(len(business_days), 0)
                 time.sleep(0.3)
 
+    def test_wrong_input(self):
+        business_days = self.krx.get_business_days(1950, 1)
+        self.assertEqual(type(business_days), list)
+        self.assertEqual(len(business_days), 0)
+
 
 if __name__ == '__main__':
     unittest.main()
