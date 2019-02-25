@@ -7,8 +7,7 @@ class MKD30030(MarketDataHttp):
     def bld(self):
         return "MKD/04/0406/04060200/mkd04060200"
 
-    @staticmethod
-    def read(date):
+    def read(self, date):
         """30030 상장 종목 검색
         :param date: 조회 일자 (YYMMDD)
         :return: 일자별 시세 조회 결과 DataFrame
@@ -19,7 +18,8 @@ class MKD30030(MarketDataHttp):
         3         54,100   원(KRW)          2  006840     54,200    55,300    53,400     55,300     669,714,100    12,367           AK홀딩스    718,017,806,200   13,247,561         54,200  5,000       1,100             1.99
         4          4,755   원(KRW)          2  054620      4,755     4,865     4,700      4,800     324,678,375    68,110          APS홀딩스     96,974,520,855   20,394,221          4,785    500         110             2.26
         """
-        result = MKD30030().post(schdate=date, stock_gubun="on", secugrp="ST", sect_tp_cd="ALL", marget_gubun="ALL")
+        result = self.post(schdate=date, stock_gubun="on", secugrp="ST",
+                                 sect_tp_cd="ALL", marget_gubun="ALL")
         return DataFrame(result['상장종목검색'])
 
 
@@ -28,8 +28,7 @@ class MKD30040(MarketDataHttp):
     def bld(self):
         return "MKD/04/0402/04020100/mkd04020100t3_02"
 
-    @staticmethod
-    def read(fromdate, todate, isin):
+    def read(self, fromdate, todate, isin):
         """30040 일자별 시세 조회 (수정종가 아님)
         :param fromdate: 조회 시작 일자
         :param todate: 조회 마지막 일자
@@ -43,7 +42,7 @@ class MKD30040(MarketDataHttp):
         3   73,279,645,300    745,562       2  163,647,814  15,988,391     97,700    3,300    99,600    97,200     99,400  2018/02/05
         4   98,290,649,100    975,164       2  163,647,814  16,528,429    101,000    2,500   103,500    99,900    103,000  2018/02/02
         """
-        result = MKD30040().post(isu_cd=isin, fromdate=fromdate, todate=todate)
+        result = self.post(isu_cd=isin, fromdate=fromdate, todate=todate)
         return DataFrame(result['block1'])
 
 
@@ -84,7 +83,39 @@ class MKD20011(MarketDataHttp):
         return "/MKD/03/0304/03040100/mkd03040100"
 
     def read(self, date):
-        result = self.post(idx_upclss_cd='01', idx_midclss_cd='02', lang='ko', bz_dd=date)
+        result = self.post(idx_upclss_cd='01', idx_midclss_cd='02', lang='ko',
+                           bz_dd=date)
+        return DataFrame(result['output'])
+
+
+class MKD20011_KOSPI(MarketDataHttp):
+    @property
+    def bld(self):
+        return "MKD/03/0304/03040101/mkd03040101T2_02"
+
+    def read(self, fromdate, todate, index):
+        """코스피 주가 지수
+        :param index    : 종합지수 - 코스피          (001)
+                           종합지수 - 코스피 벤치마크 (100)
+                           대표지수 - 코스피 200      (028)
+                           대표지수 - 코스피 100      (034)
+                           대표지수 - 코스피 50       (035)
+                           규모별   - 코스피 대형주   (002)
+                           규모별   - 코스피 중형주   (003)
+                           규모별   - 코스피 소형주   (004)
+        :param fromdate : 조회 시작 일자 (YYMMDD)
+        :param todate   : 조회 마지막 일자 (YYMMDD)
+        :return         : 코스피 주가지수 DataFrame
+               acc_trdval acc_trdvol clsprc_idx cmpprevdd_idx div_yd fluc_rt fluc_tp_cd hgprc_idx lwprc_idx         mktcap opnprc_idx      trd_dd wt_per wt_stkprc_netasst_rto
+            0   4,897,406    419,441   2,117.77          6.84   1.86   -0.32          2  2,129.37  2,108.91  1,397,318,462   2,126.03  2019/01/22   9.95                  0.90
+            1   5,170,562    408,600   2,127.78         10.01   1.85    0.47          1  2,131.05  2,106.74  1,403,936,954   2,108.72  2019/01/23  10.00                  0.90
+            2   6,035,836    413,652   2,145.03         17.25   1.83    0.81          1  2,145.08  2,125.48  1,415,738,358   2,127.88  2019/01/24  10.08                  0.91
+            3   7,065,652    410,002   2,177.73         32.70   1.81    1.52          1  2,178.01  2,146.64  1,437,842,917   2,147.92  2019/01/25  10.23                  0.93
+        """
+        idx_cd = "1{}".format(index)
+        result = self.post(idx_cd=idx_cd, ind_tp_cd='1', idx_ind_cd=index,
+                           bz_dd=todate, chartType="line", chartStandard="srate",
+                           fromdate=fromdate, todate=todate)
         return DataFrame(result['output'])
 
 
@@ -95,10 +126,10 @@ class MKD80037(MarketDataHttp):
 
     def read(self, market, fromdate, todate):
         """80037 전체종목 등락률 (수정종가로 비교)
-        :param market: 조회 시장 (STK/KSQ/ALL)
-        :param fromdate: 조회 시작 일자
-        :param todate: 조회 마지막 일자
-        :return: 등락률 DataFrame
+        :param market  : 조회 시장 (STK/KSQ/ALL)
+        :param fromdate: 조회 시작 일자 (YYMMDD)
+        :param todate  : 조회 마지막 일자 (YYMMDD)
+        :return        : 등락률 DataFrame
                      end_dd_end_pr fluc_tp_cd  isu_cd       isu_tr_amt    isu_tr_vl kor_shrt_isu_nm opn_dd_end_pr prv_dd_cmpr updn_rate
         0           11,250          2  000020   16,851,737,550    1,510,666            동화약품        11,550        -300      -2.6
         1           15,400          2  000030  181,243,425,100   11,623,346            우리은행        16,050        -650     -4.05
@@ -108,11 +139,14 @@ class MKD80037(MarketDataHttp):
         5          116,500          1  000070   30,956,512,000      270,219           삼양홀딩스       111,000       5,500      4.95
         6           56,300          1  000075      502,884,700        9,140          삼양홀딩스우        53,300       3,000      5.63
         """
-        result = self.post(ind_tp=market, adj_stkprc="Y", period_strt_dd=fromdate, period_end_dd=todate)
+        result = self.post(ind_tp=market, adj_stkprc="Y",
+                           period_strt_dd=fromdate, period_end_dd=todate)
         return DataFrame(result['block1'])
 
 
 if __name__ == "__main__":
     import pandas as pd
     pd.set_option('display.width', None)
-    print(MKD80037().read("ALL", "20180501", "20180515"))
+    # print(MKD20011().read("20180501"))
+    print(MKD20011_KOSPI().read("20190122", "20190222", "028"))
+    # print(MKD80037().read("ALL", "20180501", "20180515"))

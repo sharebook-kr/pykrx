@@ -21,6 +21,25 @@ class KrxStockBasicTest(unittest.TestCase):
         self.assertNotEqual(df.empty, True)
 
 
+class StockPriceChangeTest(unittest.TestCase):
+    def setUp(self):
+        self.krx = Krx()
+
+    def test_price_query(self):
+        # holiday - holiday
+        df = self.krx.get_market_price_change("20040418", "20040418")
+        self.assertEqual(df.empty, True)
+
+        # holiday - weekday
+        #  - 상장 폐지 종목 037730 (20040422)
+        df = self.krx.get_market_price_change("20040418", "20040430")
+        self.assertEqual(df.loc['037730']['종료일종가'], 0)
+        self.assertEqual(df.loc['037730']['등락률'    ], -100)
+
+        # weekday - weekday
+        df = self.krx.get_market_price_change("20040420", "20040422")
+        self.assertNotEqual(df.empty, True)
+
 class StockOhlcvTest(unittest.TestCase):
     def setUp(self):
         self.krx = Krx()

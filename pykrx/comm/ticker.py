@@ -9,8 +9,8 @@ class StockFinder(MarketDataHttp):
     def bld(self):
         return "COM/finder_stkisu"
 
-    @staticmethod
-    def read(market="ALL", name=""):
+    @dataframe_empty_handler
+    def read(self, market="ALL", name=""):
         """30040 일자별 시세 스크래핑에서 종목 검색기
         http://marketdata.krx.co.kr/mdi#document=040204
         :param market: 조회 시장 (STK/KSQ/ALL)
@@ -18,7 +18,7 @@ class StockFinder(MarketDataHttp):
         :return      : 종목 검색 결과 DataFrame
 
         """
-        result = StockFinder().post(mktsel=market, searchText=name)
+        result = self.post(mktsel=market, searchText=name)
         return DataFrame(result['block1'])
 
 
@@ -27,15 +27,15 @@ class DelistingFinder(MarketDataHttp):
     def bld(self):
         return "COM/finder_dellist_isu"
 
-    @staticmethod
-    def read(market="ALL", name=""):
+    @dataframe_empty_handler
+    def read(self, market="ALL", name=""):
         """30031 상장 폐지 종목에서 종목 검색기
         http://marketdata.krx.co.kr/mdi#document=040603
         :param market: 조회 시장 (STK/KSQ/ALL)
         :param name  : 검색할 종목명 -  입력하지 않을 경우 전체
         :return      : 종목 검색 결과 DataFrame
         """
-        result = DelistingFinder().post(mktsel=market, searchText=name)
+        result = self.post(mktsel=market, searchText=name)
         return DataFrame(result['result'])
 
 
@@ -97,6 +97,14 @@ class KrxTicker:
         return list(self.df[cond].index)
 
     @dataframe_empty_handler
+    def get_delist(self, todate, fromdate=None):
+        cond = self.df['상폐일'].notnull()
+        if fromdate is not None:
+            cond &= self.df['상폐일'] >= fromdate
+        cond &= self.df['상폐일'] <= todate
+        return list(self.df[cond].index)
+
+    @dataframe_empty_handler
     def get_isin(self, ticker):
         return self.df['ISIN'][ticker]
 
@@ -104,4 +112,4 @@ class KrxTicker:
 if __name__ == "__main__":
     pd.set_option('display.width', None)
     ticker = KrxTicker()
-    print(ticker.get())
+    print(ticker.get_delist(fromdate="20040422", todate="20040423"))

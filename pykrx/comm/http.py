@@ -29,7 +29,7 @@ class KrxHttp(ABC):
                 self.session.headers.update(self.header)
             uri = "{}{}".format(self.contents_url, self.uri)
             kwargs.update({"code":self.otp})
-            return self.session.post(url=uri, data=kwargs, timeout=10).json()
+            return self.session.post(url=uri, data=kwargs).json()
         except Exception as x:
             print("It failed", x.__class__.__name__)
             return None

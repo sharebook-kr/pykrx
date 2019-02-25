@@ -8,7 +8,7 @@ import calendar
 class Krx:
     def __init__(self):
         self.stock = KrxMarket()
-        self.bond = KrxBond()
+        self.bond  = KrxBond()
         self.short = KrxShort()
 
     def get_tickers(self, date=None):
@@ -47,6 +47,9 @@ class Krx:
 
     def get_market_ohlcv(self, fromdate, todate, ticker):
         return self.stock.get_market_ohlcv(fromdate, todate, ticker)
+
+    def get_index_ohlcv(self, fromdate, todate, index="코스피"):
+        return self.stock.get_market_index_change(fromdate, todate, index)
 
     # BOND
     def get_treasury_yields_in_kerb_market(self, date):
