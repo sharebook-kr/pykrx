@@ -45,36 +45,6 @@ class KrxHttp(ABC):
             return None
 
     @property
-    @abstractmethod
-    def otp_url(self):
-        raise NotImplementedError
-
-    @property
-    @abstractmethod
-    def contents_url(self):
-        raise NotImplementedError
-
-    @property
-    @abstractmethod
-    def bld(self):
-        raise NotImplementedError
-
-    @property
-    @abstractmethod
-    def uri(self):
-        raise NotImplementedError
-
-    @property
-    def name(self):
-        return "form"
-
-    @property
-    def header(self):
-        return None
-
-
-class MarketDataHttp(KrxHttp):
-    @property
     def otp_url(self):
         return "http://marketdata.krx.co.kr/contents/COM/GenerateOTP.jspx"
 
@@ -83,20 +53,19 @@ class MarketDataHttp(KrxHttp):
         return "http://marketdata.krx.co.kr/contents"
 
     @property
+    @abstractmethod
+    def bld(self):
+        raise NotImplementedError
+
+    @property
     def uri(self):
         return "/MKD/99/MKD99000001.jspx"
 
-
-class ShortHttp(KrxHttp):
     @property
-    def otp_url(self):
-        return "http://short.krx.co.kr/contents/COM/GenerateOTP.jspx"
+    def name(self):
+        return "form"
 
     @property
-    def contents_url(self):
-        return "http://short.krx.co.kr/contents"
-
-    @property
-    def uri(self):
-        return "/SRT/99/SRT99000001.jspx"
+    def header(self):
+        return None
 

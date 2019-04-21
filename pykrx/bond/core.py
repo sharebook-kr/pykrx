@@ -1,8 +1,8 @@
-from pykrx.comm.http import MarketDataHttp
+from pykrx.comm.http import KrxHttp
 from pandas import DataFrame
 
 
-class MKD40038(MarketDataHttp):
+class MKD40038(KrxHttp):
     # 지표 수익률 (20140303 ~ 현재)
     # - http://marketdata.krx.co.kr/mdi#document=05030403
     @property
@@ -29,7 +29,7 @@ class MKD40038(MarketDataHttp):
             return None
 
 
-class MKD40013(MarketDataHttp):
+class MKD40013(KrxHttp):
     # 장외 일자별 채권수익률
     # - http://marketdata.krx.co.kr/mdi#document=05030401
     @property
@@ -56,5 +56,5 @@ if __name__ == "__main__":
     import pandas as pd
     pd.set_option('display.width', None)
 
-    df = MKD40013().scraping("20190202")
+    df = MKD40013().read("20190211")
     print(df)

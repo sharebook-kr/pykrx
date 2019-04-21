@@ -1,7 +1,20 @@
-from pykrx.comm.http import ShortHttp
+from pykrx.comm.http import KrxHttp
 from pandas import DataFrame
-import numpy as np
 import time
+
+
+class ShortHttp(KrxHttp):
+    @property
+    def otp_url(self):
+        return "http://short.krx.co.kr/contents/COM/GenerateOTP.jspx"
+
+    @property
+    def contents_url(self):
+        return "http://short.krx.co.kr/contents"
+
+    @property
+    def uri(self):
+        return "/SRT/99/SRT99000001.jspx"
 
 
 class SRT02010100(ShortHttp):
@@ -41,9 +54,10 @@ class SRT02020100(ShortHttp):
         page = 1
         while True:
             result = SRT02020100().post(mkt_tp_cd=market, isu_cd=isin, strt_dd=fromdate, end_dd=todate, curPage=page)
-            df = df.append(DataFrame(result['block1']))
-
-            # exit condition
+            if len(result['block1']) == 0 :
+                return df
+            df = df.append(DataFrame(result['block1']))            
+            # exit condition            
             load_data_idx = int(result['block1'][-1]['rn'])
             total_data_cnt = int(result['block1'][0]['totCnt'])
             if load_data_idx == total_data_cnt:
@@ -60,7 +74,7 @@ class SRT02020300(ShortHttp):
         return "SRT/02/02020300/srt02020300"
 
     @staticmethod
-    def read(fromdate, todate, market, inquery):
+    def read(fromdate, todate, market=1, inquery=1):
         """02020300 공매도 거래 현황
            http://short.krx.co.kr/contents/SRT/02/02020300/SRT02020300.jsp
         :param fromdate: 조회 시작 일자 (YYMMDD)
@@ -72,7 +86,7 @@ class SRT02020300(ShortHttp):
         0       1,161,522         37,396      6,821,963              0      8,020,881  2018/01/19
         1         970,406         41,242      8,018,997         13,141      9,043,786  2018/01/18
         2       1,190,006         28,327      8,274,090          6,465      9,498,888  2018/01/17
-        """
+        """        
         result = SRT02020300().post(mkt_tp_cd=market, inqCondTpCd=inquery, strt_dd=fromdate, end_dd=todate)
         return DataFrame(result['block1'])
 
@@ -83,7 +97,7 @@ class SRT02020400(ShortHttp):
         return "SRT/02/02020400/srt02020400"
 
     @staticmethod
-    def read(date, market):
+    def read(date, market=1):
         """02020400 공매도 거래 현황
            http://short.krx.co.kr/contents/SRT/02/02010100/SRT02010100.jsp
         :param date  : 조회 일자 (YYMMDD)
@@ -105,7 +119,7 @@ class SRT02030100(ShortHttp):
         return "SRT/02/02030100/srt02030100"
 
     @staticmethod
-    def read(fromdate, todate, market, isin=""):
+    def read(fromdate, todate, market=1, isin=""):
         """02030100 공매도 잔고 현황
            http://short.krx.co.kr/contents/SRT/02/02010100/SRT02010100.jsp
         :param fromdate: 조회 시작 일자 (YYMMDD)
@@ -144,7 +158,7 @@ class SRT02030400(ShortHttp):
         return "SRT/02/02030400/srt02030400"
 
     @staticmethod
-    def read(date, market="코스피"):
+    def read(date, market=1):
         """02030400 공매도 잔고 현황
            http://short.krx.co.kr/contents/SRT/02/02020300/SRT02020300.jsp
         :param date  : 조회 일자 (YYMMDD)
@@ -165,12 +179,12 @@ if __name__ == "__main__":
     pd.set_option('display.width', None)
 
     # print(SRT02010100.read("KR7005930003", "20181205", "20181207"))
-    # print(SRT02020100.read("20181207", "20181212"))
+    print(SRT02020100.read("20190402", "20190402", market=1))
     # print(SRT02020100.read("20181207", "20181212", "코스피", "KR7005930003"))
     # print(SRT02020300.read("20181207", "20181212", "코스피", "거래대금"))
     # print(SRT02020400.read("20181212", "코스피"))
 
-    # print(SRT02030100.read("20181212", "20181212", "코스피"))
+    # print(SRT02030100.read("20181212", "20181212", 1, "KR7210980009"))
     # print(SRT02030100.read("20181207", "20181212", "코스피", "KR7210980009"))
 
-    print(SRT02030400.read("20181214", "코스피"))
+    # print(SRT02030400.read("20181214", 1))

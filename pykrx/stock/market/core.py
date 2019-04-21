@@ -1,8 +1,8 @@
-from pykrx.comm.http import MarketDataHttp
+from pykrx.comm.http import KrxHttp
 from pandas import DataFrame
 
 
-class MKD30030(MarketDataHttp):
+class MKD30030(KrxHttp):
     @property
     def bld(self):
         return "MKD/04/0406/04060200/mkd04060200"
@@ -23,7 +23,7 @@ class MKD30030(MarketDataHttp):
         return DataFrame(result['상장종목검색'])
 
 
-class MKD30040(MarketDataHttp):
+class MKD30040(KrxHttp):
     @property
     def bld(self):
         return "MKD/04/0402/04020100/mkd04020100t3_02"
@@ -46,7 +46,7 @@ class MKD30040(MarketDataHttp):
         return DataFrame(result['block1'])
 
 
-class MKD30009(MarketDataHttp):
+class MKD30009_0(KrxHttp):
     @property
     def bld(self):
         return "MKD/13/1302/13020401/mkd13020401"
@@ -67,7 +67,34 @@ class MKD30009(MarketDataHttp):
         return DataFrame(result['result'])
 
 
-class MKD01023(MarketDataHttp):
+
+class MKD30009_1(KrxHttp):
+    @property
+    def bld(self):
+        return "MKD/13/1302/13020401/mkd13020401"
+
+    def read(self, fromdate, todate, market, isin):
+        """30009 PER/PBR/배당수익률 (개별종목)
+        :param market: 조회 시장 (STK/KSQ/ALL)
+        :param fromdate: 조회 시작 일자 (YYMMDD)
+        :param todate: 조회 종료 일자 (YYMMDD)
+        :param isin: 조회할 종목의 ISIN 번호
+        :return:
+                  bps dvd_yld  end_pr iisu_code isu_cd     isu_nm                 isu_nm2   pbr   per prv_eps rn stk_dvd totCnt     work_dt
+            0  28,126     1.9  44,650         -  005930   삼성전자   <em class ="up"></em>  1.59  7.45   5,997  1     850      6  2019/03/29
+            1  28,126     1.9  44,850         -  005930   삼성전자   <em class ="up"></em>  1.59  7.48   5,997  2     850         2019/03/28
+            2  28,126    1.87  45,350         -  005930   삼성전자   <em class ="up"></em>  1.61  7.56   5,997  3     850         2019/03/27
+            3  28,126    1.88  45,250         -  005930   삼성전자   <em class ="up"></em>  1.61  7.55   5,997  4     850         2019/03/26
+            4  28,126    1.87  45,500         -  005930   삼성전자   <em class ="up"></em>  1.62  7.59   5,997  5     850         2019/03/25
+            5  28,126    1.83  46,550         -  005930   삼성전자   <em class ="up"></em>  1.66  7.76   5,997  6     850         2019/03/22
+        """
+        result = self.post(market_gubun=market, fromdate=fromdate,
+                           todate=todate, gubun=2, isu_cd=isin,
+                           isu_srt_cd="A" + isin[3:9])
+        return DataFrame(result['result'])
+
+
+class MKD01023(KrxHttp):
     @property
     def bld(self):
         return "MKD/01/0110/01100305/mkd01100305_01"
@@ -77,49 +104,7 @@ class MKD01023(MarketDataHttp):
         return DataFrame(result['block1'])
 
 
-class MKD20011(MarketDataHttp):
-    @property
-    def bld(self):
-        return "/MKD/03/0304/03040100/mkd03040100"
-
-    def read(self, date):
-        result = self.post(idx_upclss_cd='01', idx_midclss_cd='02', lang='ko',
-                           bz_dd=date)
-        return DataFrame(result['output'])
-
-
-class MKD20011_KOSPI(MarketDataHttp):
-    @property
-    def bld(self):
-        return "MKD/03/0304/03040101/mkd03040101T2_02"
-
-    def read(self, fromdate, todate, index):
-        """코스피 주가 지수
-        :param index    : 종합지수 - 코스피          (001)
-                           종합지수 - 코스피 벤치마크 (100)
-                           대표지수 - 코스피 200      (028)
-                           대표지수 - 코스피 100      (034)
-                           대표지수 - 코스피 50       (035)
-                           규모별   - 코스피 대형주   (002)
-                           규모별   - 코스피 중형주   (003)
-                           규모별   - 코스피 소형주   (004)
-        :param fromdate : 조회 시작 일자 (YYMMDD)
-        :param todate   : 조회 마지막 일자 (YYMMDD)
-        :return         : 코스피 주가지수 DataFrame
-               acc_trdval acc_trdvol clsprc_idx cmpprevdd_idx div_yd fluc_rt fluc_tp_cd hgprc_idx lwprc_idx         mktcap opnprc_idx      trd_dd wt_per wt_stkprc_netasst_rto
-            0   4,897,406    419,441   2,117.77          6.84   1.86   -0.32          2  2,129.37  2,108.91  1,397,318,462   2,126.03  2019/01/22   9.95                  0.90
-            1   5,170,562    408,600   2,127.78         10.01   1.85    0.47          1  2,131.05  2,106.74  1,403,936,954   2,108.72  2019/01/23  10.00                  0.90
-            2   6,035,836    413,652   2,145.03         17.25   1.83    0.81          1  2,145.08  2,125.48  1,415,738,358   2,127.88  2019/01/24  10.08                  0.91
-            3   7,065,652    410,002   2,177.73         32.70   1.81    1.52          1  2,178.01  2,146.64  1,437,842,917   2,147.92  2019/01/25  10.23                  0.93
-        """
-        idx_cd = "1{}".format(index)
-        result = self.post(idx_cd=idx_cd, ind_tp_cd='1', idx_ind_cd=index,
-                           bz_dd=todate, chartType="line", chartStandard="srate",
-                           fromdate=fromdate, todate=todate)
-        return DataFrame(result['output'])
-
-
-class MKD80037(MarketDataHttp):
+class MKD80037(KrxHttp):
     @property
     def bld(self):
         return "MKD/13/1302/13020102/mkd13020102"
@@ -147,6 +132,6 @@ class MKD80037(MarketDataHttp):
 if __name__ == "__main__":
     import pandas as pd
     pd.set_option('display.width', None)
-    # print(MKD20011().read("20180501"))
-    print(MKD20011_KOSPI().read("20190122", "20190222", "028"))
+    # print(MKD80037().read("ALL", "20180501", "20180801"))
     # print(MKD80037().read("ALL", "20180501", "20180515"))
+    print(MKD30009_1().read('20190322', '20190329', 'ALL', 'KR7005930003'))

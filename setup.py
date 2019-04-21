@@ -1,15 +1,15 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name            = 'pykrx',
     version         = '0.0.6',
     description     = 'KRX scraping',
     url             = 'https://github.com/sharebook-kr/pykrx',
-    author          = 'Lukas Yoo',
-    author_email    = 'jonghun.yoo@outlook.com',
-    install_requires=['requests', 'pandas'],
+    author          = 'Brayden Jo, Lukas Yoo',
+    author_email    = 'hyunho.jo@outlook.com, jonghun.yoo@outlook.com, pystock@outlook.com',
+    install_requires= ['requests', 'pandas', 'datetime',],
     license         = 'MIT',
-    packages        = ['pykrx', 'pykrx.comm', 'pykrx.stock', 'pykrx.short', 'pykrx.bond'],
-    python_requires  = '>=3',
+    packages        = find_packages(include=['pykrx', 'pykrx.*', 'pykrx.stock.*', 'pykrx.e3.*', 'pykrx.bond.*' ]),
+    python_requires = '>=3',
     zip_safe        = False
 )

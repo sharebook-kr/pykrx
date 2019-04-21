@@ -3,12 +3,16 @@ attrs==18.2.0
 certifi==2018.11.29
 chardet==3.0.4
 colorama==0.4.1
+cycler==0.10.0
 idna==2.8
+kiwisolver==1.0.1
+matplotlib==3.0.3
 more-itertools==5.0.0
 numpy==1.16.1
 pandas==0.24.1
 pluggy==0.8.1
 py==1.7.0
+pyparsing==2.3.1
 pytest==4.2.0
 python-dateutil==2.8.0
 pytz==2018.9

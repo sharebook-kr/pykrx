@@ -1,33 +1,30 @@
-from pykrx.comm.http import MarketDataHttp
 from pykrx.comm.util import dataframe_empty_handler, singleton
-import pandas as pd
+from pykrx.comm.http import KrxHttp
 from pandas import DataFrame
+import pandas as pd
 
 
-class StockFinder(MarketDataHttp):
+class _StockFinder(KrxHttp):
     @property
     def bld(self):
         return "COM/finder_stkisu"
 
-    @dataframe_empty_handler
     def read(self, market="ALL", name=""):
         """30040 일자별 시세 스크래핑에서 종목 검색기
         http://marketdata.krx.co.kr/mdi#document=040204
         :param market: 조회 시장 (STK/KSQ/ALL)
         :param name  : 검색할 종목명 -  입력하지 않을 경우 전체
         :return      : 종목 검색 결과 DataFrame
-
         """
         result = self.post(mktsel=market, searchText=name)
         return DataFrame(result['block1'])
 
 
-class DelistingFinder(MarketDataHttp):
+class _DelistingFinder(KrxHttp):
     @property
     def bld(self):
         return "COM/finder_dellist_isu"
 
-    @dataframe_empty_handler
     def read(self, market="ALL", name=""):
         """30031 상장 폐지 종목에서 종목 검색기
         http://marketdata.krx.co.kr/mdi#document=040603
@@ -40,14 +37,16 @@ class DelistingFinder(MarketDataHttp):
 
 
 @singleton
-class KrxTicker:
+class _StockTicker:
     def __init__(self):
         # 조회일 기준의 상장/상폐 종목 리스트
         df_listed = self._get_stock_info_listed()
         df_delisted = self._get_stock_info_delisted()
+        self.df_delisted = df_delisted                ## DEBUG !!
         # Merge two DataFrame
         self.df = pd.merge(df_listed, df_delisted, how='outer')
         self.df = self.df.set_index('티커')
+        self.df = self.df.drop_duplicates(['ISIN'])
 
     @dataframe_empty_handler
     def _get_stock_info_listed(self, market="전체"):
@@ -61,10 +60,13 @@ class KrxTicker:
             006840      AK홀딩스  KR7006840003   KOSPI
         """
         market = {"코스피": "STK", "코스닥": "KSQ", "코넥스": "KNX", "전체": "ALL"}.get(market, "ALL")
-        df = StockFinder().read(market)
+        df = _StockFinder().read(market)
         df.columns = ['종목', 'ISIN', '시장', '티커']
+        # - 증권(7)과 사용자 영역 선택
+        df = df[(df.ISIN.str[2] >= '7')]
         # - 티커 축약 (A037440 -> 037440)
-        df['티커'] = df['티커'].apply(lambda x: x[1:])
+        df['티커'] = df['티커'].apply(lambda x: x[1:7])
+        df = df.drop_duplicates(['ISIN'])
         return df
 
     @dataframe_empty_handler
@@ -73,43 +75,64 @@ class KrxTicker:
         :param market: 전체/코스피/코스닥/코넥스 - 입력하지 않을 경우 전체
         :return      : 종목 검색 결과 DataFrame
         .                              ISIN     시장       티커    상폐일
-            AK홀딩스8R           KRA006840144  KOSPI  J00684014  20140804
+            AK홀딩스8R           KRA006840144  KOSPI    J006840  20140804
             AP우주통신           KR7015670003  KOSPI    A015670  20070912
             AP우주통신(1우B)     KR7015671001  KOSPI    A015675  20070912
             BHK보통주            KR7003990009  KOSPI    A003990  20090430
         """
         market = {"코스피": "STK", "코스닥": "KSQ", "코넥스": "KNX", "전체": "ALL"}.get(market, "ALL")
-        df = DelistingFinder().read(market)
+        df = _DelistingFinder().read(market)
 
         df = df[['shrt_isu_cd', 'isu_nm', 'isu_cd', 'market_name', 'delist_dd']]
         df.columns = ['티커', '종목', 'ISIN', '시장', '상폐일']
+        # - 증권(7)과 사용자 영역 선택
+        df = df[(df.ISIN.str[2] == '7') | (df.ISIN.str[2] == '9')]
         # - 티커 축약 (A037440 -> 037440)
-        df['티커'] = df['티커'].apply(lambda x: x[1:])
+        df['티커'] = df['티커'].apply(lambda x: x[1:7])
+        df = df.drop_duplicates(['ISIN'])
         return df
 
-    @dataframe_empty_handler
-    def get(self, date=None):
-        # 조회 시점에 상장된 종목을 반환
-        cond = self.df['상폐일'].isnull()
-        if date is not None:
-            # 조회 일자가 지정됐다면, 조회 일자보다 앞선 상폐일을 갖은 데이터 추가
-            cond |= self.df['상폐일'] < date
-        return list(self.df[cond].index)
 
-    @dataframe_empty_handler
-    def get_delist(self, todate, fromdate=None):
-        cond = self.df['상폐일'].notnull()
-        if fromdate is not None:
-            cond &= self.df['상폐일'] >= fromdate
-        cond &= self.df['상폐일'] <= todate
-        return list(self.df[cond].index)
+@dataframe_empty_handler
+def get_stock_ticker_isin(ticker):
+    stock = _StockTicker()
+    return stock.df['ISIN'][ticker]
 
-    @dataframe_empty_handler
-    def get_isin(self, ticker):
-        return self.df['ISIN'][ticker]
+
+@dataframe_empty_handler
+def get_stock_market_from(ticker):
+    stock = _StockTicker()
+    return stock.df['시장'][ticker]
+
+
+@dataframe_empty_handler
+def get_stock_ticker_list(date=None):
+    stock = _StockTicker()
+    # 조회 시점에 상장된 종목을 반환
+    cond = stock.df['상폐일'].isnull()
+    if date is not None:
+        # 조회 일자가 지정됐다면, 조회 일자보다 앞선 상폐일을 갖은 데이터 추가
+        cond |= stock.df['상폐일'] > date
+    return list(stock.df[cond].index)
+
+
+@dataframe_empty_handler
+def get_stock_ticker_delist(todate, fromdate=None):
+    stock = _StockTicker()
+    cond = stock.df['상폐일'].notnull()
+    if fromdate is not None:
+        cond &= stock.df['상폐일'] >= fromdate
+    cond &= stock.df['상폐일'] <= todate
+    return list(stock.df[cond].index)
 
 
 if __name__ == "__main__":
     pd.set_option('display.width', None)
-    ticker = KrxTicker()
-    print(ticker.get_delist(fromdate="20040422", todate="20040423"))
+    # print(get_stock_ticker_delist(fromdate="20040422", todate="20040423"))
+    # print(get_stock_ticker_list())
+    # print(get_stock_ticker_isin("000660"))
+    market = get_stock_market_from("000660")
+    print(market)
+#    tickers = get_stock_ticker_list("20150720")
+#    print(len(tickers))
+    # print(get_stock_ticker_isin("035420"))
