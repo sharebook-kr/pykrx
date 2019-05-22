@@ -31,7 +31,7 @@ from pykrx import bond
 get_stock_ticker_list() 메서드는 전 종목의 ticker를 리스트로 반환합니다. 
 
 ```python
-tickers = stock.get_stock_ticker_list()
+tickers = stock.get_market_ticker_list()
 print(tickers)
 ```
 ###### 실행결과 
@@ -111,28 +111,28 @@ print(df.loc["051170"])
 ```
 
 #### 2.1.1.4 종목별 DIV/BPS/PER/EPS 조회
-get_market_fundamental_by_ticker() 함수는 입력된 일자의 DIV/BPS/PER/EPS를 조회합니다. 
+get_market_fundamental_by_ticker() 함수는 입력된 일자의 DIV/BPS/PER/EPS/PBR를 조회합니다. PBR은 `PER x EPS / BPS`로 계산된 값입니다.
 ```python
 df = stock.get_market_fundamental_by_ticker("20180305")
 print(df.head(2))
 ```
 ```text
-           종목명     DIV     BPS       PER    EPS                                   
-000250   삼천당제약   0.14   5689  84.480003   422
-000440  중앙에너비스  2.76  37029  25.549999  1135
+             종목명   DIV    BPS        PER     EPS       PBR                                
+000250   삼천당제약  0.14    5689  84.480003    422   6.266578
+000440 중앙에너비스  2.76   37029  25.549999   1135   0.783150
 ```
 
 #### 2.1.1.5 일자별 DIV/BPS/PER/EPS 조회
 
-get_market_fundamental_by_date() 함수는 특정 종목에 대해 입력된 기간의 DIV/BPS/PER/EPS를 조회합니다.
+get_market_fundamental_by_date() 함수는 특정 종목에 대해 입력된 기간의 DIV/BPS/PER/EPS/PBR를 조회합니다. PBR은 `PER x EPS / BPS`로 계산된 값입니다.
 ```python
 df = stock.get_market_fundamental_by_date("20180301", "20180320", '005930')
 print(df.head(2))
 ```
 ```text
-             DIV      BPS        PER     EPS                                 
-2018003019  1.12  1156530  16.059999  157967
-2018003020  1.11  1156530  16.209999  157967
+           DIV      BPS        PER     EPS       PBR                          
+20180302  1.24  1156530  14.570000  157967  1.990073
+20180305  1.26  1156530  14.310000  157967  1.954560
 ```
 get_market_fundamental_by_date() 함수에 frequency 파라미터(d/m/y)를 추가할 수 있습니다. d는 일자, m은 월, y는 연도를 의미합니다. 다음은 20180810부터 20181212까지의 삼성전자 월별 DIV/BPS/PER/EPS를 출력합니다. 이때 해당 월의 종가를 기준으로 값이 출력됩니다.  
 ```python

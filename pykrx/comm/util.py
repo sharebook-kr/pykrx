@@ -34,7 +34,7 @@ def resample_ohlcv(df, freq, how):
     :param freq : d - 일 / m - 월 / y - 년
     :return:    : resampling된 DataFrame
     """    
-    if freq != 'd':        
+    if freq != 'd' and len(df) > 0:
         df.index = pd.to_datetime(df.index, format='%Y%m%d')
         if freq == 'm':
             df = df.resample('M').apply(how)

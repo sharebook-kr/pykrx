@@ -62,13 +62,15 @@ def get_market_price_change_by_ticker(fromdate, todate):
 def get_market_fundamental_by_date(fromdate, todate, ticker, freq='d'):
     isin = mrkt.get_stock_ticker_isin(ticker)
     df = mrkt.get_market_fundamental_by_date(fromdate, todate, isin)
-    how = {'DIV': 'first', 'BPS': 'first', 'PER': 'first', 'EPS': 'first'}
+    df['PBR'] = df['PER'] * df['EPS'] / df['BPS']
+    df.loc[df['BPS'] == 0, 'PBR'] = 0
+    how = {'DIV': 'first', 'BPS': 'first', 'PER': 'first', 'EPS': 'first',
+           'PBR': 'first'}
     return resample_ohlcv(df, freq, how)
 
 
 def get_market_fundamental_by_ticker(date, market="ALL"):
     df = mrkt.get_market_fundamental_by_ticker(date, market)
-    # 추정 PBR
     df['PBR'] = df['PER'] * df['EPS'] / df['BPS']
     df.loc[df['BPS'] == 0, 'PBR'] = 0
     return df
@@ -156,9 +158,10 @@ if __name__ == "__main__":
     # df = get_market_ohlcv_by_date("20190225", "20190228", "000660")
     # df = get_market_ohlcv_by_date("20150720", "20150810", "000020", "m")
     # df = get_market_price_change_by_ticker("20180301", "20180320")
+    # df = get_market_ohlcv_by_date("20190401", "20190405", "000660")
     df = get_market_fundamental_by_ticker("20180305")
     # df = get_market_fundamental_by_date("20180301", "20180320", '005930')
-    # df = get_market_fundamental_by_date("20180301", "20180320", "005930", "m")
+    # df = get_market_fundamental_by_date("20180301", "20180320", '005930')
     # tickers = get_index_ticker_list("20190225", "KOSDAQ")
     # print(tickers)
     # df = get_index_kosdaq_ohlcv_by_date("20190101", "20190228", "코스닥 150")
