@@ -28,7 +28,7 @@ from pykrx import bond
 코스피 종목의 주가 관련 정보를 얻는 API 입니다.  
 
 #### 2.1.1.1 Ticker 
-get_stock_ticker_list() 메서드는 전 종목의 ticker를 리스트로 반환합니다. 
+get_market_ticker_list() 메서드는 전 종목의 ticker를 리스트로 반환합니다. 
 
 ```python
 tickers = stock.get_market_ticker_list()
@@ -40,7 +40,7 @@ print(tickers)
 ```        
 날짜(YYMMDD)를 추가로 입력하면 해당 일자의 ticker를 얻을 수 있습니다. 
 ```python
-tickers = stock.get_stock_ticker_list("29100404")
+tickers = stock.get_market_ticker_list("29100404")
 print(tickers)
 ```
 ###### 실행결과 
@@ -49,6 +49,16 @@ print(tickers)
 ```   
 <br/>
 
+get_market_ticker_name() 함수로 티커를 입력하면 종목이름을 반환합니다. 
+```python
+종목 = stock.get_market_ticker_name("000660")
+print(종목)
+```
+
+###### 실행결과 
+```text
+SK하이닉스
+```   
 
 #### 2.1.1.2 일자별 OHLCV 조회
 get_market_ohlcv_by_date() 함수는 시작일/종료일/티커 세 개의 파라미터를 입력받아 OHLCV를 일자별로 정렬하여 DataFrame으로 반환합니다.

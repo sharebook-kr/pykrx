@@ -13,6 +13,10 @@ def get_market_ticker_list(date=None):
     return mrkt.get_stock_ticker_list(date)
 
 
+def get_market_ticker_name(ticker):
+    return mrkt.get_stock_name(ticker)
+
+
 def get_business_days(year, mon):
     strt = "{}{:02d}01".format(year, mon)
     last = "{}{:02d}31".format(year, mon)
@@ -62,6 +66,9 @@ def get_market_price_change_by_ticker(fromdate, todate):
 def get_market_fundamental_by_date(fromdate, todate, ticker, freq='d'):
     isin = mrkt.get_stock_ticker_isin(ticker)
     df = mrkt.get_market_fundamental_by_date(fromdate, todate, isin)
+    if df.empty:
+        return df
+
     df['PBR'] = df['PER'] * df['EPS'] / df['BPS']
     df.loc[df['BPS'] == 0, 'PBR'] = 0
     how = {'DIV': 'first', 'BPS': 'first', 'PER': 'first', 'EPS': 'first',
@@ -71,8 +78,9 @@ def get_market_fundamental_by_date(fromdate, todate, ticker, freq='d'):
 
 def get_market_fundamental_by_ticker(date, market="ALL"):
     df = mrkt.get_market_fundamental_by_ticker(date, market)
-    df['PBR'] = df['PER'] * df['EPS'] / df['BPS']
-    df.loc[df['BPS'] == 0, 'PBR'] = 0
+    if not df.empty:
+        df['PBR'] = df['PER'] * df['EPS'] / df['BPS']
+        df.loc[df['BPS'] == 0, 'PBR'] = 0
     return df
 
 # -----------------------------------------------------------------------------
@@ -159,7 +167,9 @@ if __name__ == "__main__":
     # df = get_market_ohlcv_by_date("20150720", "20150810", "000020", "m")
     # df = get_market_price_change_by_ticker("20180301", "20180320")
     # df = get_market_ohlcv_by_date("20190401", "20190405", "000660")
-    df = get_market_fundamental_by_ticker("20180305")
+    # df = get_market_fundamental_by_ticker("20180305")
+    # df = get_market_fundamental_by_date("20000101", "20181231", "092970", "m")
+    df = get_market_ticker_name("000660")
     # df = get_market_fundamental_by_date("20180301", "20180320", '005930')
     # df = get_market_fundamental_by_date("20180301", "20180320", '005930')
     # tickers = get_index_ticker_list("20190225", "KOSDAQ")

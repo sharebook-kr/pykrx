@@ -94,6 +94,12 @@ class _StockTicker:
 
 
 @dataframe_empty_handler
+def get_stock_name(ticker):
+    df  = _StockTicker().df
+    return df[df.index == ticker]['종목'].iloc[0]
+
+
+@dataframe_empty_handler
 def get_stock_ticker_isin(ticker):
     stock = _StockTicker()
     return stock.df['ISIN'][ticker]
