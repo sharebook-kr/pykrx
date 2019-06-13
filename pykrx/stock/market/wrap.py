@@ -2,6 +2,7 @@ from pykrx.comm import dataframe_empty_handler
 from pykrx.stock.market.core import (MKD30040, MKD80037, MKD30009_0, 
                                      MKD30009_1)
 import numpy as np
+import pandas as pd
 
 
 @dataframe_empty_handler
@@ -23,7 +24,7 @@ def get_market_ohlcv_by_date(fromdate, todate, isin):
              'tdd_clsprc', 'acc_trdvol']]
     df.columns = ['날짜', '시가', '고가', '저가', '종가', '거래량']
     df = df.replace('/', '', regex=True)
-    df = df.replace(',', '', regex=True)    
+    df = df.replace(',', '', regex=True)
     df = df.set_index('날짜')
     df = df.astype(np.int32)
     return df.sort_index()
@@ -125,8 +126,9 @@ def get_market_fundamental_by_date(fromdate, todate, isin, market="ALL"):
 if __name__ == "__main__":
     import pandas as pd
     pd.set_option('display.expand_frame_repr', False)
-    df = get_market_fundamental_by_ticker("20190401", "ALL")
-    # df = get_market_ohlcv_by_date("20150720", "20150810", "KR7005930003")
-    # df = get_market_fundamental_by_date("20150720", "20150810", "KR7005930003")
-    print(df)
+    # df = get_market_fundamental_by_ticker("20190401", "ALL")
+    #df = get_market_ohlcv_by_date("20150720", "20150810", "KR7005930003")
+    df = get_market_fundamental_by_date("20150720", "20150810", "KR7005930003")
+    print(df.head())
+    print(df.index)
     
