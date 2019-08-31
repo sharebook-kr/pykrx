@@ -1,5 +1,4 @@
 from pandas import DataFrame
-import pandas as pd
 
 
 def dataframe_empty_handler(func):
@@ -26,25 +25,3 @@ def singleton(class_):
             self._sealed = True
     class_w.__name__ = class_.__name__
     return class_w
-
-
-def resample_ohlcv(df, freq, how):
-    """
-    :param df   : KRX OLCV format의 DataFrame
-    :param freq : d - 일 / m - 월 / y - 년
-    :return:    : resampling된 DataFrame
-    """
-    if freq == 'd':
-        df.index = pd.to_datetime(df.index, format='%Y%m%d')
-    elif freq != 'd' and len(df) > 0:
-        df.index = pd.to_datetime(df.index, format='%Y%m%d')
-        if freq == 'm':
-            df = df.resample('M').apply(how)
-            df.index = df.index.strftime('%Y%m')            
-        elif freq == 'y':
-            df = df.resample('Y').apply(how)
-            df.index = df.index.strftime('%Y')            
-        else:
-            print("choose a freq parameter in ('m', 'y', 'd')")
-            raise RuntimeError
-    return df

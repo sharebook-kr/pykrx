@@ -1,17 +1,13 @@
 import requests
+from abc import abstractmethod
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-from abc import ABC, abstractmethod
+from abc import ABC
 
 
-class KrxHttp(ABC):
+class Webio(ABC):
     def __init__(self):
         self.session = self._requests_retry_session()
-        self.otp = self._get_otp_from_krx()
-
-    def _get_otp_from_krx(self):
-        url = "{}?bld={}&name={}".format(self.otp_url, self.bld, self.name)
-        return self.session.get(url=url).text
 
     @staticmethod
     def _requests_retry_session(retries=5, backoff_factor=0.3, status_forcelist=(500, 502, 504), session=None):
@@ -27,43 +23,30 @@ class KrxHttp(ABC):
         try:
             if self.header is not None :
                 self.session.headers.update(self.header)
-            uri = "{}{}".format(self.contents_url, self.uri)
-            kwargs.update({"code":self.otp})
-            return self.session.post(url=uri, data=kwargs).json()
+            uri = "{}{}".format(self.base_url, self.uri)
+            return self.session.post(url=uri, data=kwargs)
         except Exception as x:
             print("It failed", x.__class__.__name__)
             return None
 
-    def get(self, path, timeout=3, **kwargs):
+    def get(self, **kwargs):
         try:
-            if self.header is not None :
-                self.session.headers.update(self.header)
-            raise NotImplementedError
-            #return self.session.get(url=uri, params=kwargs, timeout=timeout).json()
+            # if self.header is not None :
+            #     self.session.headers.update(self.header)
+            uri = "{}{}".format(self.base_url, self.uri)
+            return self.session.get(url=uri, params=kwargs)
         except Exception as x:
             print("It failed", x.__class__.__name__)
             return None
-
-    @property
-    def otp_url(self):
-        return "http://marketdata.krx.co.kr/contents/COM/GenerateOTP.jspx"
-
-    @property
-    def contents_url(self):
-        return "http://marketdata.krx.co.kr/contents"
 
     @property
     @abstractmethod
-    def bld(self):
-        raise NotImplementedError
+    def base_url(self):
+        return "http://marketdata.krx.co.kr/contents"
 
     @property
     def uri(self):
-        return "/MKD/99/MKD99000001.jspx"
-
-    @property
-    def name(self):
-        return "form"
+        return "/"
 
     @property
     def header(self):
