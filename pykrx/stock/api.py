@@ -10,8 +10,6 @@ def resample_ohlcv(df, freq, how):
     :param freq : d - 일 / m - 월 / y - 년
     :return:    : resampling된 DataFrame
     """
-    print(freq)
-    print(df.head())
     if freq != 'd' and len(df) > 0:
         if freq == 'm':
             df = df.resample('M').apply(how)

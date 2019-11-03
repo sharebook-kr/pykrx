@@ -129,7 +129,8 @@ def get_market_fundamental_by_date(fromdate, todate, isin, market="ALL"):
     df = df.replace(',', '', regex=True)
     df = df.astype({"DIV": np.float64, "BPS": np.int32,
                     "PER": np.float64, "EPS": np.int32}, )
-    df.set_index('날짜', inplace=True)
+    df = df.set_index('날짜')
+    df.index = pd.to_datetime(df.index, format='%Y%m%d')
     return df.sort_index()
 
 
