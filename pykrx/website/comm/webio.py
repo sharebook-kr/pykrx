@@ -50,5 +50,5 @@ class Webio(ABC):
 
     @property
     def header(self):
-        return None
+        return {"User-Agent": "Mozilla/5.0"}
 
