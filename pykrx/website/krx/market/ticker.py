@@ -62,8 +62,7 @@ class _StockTicker:
         """
         market = {"코스피": "STK", "코스닥": "KSQ", "코넥스": "KNX", "전체": "ALL"}.get(market, "ALL")
         df = _StockFinder().read(market)
-        #df.rename(columns = {'full_code': 'ISIN', 'short_code': '티커', 'codeName': '종목', 'marketName': '시장'}, inplace=True)
-        df.columns = ['종목', 'ISIN', '시장', '티커']
+        df.rename(columns = {'full_code': 'ISIN', 'short_code': '티커', 'codeName': '종목', 'marketName': '시장'}, inplace=True)
         # - 증권(7)과 사용자 영역 선택
         df = df[(df.ISIN.str[2] >= '7')]
         # - 티커 축약 (A037440 -> 037440)
