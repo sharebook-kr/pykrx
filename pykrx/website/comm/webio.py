@@ -31,8 +31,8 @@ class Webio(ABC):
 
     def get(self, **kwargs):
         try:
-            # if self.header is not None :
-            #     self.session.headers.update(self.header)
+            if self.header is not None :
+                self.session.headers.update(self.header)
             uri = "{}{}".format(self.base_url, self.uri)
             return self.session.get(url=uri, params=kwargs)
         except Exception as x:
@@ -50,5 +50,5 @@ class Webio(ABC):
 
     @property
     def header(self):
-        return None
+        return {"User-Agent": "Mozilla/5.0"}
 

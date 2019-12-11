@@ -9,11 +9,13 @@ class KrxWebIo(Webio):
 
     def _get_otp_from_krx(self):
         url = "{}?bld={}&name={}".format(self.otp_url, self.bld, self.name)
-        return self.session.get(url=url).text
+        headers = {"User-Agent": "Mozilla/5.0"}
+        return self.session.get(url=url, headers=headers).text
 
     def post(self, **kwargs):
         kwargs.update({"code": self.otp})
-        return super().post(**kwargs).json()
+        data = super().post(**kwargs)
+        return data.json()
 
     @property
     def otp_url(self):
@@ -36,7 +38,4 @@ class KrxWebIo(Webio):
     def name(self):
         return "form"
 
-    @property
-    def header(self):
-        return None
 
