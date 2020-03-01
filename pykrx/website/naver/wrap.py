@@ -5,7 +5,6 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 
-
 # fromdate, todate, isin
 def get_market_ohlcv_by_date(fromdate, todate, ticker):
     strtd = datetime.strptime(fromdate, '%Y%m%d')
@@ -29,5 +28,5 @@ def get_market_ohlcv_by_date(fromdate, todate, ticker):
 
 if __name__ == "__main__":
     # df = get_market_ohlcv_by_date("20010101", "20190820", "005930")
-    df = get_market_ohlcv_by_date("20040418", "20040418", "000020")
+    df = get_market_ohlcv_by_date("20200226", "20200227", "000020")
     print(df)

@@ -1,13 +1,14 @@
-from pykrx.website.comm.webio import Webio
+from pykrx.website.comm.webio import Get
 
 
-class NaverWebIo(Webio):
-    def __init__(self):
-        super().__init__()
+class NaverWebIo(Get):
+    def get(self, **params):
+        resp = super().read(**params)
+        return resp
 
     @property
-    def base_url(self):
-        return "https://fchart.stock.naver.com"
+    def url(self):
+        return "http://fchart.stock.naver.com/sise.nhn"
 
 
 class Sise(NaverWebIo):

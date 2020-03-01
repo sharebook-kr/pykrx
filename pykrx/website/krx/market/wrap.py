@@ -406,13 +406,13 @@ if __name__ == "__main__":
     # df = get_market_ohlcv_by_date("20150720", "20150810", "005930")
     # df = get_market_price_change_by_ticker("20040418", "20040418")
     # df = get_market_price_change_by_ticker("20040418", "20040430")
-    #df = get_market_fundamental_by_date("20150720", "20150810", "KR7005930003")
+    # df = get_market_fundamental_by_date("20150720", "20150810", "KR7005930003")
 
     # index
     # df = get_index_ohlcv_by_date("20190408", "20190412", "001", "KOSDAQ")
     # df = get_index_portfolio_deposit_file("20000104", "004", "KOSPI")
-    #df = get_index_portfolio_deposit_file("20190410", "001", "KOSDAQ")
-    # df = get_index_portfolio_deposit_file("20190410", "코스피 200")
+    # df = get_index_portfolio_deposit_file("20190410", "001", "KOSDAQ")
+    df = get_index_portfolio_deposit_file("20190410", "028", "KOSPI")
     # df = get_index_status_by_group("20190410", "KOSPI")
     # print(df)
 

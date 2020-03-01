@@ -186,7 +186,7 @@ class MKD20011_SUB(KrxWebIo):
 class MKD20011_PDF(KrxWebIo):
     @property
     def bld(self):
-        return "MKD/03/0304/03040101/mkd03040101T3_07"
+        return "MKD/03/0304/03040101/mkd03040101T3_01"
 
     def read(self, date, index, market):
         """주가지수 구성 항목
