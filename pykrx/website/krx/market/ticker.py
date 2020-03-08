@@ -132,6 +132,7 @@ def get_stock_ticker_delist(todate, fromdate=None):
     cond &= stock.df['상폐일'] <= todate
     return list(stock.df[cond].index)
 
+
 ################################################################################
 @singleton
 class IndexTicker:
@@ -181,7 +182,7 @@ if __name__ == "__main__":
     # print(get_stock_ticker_isin("000660"))
     # market = get_stock_market_from("000660")
     # print(market)
-    tickers = get_stock_ticker_list("20150720")
+    # tickers = get_stock_ticker_list("20150720")
     # print(tickers)
 #    print(len(tickers))
     # print(get_stock_ticker_isin("035420"))

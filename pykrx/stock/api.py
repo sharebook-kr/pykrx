@@ -4,6 +4,15 @@ import datetime
 import pandas as pd
 
 
+def _datetime2string(dt, freq='d'):
+    if freq.upper() == 'Y':
+        return dt.strftime("%Y")
+    elif freq.upper() == 'M':
+        return dt.strftime("%Y%m")
+    else:
+        return dt.strftime("%Y%m%d")
+
+
 def resample_ohlcv(df, freq, how):
     """
     :param df   : KRX OLCV format의 DataFrame
@@ -22,10 +31,10 @@ def resample_ohlcv(df, freq, how):
             raise RuntimeError
     return df
 
+
 # -----------------------------------------------------------------------------
 # 주식 API
 # -----------------------------------------------------------------------------
-
 def get_market_ticker_list(date=None):
     return krx.get_stock_ticker_list(date)
 
@@ -36,8 +45,10 @@ def get_market_ticker_name(ticker):
 
 def get_business_days(year, mon):
     strt = "{}{:02d}01".format(year, mon)
-    last = "{}{:02d}31".format(year, mon)
+    last = "{}{:02d}01".format(year, mon+1)
     df = get_market_ohlcv_by_date(strt, last, "000020")
+    if df.index[-1].month != int(mon):
+        df = df.iloc[:-1]
     return df.index.tolist()
 
 
@@ -50,6 +61,12 @@ def get_market_ohlcv_by_date(fromdate, todate, ticker, freq='d', adjusted=True):
     :param adjusted: 수정 종가 여부 (True/False)
     :return:
     """
+    if isinstance(fromdate, datetime.datetime):
+        fromdate = _datetime2string(fromdate)
+
+    if isinstance(todate, datetime.datetime):
+        todate = _datetime2string(todate)
+
     if adjusted:
         df = naver.get_market_ohlcv_by_date(fromdate, todate, ticker)
     else:
@@ -60,6 +77,12 @@ def get_market_ohlcv_by_date(fromdate, todate, ticker, freq='d', adjusted=True):
 
 
 def get_market_price_change_by_ticker(fromdate, todate):
+    if isinstance(fromdate, datetime.datetime):
+        fromdate = _datetime2string(fromdate)
+
+    if isinstance(todate, datetime.datetime):
+        todate = _datetime2string(todate)
+
     df_a = krx.get_market_price_change_by_ticker(fromdate, todate)
     # MKD80037는 상장 폐지 종목은 제외한 정보를 전달하기 때문에, 시작일의 가격
     # 정보 중에서 시가를 가져온다.
@@ -87,6 +110,12 @@ def get_market_price_change_by_ticker(fromdate, todate):
 
 
 def get_market_fundamental_by_date(fromdate, todate, ticker, freq='d'):
+    if isinstance(fromdate, datetime.datetime):
+        fromdate = _datetime2string(fromdate)
+
+    if isinstance(todate, datetime.datetime):
+        todate = _datetime2string(todate)
+
     isin = krx.get_stock_ticker_isin(ticker)
     df = krx.get_market_fundamental_by_date(fromdate, todate, isin)
     if df.empty:
@@ -100,21 +129,30 @@ def get_market_fundamental_by_date(fromdate, todate, ticker, freq='d'):
 
 
 def get_market_fundamental_by_ticker(date, market="ALL"):
+    if isinstance(date, datetime.datetime):
+        date = _datetime2string(date)
+
     df = krx.get_market_fundamental_by_ticker(date, market)
     if not df.empty:
         df['PBR'] = df['PER'] * df['EPS'] / df['BPS']
         df.loc[df['BPS'] == 0, 'PBR'] = 0
     return df
 
+
 # -----------------------------------------------------------------------------
 # 지수(INDEX) API
 # -----------------------------------------------------------------------------
-
 def get_index_ticker_list(date, market="KOSPI"):
+    if isinstance(date, datetime.datetime):
+        date = _datetime2string(date)
+
     return krx.IndexTicker().get_ticker(date, market)
 
     
 def get_index_portfolio_deposit_file(date, ticker, market="KOSPI"):
+    if isinstance(date, datetime.datetime):
+        date = _datetime2string(date)
+
     id = krx.IndexTicker().get_id(date, market, ticker)
     return krx.get_index_portfolio_deposit_file(date, id, market)
 
@@ -127,7 +165,7 @@ def _get_index_ohlcv_by_date(fromdate, todate, ticker, market, freq):
         :param market  : KOSPI / KOSDAQ
         :param freq    : d - 일 / m - 월 / y - 년
         :return:
-        """
+    """
     id = krx.IndexTicker().get_id(fromdate, market, ticker)
     df = krx.get_index_ohlcv_by_date(fromdate, todate, id, market)
     how = {'시가': 'first', '고가': 'max', '저가': 'min', '종가': 'last',
@@ -136,14 +174,26 @@ def _get_index_ohlcv_by_date(fromdate, todate, ticker, market, freq):
 
 
 def get_index_kospi_ohlcv_by_date(fromdate, todate, ticker, freq='d'):
+    if isinstance(fromdate, datetime.datetime):
+        fromdate = _datetime2string(fromdate, freq)
+
+    if isinstance(todate, datetime.datetime, freq):
+        todate = _datetime2string(todate)
     return _get_index_ohlcv_by_date(fromdate, todate, ticker, "KOSPI", freq)
 
 
 def get_index_kosdaq_ohlcv_by_date(fromdate, todate, ticker, freq='d'):
+    if isinstance(fromdate, datetime.datetime):
+        fromdate = _datetime2string(fromdate, freq)
+
+    if isinstance(todate, datetime.datetime, freq):
+        todate = _datetime2string(todate)
     return _get_index_ohlcv_by_date(fromdate, todate, ticker, "KOSDAQ", freq)
 
 
 def get_index_status_by_group(date, market):
+    if isinstance(date, datetime.datetime):
+        date = _datetime2string(date)
     return krx.get_index_status_by_group(date, market)
 
 
@@ -186,8 +236,8 @@ def get_shorting_balance_top50(date, market):
 
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
-    # df = get_market_ohlcv_by_date("20190225", "20190228", "000660")
-    df = get_market_ohlcv_by_date("20190225", "20190228", "000660", adjusted=False)
+    df = get_market_ohlcv_by_date("20190225", "20190228", "000660")
+    # df = get_market_ohlcv_by_date("20190225", "20190228", "000660", adjusted=False)
     # df = get_market_ohlcv_by_date("20040418", "20140418", "000020")
     # df = get_market_price_change_by_ticker("20190624", "20190630")
     # df = get_market_ohlcv_by_date("20180101", "20181231", "000660", "y")
