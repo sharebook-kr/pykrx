@@ -8,7 +8,6 @@ from pykrx.website.krx.market.core import (MKD30040, MKD80037, MKD30009_0,
                                            )
 import numpy as np
 import datetime
-import pandas as pd
 
 
 ################################################################################
@@ -249,6 +248,7 @@ def get_shorting_status_by_date(fromdate, todate, isin):
     df = df.replace(',', '', regex=True)
     df = df.astype({"공매도": np.int32, "잔고": np.int32,
                     "공매도금액": np.int64, "잔고금액": np.int64})
+    df.index = pd.to_datetime(df.index, format='%Y%m%d')
     return df.sort_index()
 
 
@@ -305,6 +305,7 @@ def get_shorting_investor_by_date(fromdate, todate, market, inquery="거래량")
     df = df.replace('/', '', regex=True)
     df = df.set_index('날짜')
     df = df.replace(',', '', regex=True).astype(np.int64)
+    df.index = pd.to_datetime(df.index, format='%Y%m%d')
     return df.sort_index()
 
 
@@ -367,6 +368,7 @@ def get_shorting_balance_by_ticker(fromdate, todate, isin, market="KOSPI"):
     df = df.astype({"공매도잔고": np.int32, "상장주식수": np.int64, "공매도금액": np.int64,
                     "시가총액": np.int64,
                     "비중": np.float64})
+    df.index = pd.to_datetime(df.index, format='%Y/%m/%d')
     return df.sort_index()
 
 
@@ -412,7 +414,7 @@ if __name__ == "__main__":
     # df = get_index_ohlcv_by_date("20190408", "20190412", "001", "KOSDAQ")
     # df = get_index_portfolio_deposit_file("20000104", "004", "KOSPI")
     # df = get_index_portfolio_deposit_file("20190410", "001", "KOSDAQ")
-    df = get_index_portfolio_deposit_file("20190410", "028", "KOSPI")
+    # df = get_index_portfolio_deposit_file("20190410", "028", "KOSPI")
     # df = get_index_status_by_group("20190410", "KOSPI")
     # print(df)
 
@@ -424,5 +426,4 @@ if __name__ == "__main__":
     # df = get_shorting_volume_top50("20190211")
     # df = get_shorting_balance_by_ticker("20190211", "20190215", "KR7005930003")
     # df = get_shorting_balance_top50("20190401")
-
-    print(df)
+    # print(df)

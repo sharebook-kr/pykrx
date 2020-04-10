@@ -380,7 +380,7 @@ print(df.head())
 
 코스닥 또한 거래량을 조회할 수 있습니다.  
  ```python
-df = get_shorting_balance_top50("20190401", "KOSDAQ")
+df = stock.get_shorting_balance_top50("20190401", "KOSDAQ")
 ```
 ```text
            종목명 순위  잔고수량    주식수      잔고금액        시가총액   비중
@@ -398,25 +398,16 @@ df = get_shorting_balance_top50("20190401", "KOSDAQ")
 #### 2.2.1.1 ETF 티커
 get_etf_ticker_list() 함수는 ETF에서 사용할 수 있는 티커를 리스트로 반환합니다.
 ```python
-tickers = e3.get_etf_ticker_list()
+tickers = stock.get_etf_ticker_list()
 print(tickers[:10])
 ```
 ```text
-['ARIRANG 200',
- 'ARIRANG 200동일가중',
- 'ARIRANG 200로우볼',
- 'ARIRANG 200모멘텀',
- 'ARIRANG 200밸류',
- 'ARIRANG 200선물레버리지',
- 'ARIRANG 200선물인버스2X',
- 'ARIRANG 200퀄리티',
- 'ARIRANG ESG우수기업',
- 'ARIRANG KRX300']
+['346000', '342140', '342500', '342600', '342610', .... ]
 ```
 #### 2.2.1.1 ETF OHLCV
-get_etf_ohlcv_by_date() 함수는 ETF의 OHLCV를 일자별로 출력합니다. 다음은 "ARIRANG 200동일가중"의 OHLCV를 출력합니다.  
+get_etf_ohlcv_by_date() 함수는 ETF의 OHLCV를 일자별로 출력합니다. 다음은 "ARIRANG 200동일가중(295820)"의 OHLCV를 출력합니다.  
 ```python
-df = e3.get_etf_ohlcv_by_date("20190401", "20190405", "ARIRANG 200동일가중")   
+df = stock.get_etf_ohlcv_by_date("20190401", "20190405", "295820")   
 print(df.head())
 ```
 
@@ -431,7 +422,7 @@ print(df.head())
 get_etf_ohlcv_by_date() 함수에 frequency 파라미터(d/m/y)를 추가할 수 있습니다. 
 d는 일자, m은 월, y는 연도를 의미합니다. 다음은 20190301부터 20190405까지의 "ARIRANG 200동일가중"의 월별 OHLCV를 출력합니다.
 ```python
-df = e3.get_etf_ohlcv_by_date("20190301", "20190405", "ARIRANG 200동일가중", 'm')
+df = stock.get_etf_ohlcv_by_date("20190301", "20190405", "295820", 'm')
 print(df.head())   
 ```
 ```text
@@ -442,29 +433,71 @@ print(df.head())
 get_etf_ticker_list()로 얻어온 티커를 사용해서 반복적으로 OHLCV를 조회할 수 있습니다.
 ```python
 import time
-tickers = e3.get_etf_ticker_list()
+tickers = stock.get_etf_ticker_list()
 for ticker in tickers[:10]:    
-    df = e3.get_etf_ohlcv_by_date("20190301", "20190405", ticker)
+    df = stock.get_etf_ohlcv_by_date("20190301", "20190405", ticker)
     print(df.head(2))
     time.sleep(1)
 ```
 
 
-#### 2.2.1.1 PDF 정보
+#### 2.2.1.2 PDF 정보
 get_etf_portfolio_deposit_file() 함수는 ETF를 구성하는 종목/비중 정보를 얻어옵니다.  
+다음은 KODEX 200동일가중(252650)의 PDF를 조회합니다.
 ```python
-df = e3.get_etf_portfolio_deposit_file("20190329", "ARIRANG 200동일가중")
+df = stock.get_etf_portfolio_deposit_file("252650", "20190329")
 print(df.head())
 ```
-평가 금액이 종목당 약 26만-28정도로 비중 조절된 것을 확인할 수 있습니다. 
+평가 금액이 종목당 약 1200만정도로 비중이 조절된 것을 확인할 수 있습니다. 
 ```text
           계약수    금액    비중
-LG생활건강     2  2794000  0.60
-호텔신라      28  2738400  0.59
-SK하이닉스    34  2686000  0.58
-넥센타이어   244  2659600  0.57
-NH투자증권   180  2619000  0.57
+동원시스템즈 337  11963500  0.59
+호텔신라     121  11543400  0.57
+신세계        34  11475000  0.57
+엔씨소프트    23  11408000  0.56
+LG생활건강     8  11336000  0.56
 ```
+
+날짜를 입력하지 않으면 조회 시점을 기준으로 조회합니다. 
+```python
+df = stock.get_etf_portfolio_deposit_file("252650")
+print(df.head())
+```
+
+#### 2.2.1.3 괴리율 추이
+get_etf_price_deviation() 함수는 ETF의 종가/순자산가치/괴리율 정보를 얻어옵니다.
+다음은 ARIRANG 200동일가중(295820) 종목의 괴리율을 출력합니다. 
+```python
+df = get_etf_price_deviation("20200101", "20200401", "295820")
+print(df.head())
+``` 
+```text
+            종가          NAV   괴리율
+날짜                                 
+2020-01-02  8285  8302.580078   -0.21
+2020-01-03  8290  8297.889648   -0.10
+2020-01-06  8150  8145.950195    0.05
+2020-01-07  8220  8226.049805   -0.07
+2020-01-08  7980  7998.839844   -0.24
+```
+
+#### 2.2.1.4 추적오차율 추이
+get_etf_tracking_error() 함수는 ETF의 순자산가치/기초지수/추적오차 정보를 얻어옵니다.
+```python
+df = get_etf_tracking_error("20200101", "20200401", "295820")
+print(df.head())
+```
+
+```text
+                    NAV         지수   추적오차
+날짜
+2020-01-02  8302.580078  1819.109985    0.32
+2020-01-03  8297.889648  1818.130005    0.32
+2020-01-06  8145.950195  1784.719971    0.32
+2020-01-07  8226.049805  1802.339966    0.32
+2020-01-08  7998.839844  1752.359985    0.32
+```
+
 
 ### 2.2.2 ETN 
 #### 2.2.2.1

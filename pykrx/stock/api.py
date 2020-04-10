@@ -221,6 +221,39 @@ def get_shorting_balance_top50(date, market):
     return krx.get_shorting_balance_top50(date, market)
 
 
+# -----------------------------------------------------------------------------
+# ETF API
+# -----------------------------------------------------------------------------
+def get_etf_ticker_list(date=None):
+    if date is None:
+        date = datetime.datetime.now()
+        date = _datetime2string(date)
+    return krx.get_etf_ticker_list(date)
+
+
+def get_etf_isin(ticker):
+    return krx.get_etf_isin(ticker)
+
+
+def get_etf_ohlcv_by_date(fromdate, todate, ticker):
+    return krx.get_etf_ohlcv_by_date(fromdate, todate, ticker)
+
+
+def get_etf_portfolio_deposit_file(ticker, date=None):
+    if date is None:
+        date = datetime.datetime.now()
+        date = _datetime2string(date)
+    return krx.get_etf_portfolio_deposit_file(ticker, date)
+
+
+def get_etf_price_deviation(fromdate, todate, ticker):
+    return krx.get_etf_price_deviation(fromdate, todate, ticker)
+
+
+def get_etf_tracking_error(fromdate, todate, ticker):
+    return krx.get_etf_tracking_error(fromdate, todate, ticker)
+
+
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
     # df = get_market_ohlcv_by_date("20190225", "20190228", "000660")
@@ -248,4 +281,12 @@ if __name__ == "__main__":
     # df = get_shorting_volume_top50("20190401", "KOSPI")
     # df = get_shorting_balance_by_ticker("20190401", "20190405", "005930")
     # df = get_shorting_balance_top50("20190401", "KOSDAQ")
-    # print(df)
+    df = get_etf_ticker_list()
+    # df = get_etf_isin("346000")
+    # df = get_etf_ohlcv_by_date("20200101", "20200401", "295820")
+    # df = get_etf_portfolio_deposit_file("252650", "20190329")
+    # df = get_etf_price_deviation("20200101", "20200401", "295820")
+    # df = get_etf_tracking_error("20200101", "20200401", "295820")
+    print(df)
+
+
