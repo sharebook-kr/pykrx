@@ -1,2 +1,1 @@
-
-# __all__ = ['bond', 'e3', 'stock']
+from pykrx.version import __version__

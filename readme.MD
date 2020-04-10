@@ -156,18 +156,26 @@ print(df.head(2))
 코스피 인덱스를 조회합니다.
 
 #### 2.1.2.1 인덱스 종류 조회
-get_index_kospi_ticker_list() 함수는 코스피 인덱스 종류를 리스트로 반환합니다. 
+get_index_ticker_list() 함수는 코스피 및 코스닥 시장의 인덱스를 리스트로 반환합니다.
+market 파라미터에 코스피 (KOSPI) 혹은 코스닥 (KOSDAQ) 시장을 구분해야 합니다.
 ```python
-tickers = stock.get_index_kospi_ticker_list()
+tickers = stock.get_index_ticker_list(market="KOSPI")
+print(tickers)
+```
+
+생략하면 코스피 시장의 인덱스를 반환합니다.  
+반환값의 "코스피"는 코스피 지수를 의미합니다.
+```python
+tickers = stock.get_index_ticker_list()
 print(tickers)
 ```
 ```text
 ['코스피', '코스피 200', '코스피 100', '코스피 50', ... ]
 ```
 #### 2.1.2.2 인덱스 종류 조회
-get_index_kospi_ohlcv_by_date() 함수는 입력된 기간 동안의 인덱스 OHLCV를 조회합니다. 다음은 20190101-20190228 동안의 "코스피 200" 인덱스의 OHLCV를 조회합니다.
+get_index_ohlcv_by_date() 함수는 입력된 기간 동안의 인덱스 OHLCV를 조회합니다. 다음은 20190101-20190228 동안의 "코스피 200" 인덱스의 OHLCV를 조회합니다.
 ```python
-df = get_index_kospi_ohlcv_by_date("20190101", "20190228", "코스피 200")
+df = get_index_ohlcv_by_date("20190101", "20190228", "코스피 200")
 print(df.head(2))
 ```
 ```text
@@ -175,10 +183,10 @@ print(df.head(2))
 20190102  263.350006  263.769989  257.470001  258.230011  69950000
 20190103  258.190002  258.700012  255.350006  255.770004  90521000
 ```
-get_index_kospi_ohlcv_by_date() 함수에 frequency 파라미터(d/m/y)를 추가할 수 있습니다. 
+get_index_ohlcv_by_date() 함수에 frequency 파라미터(d/m/y)를 추가할 수 있습니다. 
 d는 일자, m은 월, y는 연도를 의미합니다. 다음은 20190101부터 20190228까지의 "코스피 200"의 월별 OHLCV를 출력합니다. 
 ```python
-df = get_index_kospi_ohlcv_by_date("20190101", "20190228", "코스피 200", "m")
+df = get_index_ohlcv_by_date("20190101", "20190228", "코스피 200", "m")
 print(df.head(2))
 ```
 ```text

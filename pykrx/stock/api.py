@@ -143,21 +143,19 @@ def get_market_fundamental_by_ticker(date, market="ALL"):
 # 지수(INDEX) API
 # -----------------------------------------------------------------------------
 def get_index_ticker_list(date, market="KOSPI"):
-    if isinstance(date, datetime.datetime):
-        date = _datetime2string(date)
-
-    return krx.IndexTicker().get_ticker(date, market)
+    return krx.IndexTicker().get_ticker(market, date)
 
     
-def get_index_portfolio_deposit_file(date, ticker, market="KOSPI"):
+def get_index_portfolio_deposit_file(date, ticker):
     if isinstance(date, datetime.datetime):
         date = _datetime2string(date)
 
-    id = krx.IndexTicker().get_id(date, market, ticker)
+    id = krx.IndexTicker().get_id(ticker, date)
+    market = krx.IndexTicker().get_market(ticker, date)
     return krx.get_index_portfolio_deposit_file(date, id, market)
 
 
-def _get_index_ohlcv_by_date(fromdate, todate, ticker, market, freq):
+def _get_index_ohlcv_by_date(fromdate, todate, ticker, freq):
     """
         :param fromdate: 조회 시작 일자 (YYYYMMDD)
         :param todate  : 조회 종료 일자 (YYYYMMDD)
@@ -166,29 +164,20 @@ def _get_index_ohlcv_by_date(fromdate, todate, ticker, market, freq):
         :param freq    : d - 일 / m - 월 / y - 년
         :return:
     """
-    id = krx.IndexTicker().get_id(fromdate, market, ticker)
+    id = krx.IndexTicker().get_id(ticker, fromdate)
+    market = krx.IndexTicker().get_market(ticker, fromdate)
     df = krx.get_index_ohlcv_by_date(fromdate, todate, id, market)
-    how = {'시가': 'first', '고가': 'max', '저가': 'min', '종가': 'last',
-           '거래량': 'sum'}
+    how = {'시가': 'first', '고가': 'max', '저가': 'min', '종가': 'last', '거래량': 'sum'}
     return resample_ohlcv(df, freq, how)
 
 
-def get_index_kospi_ohlcv_by_date(fromdate, todate, ticker, freq='d'):
+def get_index_ohlcv_by_date(fromdate, todate, ticker, freq='d'):
     if isinstance(fromdate, datetime.datetime):
         fromdate = _datetime2string(fromdate, freq)
 
-    if isinstance(todate, datetime.datetime, freq):
+    if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
-    return _get_index_ohlcv_by_date(fromdate, todate, ticker, "KOSPI", freq)
-
-
-def get_index_kosdaq_ohlcv_by_date(fromdate, todate, ticker, freq='d'):
-    if isinstance(fromdate, datetime.datetime):
-        fromdate = _datetime2string(fromdate, freq)
-
-    if isinstance(todate, datetime.datetime, freq):
-        todate = _datetime2string(todate)
-    return _get_index_ohlcv_by_date(fromdate, todate, ticker, "KOSDAQ", freq)
+    return _get_index_ohlcv_by_date(fromdate, todate, ticker, freq)
 
 
 def get_index_status_by_group(date, market):
@@ -211,13 +200,11 @@ def get_shorting_volume_by_ticker(date, market):
 
 
 def get_shorting_investor_volume_by_date(fromdate, todate, market):
-    return krx.get_shorting_investor_by_date(fromdate, todate, market,
-                                               "거래량")
+    return krx.get_shorting_investor_by_date(fromdate, todate, market, "거래량")
 
 
 def get_shorting_investor_price_by_date(fromdate, todate, market):
-    return krx.get_shorting_investor_by_date(fromdate, todate, market,
-                                              "거래대금")
+    return krx.get_shorting_investor_by_date(fromdate, todate, market, "거래대금")
 
 
 def get_shorting_volume_top50(date, market):
@@ -236,7 +223,7 @@ def get_shorting_balance_top50(date, market):
 
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
-    df = get_market_ohlcv_by_date("20190225", "20190228", "000660")
+    # df = get_market_ohlcv_by_date("20190225", "20190228", "000660")
     # df = get_market_ohlcv_by_date("20190225", "20190228", "000660", adjusted=False)
     # df = get_market_ohlcv_by_date("20040418", "20140418", "000020")
     # df = get_market_price_change_by_ticker("20190624", "20190630")
@@ -249,16 +236,16 @@ if __name__ == "__main__":
     # tickers = get_index_ticker_list("20190225", "KOSDAQ")
     # print(tickers)
     # df = get_shorting_status_by_date("20181210", "20181212", "005930")
-    # df = get_index_kosdaq_ohlcv_by_date("20190101", "20190228", "코스닥 150")
-    # df = get_index_kospi_ohlcv_by_date("20190101", "20190228", "코스피")
-    # df = get_index_kosdaq_ohlcv_by_date("20190101", "20190228", "코스닥")
-    # df = get_index_kospi_ohlcv_by_date("20000101", "20180630", "코스피 200", "m")
+    # df = get_index_ohlcv_by_date("20190101", "20190228", "코스닥 150")
+    # df = get_index_ohlcv_by_date("20190101", "20190228", "코스피")
+    # df = get_index_ohlcv_by_date("20190101", "20190228", "코스닥")
+    # df = get_index_ohlcv_by_date("20000101", "20180630", "코스피 200", "m")
     # df = get_index_portfolio_deposit_file("20190412", "코스피 소형주")
-    # df = krx.IndexTicker().get_id("20000201", "KOSPI", "004")
+    # df = krx.IndexTicker().get_id("코스피 200", "20000201")
     # df = get_index_portfolio_deposit_file("20000201", "코스피 소형주")
     # df = get_shorting_investor_volume_by_date("20190401", "20190405", "KOSPI")
     # df = get_shorting_investor_price_by_date("20190401", "20190405", "KOSPI")
     # df = get_shorting_volume_top50("20190401", "KOSPI")
     # df = get_shorting_balance_by_ticker("20190401", "20190405", "005930")
     # df = get_shorting_balance_top50("20190401", "KOSDAQ")
-    print(df)
+    # print(df)

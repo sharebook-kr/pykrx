@@ -2,6 +2,7 @@ from pykrx.website.comm import dataframe_empty_handler, singleton
 from pykrx.website.krx.krxio import KrxWebIo
 from pykrx.website.krx.market.core import MKD20011
 from pandas import DataFrame
+from datetime import datetime
 import pandas as pd
 
 
@@ -139,40 +140,46 @@ class IndexTicker:
     def __init__(self):
         self.df = DataFrame()
 
-    def get_ticker(self, date, market):
-        self._get(date, market)
+    def get_ticker(self, market, date=None):
+        date = IndexTicker._get_datetime(date)
+        self._download_ticker(date)
         cond = (self.df['date'] == date) & (self.df['ind_tp_cd'] == market)
         return self.df[cond].index.tolist()
 
-    def get_id(self, date, market, ticker):
-        self._get(date, market)
+    def get_id(self, ticker, date=None):
+        date = IndexTicker._get_datetime(date)
+        self._download_ticker(date)
         cond = (self.df.index == ticker) & (self.df['date'] == date)
         if len(self.df[cond]) == 0:
             print("NOT FOUND")
             return None
         return self.df.loc[cond, 'idx_ind_cd'][0]
 
-    def get_market(self, date, market, ticker):
-        self._get(date, market)
+    def get_market(self, ticker, date=None):
+        date = IndexTicker._get_datetime(date)
+        self._download_ticker(date)
         cond = self.df.index == ticker
         return self.df.loc[cond, 'ind_tp_cd'][0]
 
-    def _get(self, date, market):
-        try:
-            cond = (self.df['date'] == date) & (self.df['ind_tp_cd'] == market)
-            if len(self.df[cond]) == 0:
-                raise KeyError
-        except KeyError:
-            index = {"KOSPI": "02", "KOSDAQ": "03"}.get(market, "KOSPI")
-            df = MKD20011().read(date, index)
-            if len(df) == 0:
-                return df
+    @staticmethod
+    def _get_datetime(date):
+        if date is None:
+            date = datetime.now()
+        if not isinstance(date, datetime):
+            date = datetime.strptime(date, "%Y%m%d")
+        return date
 
-            df = df.set_index('idx_nm')
-            df['date'] = date
-            df['ind_tp_cd'] = df['ind_tp_cd'].apply(
-                lambda x: "KOSPI" if x == "1" else "KOSDAQ")
-            self.df = self.df.append(df)
+    def _download_ticker(self, date):
+        if 'date' not in self.df.columns or len(self.df[self.df['date'].dt.day == date.day]) == 0:
+            for index in {"KOSPI": "02", "KOSDAQ": "03"}.values():
+                df = MKD20011().read(date, index)
+                if len(df) == 0:
+                    continue
+
+                df = df.set_index('idx_nm')
+                df['date'] = date
+                df['ind_tp_cd'] = df['ind_tp_cd'].apply(lambda x: "KOSPI" if x == "1" else "KOSDAQ")
+                self.df = self.df.append(df)
 
 
 if __name__ == "__main__":
@@ -190,6 +197,6 @@ if __name__ == "__main__":
     # Index Ticker
     #    tickers = IndexTicker().get_ticker("20190412", "KOSPI")
     #    print(tickers)
-    index_id = IndexTicker().get_id("20190412", "KOSPI", "코스피")
+    index_id = IndexTicker().get_id("코스피")
     print(index_id)
-    print(IndexTicker().get_market("20190412", "KOSPI", "코스피"))
+    print(IndexTicker().get_id("코스피 200", "20000201"))
