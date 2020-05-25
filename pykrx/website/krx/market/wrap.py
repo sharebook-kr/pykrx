@@ -7,6 +7,7 @@ from pykrx.website.krx.market.core import (MKD30040, MKD80037, MKD30009_0,
                                            SRT02020400, SRT02030100, SRT02030400
                                            )
 import numpy as np
+import pandas as pd
 import datetime
 
 
@@ -402,7 +403,6 @@ def get_shorting_balance_top50(date, market="KOSPI"):
 
 
 if __name__ == "__main__":
-    import pandas as pd
     pd.set_option('display.expand_frame_repr', False)
     # df = get_market_fundamental_by_ticker("20190401", "ALL")
     # df = get_market_ohlcv_by_date("20150720", "20150810", "005930")
