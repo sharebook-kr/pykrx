@@ -213,8 +213,8 @@ class MKD80002(KrxWebIo):
         """전체지수 등락률
         :param fromdate : 조회 시작 일자 (YYMMDD)
         :param todate   : 조회 마지막 일자 (YYMMDD)
-        :param market: KRX (2) / KOSPI (3) / KOSDAQ (4)
-        :return      : PDF DataFrame
+        :param market: 2(KRX) / 3(KOSPI) / 4 (KOSDAQ)
+        :return      : 지수 등락률 DataFrame
                 group_code group_name kor_indx_ind_nm     indx     prv_dd_indx  prv_dd_cmpr  fluc_tp  prv_dd_cmpr_chart updn_rate  updn_flag       tr_vl            tr_amt
             0          3        KRX         KRX 300     1,207.80    1,236.27       28.47       1               28.47      2.36         3      1,439,933,029  55,545,303,395,341
             1          3        KRX         KRX 100     4,234.80    4,335.24      100.44       1              100.44      2.37         3        500,776,865  32,360,209,330,383
@@ -224,6 +224,51 @@ class MKD80002(KrxWebIo):
         """
 
         result = self.post(marketTp=market, period_strt_dd=fromdate, period_end_dd=todate)
+        return DataFrame(result['block1'])
+
+
+class MDK80033_0(KrxWebIo):
+    @property
+    def bld(self):
+        return "MKD/13/1302/13020301/mkd13020301_01"
+
+    def read(self, fromdate, todate, market):
+        """거래실적 추이 (거래량)
+        :param fromdate : 조회 시작 일자 (YYMMDD)
+        :param todate   : 조회 마지막 일자 (YYMMDD)
+        :param market   : kospi / kosdaq / konex
+        :return         : 거래실적 추이 DataFrame
+                       dt            tot            stk        sect       reit             fm rpt_mass mktd_mass mktd_bsk mktd_dkpl tme_end_pr   tme_mass  tme_bsk    tme_unit tme_dkpl bz_termnl_ask cable_termnl_ask wrls_termnl_ask      hts_ask     etc_ask bz_termnl_bid cable_termnl_bid wrls_termnl_bid      hts_bid     etc_bid
+                0  2020/05/27  1,178,847,686  1,156,800,749  19,567,184  1,181,347  1,159,323,745        0   421,116        0         0  3,271,098    855,312        0  14,976,415        0    71,353,441        2,112,812     567,158,607  453,973,325  84,249,501    72,550,845        1,870,205     563,795,722  451,021,048  89,609,866
+                1  2020/05/26  1,017,804,023  1,008,972,681   6,436,255  1,438,271    999,126,798        0    15,406  249,637         0  2,885,337  1,164,620        0  14,362,225        0    64,446,407        1,521,342     481,103,100  408,886,368  61,846,806    64,630,912        1,302,029     472,185,427  406,662,217  73,023,438
+                2  2020/05/25    641,458,990    612,379,841  27,522,107  1,021,316    629,592,119        0     9,539        0         0  2,069,182    393,961        0   9,394,189        0    46,899,361        1,141,784     306,793,497  235,845,426  50,778,922    44,817,143        1,167,310     306,395,061  234,893,243  54,186,233
+                3  2020/05/22    847,467,288    830,997,456  13,472,156  2,173,679    832,046,355        0   245,749        0         0  3,101,995  3,094,402  382,092   8,596,695        0    63,527,104        1,580,861     382,694,417  312,464,634  87,200,272    54,102,924        1,552,136     413,978,629  315,154,794  62,678,805
+                4  2020/05/21    601,199,346    596,327,758   2,325,716  1,780,149    588,696,773        0   426,864        0         0  2,359,680    368,345        0   9,347,684        0    60,969,199        1,050,550     283,828,511  192,808,025  62,543,061    52,553,279        1,177,388     293,822,455  194,186,529  59,459,695
+
+        """
+        result = self.post(ind_tp=market, fr_work_dt=fromdate, to_work_dt=todate)
+        return DataFrame(result['block1'])
+
+class MDK80033_1(KrxWebIo):
+    @property
+    def bld(self):
+        return "MKD/13/1302/13020301/mkd13020301_02"
+
+    def read(self, fromdate, todate, market):
+        """거래실적 추이 (거래대금)
+        :param fromdate : 조회 시작 일자 (YYMMDD)
+        :param todate   : 조회 마지막 일자 (YYMMDD)
+        :param market   : kospi / kosdaq / konex
+        :return         : 거래실적 추이 DataFrame
+                       dt            tot            stk        sect       reit             fm rpt_mass mktd_mass mktd_bsk mktd_dkpl tme_end_pr   tme_mass  tme_bsk    tme_unit tme_dkpl bz_termnl_ask cable_termnl_ask wrls_termnl_ask      hts_ask     etc_ask bz_termnl_bid cable_termnl_bid wrls_termnl_bid      hts_bid     etc_bid
+                0  2020/05/27  1,178,847,686  1,156,800,749  19,567,184  1,181,347  1,159,323,745        0   421,116        0         0  3,271,098    855,312        0  14,976,415        0    71,353,441        2,112,812     567,158,607  453,973,325  84,249,501    72,550,845        1,870,205     563,795,722  451,021,048  89,609,866
+                1  2020/05/26  1,017,804,023  1,008,972,681   6,436,255  1,438,271    999,126,798        0    15,406  249,637         0  2,885,337  1,164,620        0  14,362,225        0    64,446,407        1,521,342     481,103,100  408,886,368  61,846,806    64,630,912        1,302,029     472,185,427  406,662,217  73,023,438
+                2  2020/05/25    641,458,990    612,379,841  27,522,107  1,021,316    629,592,119        0     9,539        0         0  2,069,182    393,961        0   9,394,189        0    46,899,361        1,141,784     306,793,497  235,845,426  50,778,922    44,817,143        1,167,310     306,395,061  234,893,243  54,186,233
+                3  2020/05/22    847,467,288    830,997,456  13,472,156  2,173,679    832,046,355        0   245,749        0         0  3,101,995  3,094,402  382,092   8,596,695        0    63,527,104        1,580,861     382,694,417  312,464,634  87,200,272    54,102,924        1,552,136     413,978,629  315,154,794  62,678,805
+                4  2020/05/21    601,199,346    596,327,758   2,325,716  1,780,149    588,696,773        0   426,864        0         0  2,359,680    368,345        0   9,347,684        0    60,969,199        1,050,550     283,828,511  192,808,025  62,543,061    52,553,279        1,177,388     293,822,455  194,186,529  59,459,695
+
+        """
+        result = self.post(ind_tp=market, fr_work_dt=fromdate, to_work_dt=todate)
         return DataFrame(result['block1'])
 
 
@@ -402,30 +447,27 @@ class SRT02030400(ShortHttp):
 
 if __name__ == "__main__":
     import pandas as pd
-
     pd.set_option('display.width', None)
 
     # stock
     # df = MKD80037().read("ALL", "20180501", "20180801")
     # df = MKD80037().read("ALL", "20180501", "20180515")
-
     # index
     # df = MKD20011_PDF().read("20190412", "001", 2)
     # df = MKD20011().read("20190413", "03")
     # df = MKD20011_SUB().read("20190408", "20190412", "001", 1)
     # df = MKD20011_SUB().read("20190408", "20190412", "001", 2)
     # print(MKD30009_1().read('20190322', '20190329', 'ALL', 'KR7005930003'))
-    df = MKD80002().read("20200520", "20200527", 2)
+    # df = MKD80002().read("20200520", "20200527", 2)
+    # df = MDK80033_0().read("20200519", "20200526", 'kospi')
+    # df = MDK80033_1().read("20200519", "20200526", 'kospi')
     # shorting
     # print(SRT02010100.read("KR7005930003", "20181205", "20181207"))
     # print(SRT02020100.read("20190402", "20190402", market=1))
     # print(SRT02020100.read("20181207", "20181212", "코스피", "KR7005930003"))
     # print(SRT02020300.read("20181207", "20181212", "코스피", "거래대금"))
     # print(SRT02020400.read("20181212", "코스피"))
-
     # print(SRT02030100.read("20181212", "20181212", 1, "KR7210980009"))
     # print(SRT02030100.read("20181207", "20181212", "코스피", "KR7210980009"))
-
     # print(SRT02030400.read("20181214", 1))
-
     print(df.head())

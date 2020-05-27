@@ -139,6 +139,22 @@ def get_market_fundamental_by_ticker(date, market="ALL"):
     return df
 
 
+def get_market_trading_volume_by_date(fromdate, todate, market="KOSPI"):
+    if isinstance(fromdate, datetime.datetime):
+        fromdate = _datetime2string(fromdate)
+    if isinstance(todate, datetime.datetime):
+        todate = _datetime2string(todate)
+    return krx.get_market_trading_volume_by_date(fromdate, todate, market)
+
+
+def get_market_trading_value_by_date(fromdate, todate, market="KOSPI"):
+    if isinstance(fromdate, datetime.datetime):
+        fromdate = _datetime2string(fromdate)
+    if isinstance(todate, datetime.datetime):
+        todate = _datetime2string(todate)
+    return krx.get_market_trading_value_by_date(fromdate, todate, market)
+
+
 # -----------------------------------------------------------------------------
 # 지수(INDEX) API
 # -----------------------------------------------------------------------------
@@ -192,6 +208,7 @@ def get_index_price_change_by_name(fromdate, todate, market="KOSPI"):
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
     return krx.get_index_price_change_by_name(fromdate, todate, market)
+
 
 # -----------------------------------------------------------------------------
 # 공매도(SHORTING) API
@@ -273,6 +290,8 @@ if __name__ == "__main__":
     # df = get_market_ticker_name("000660")
     # df = get_market_fundamental_by_date("20180301", "20180320", '005930')
     # df = get_market_fundamental_by_date("20180301", "20180320", '005930')
+    # df = get_market_trading_volume_by_date("20200519", "20200526", 'KOSPI')
+    # df = get_market_trading_value_by_date("20200519", "20200526", 'KOSPI')
     # tickers = get_index_ticker_list("20190225", "KOSDAQ")
     # print(tickers)
     # df = get_shorting_status_by_date("20181210", "20181212", "005930")
@@ -280,7 +299,7 @@ if __name__ == "__main__":
     # df = get_index_ohlcv_by_date("20190101", "20190228", "코스피")
     # df = get_index_ohlcv_by_date("20190101", "20190228", "코스닥")
     # df = get_index_ohlcv_by_date("20000101", "20180630", "코스피 200", "m")
-    df = get_index_price_change_by_name("20200520", "20200527", "KOSDAQ")
+    # df = get_index_price_change_by_name("20200520", "20200527", "KOSDAQ")
     # df = get_index_portfolio_deposit_file("20190412", "코스피 소형주")
     # df = krx.IndexTicker().get_id("코스피 200", "20000201")
     # df = get_index_portfolio_deposit_file("20000201", "코스피 소형주")
