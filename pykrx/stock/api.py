@@ -186,6 +186,13 @@ def get_index_status_by_group(date, market):
     return krx.get_index_status_by_group(date, market)
 
 
+def get_index_price_change_by_name(fromdate, todate, market="KOSPI"):
+    if isinstance(fromdate, datetime.datetime):
+        fromdate = _datetime2string(fromdate)
+    if isinstance(todate, datetime.datetime):
+        todate = _datetime2string(todate)
+    return krx.get_index_price_change_by_name(fromdate, todate, market)
+
 # -----------------------------------------------------------------------------
 # 공매도(SHORTING) API
 # -----------------------------------------------------------------------------
@@ -273,6 +280,7 @@ if __name__ == "__main__":
     # df = get_index_ohlcv_by_date("20190101", "20190228", "코스피")
     # df = get_index_ohlcv_by_date("20190101", "20190228", "코스닥")
     # df = get_index_ohlcv_by_date("20000101", "20180630", "코스피 200", "m")
+    df = get_index_price_change_by_name("20200520", "20200527", "KOSDAQ")
     # df = get_index_portfolio_deposit_file("20190412", "코스피 소형주")
     # df = krx.IndexTicker().get_id("코스피 200", "20000201")
     # df = get_index_portfolio_deposit_file("20000201", "코스피 소형주")
@@ -281,7 +289,7 @@ if __name__ == "__main__":
     # df = get_shorting_volume_top50("20190401", "KOSPI")
     # df = get_shorting_balance_by_ticker("20190401", "20190405", "005930")
     # df = get_shorting_balance_top50("20190401", "KOSDAQ")
-    df = get_etf_ticker_list()
+    # df = get_etf_ticker_list()
     # df = get_etf_isin("346000")
     # df = get_etf_ohlcv_by_date("20200101", "20200401", "295820")
     # df = get_etf_portfolio_deposit_file("252650", "20190329")

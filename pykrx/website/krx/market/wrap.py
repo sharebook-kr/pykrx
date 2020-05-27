@@ -2,7 +2,7 @@ from pykrx.website.comm import dataframe_empty_handler
 from pykrx.website.krx.market.ticker import get_stock_ticker_isin
 from pykrx.website.krx.market.core import (MKD30040, MKD80037, MKD30009_0,
                                            MKD30009_1, MKD20011, MKD20011_SUB,
-                                           MKD20011_PDF, SRT02010100,
+                                           MKD20011_PDF, SRT02010100, MKD80002,
                                            SRT02020100, SRT02020300,
                                            SRT02020400, SRT02030100, SRT02030400
                                            )
@@ -194,15 +194,38 @@ def get_index_status_by_group(date, market):
     """
     market = {"KOSPI": "02", "KOSDAQ": "03"}.get(market, "02")
     df = MKD20011().read(date, market)
-
-    df = df[['idx_nm', 'annc_tm', 'bas_tm', 'bas_idx', 'prsnt_prc',
-             'idx_mktcap']]
-    df.columns = ['지수명', '기준시점', '발표시점', '기준지수', '현재지수',
-                  '시가총액']
+    df = df[['idx_nm', 'annc_tm', 'bas_tm', 'bas_idx', 'prsnt_prc', 'idx_mktcap']]
+    df.columns = ['지수명', '기준시점', '발표시점', '기준지수', '현재지수', '시가총액']
     df = df.set_index('지수명')
     df = df.replace(',', '', regex=True)
     df = df.replace('', 0)
     df = df.astype({"기준지수": float, "현재지수": float, "시가총액": int}, )
+    return df
+
+
+@dataframe_empty_handler
+def get_index_price_change_by_name(fromdate, todate, market):
+    """전체지수 등락률
+        :param fromdate: 조회 시작 일자 (YYYYMMDD)
+        :param todate  : 조회 종료 일자 (YYYYMMDD)
+        :param market  :  KRX / KOSPI / KOSDQA
+        :return        : 전체지수 등락률 DataFrame
+                                       기준시점    발표시점 기준지수 현재지수    시가총액
+            코스피                   1983.01.04  1980.01.04   100.0   2486.35  1617634318
+            코스피 벤치마크           2015.09.14  2010.01.04  1696.0   2506.92  1554948117
+            코스피 비중제한 8% 지수   2017.12.18  2015.01.02  1000.0   1272.93  1559869409
+            코스피 200               1994.06.15  1990.01.03   100.0    327.13  1407647304
+            코스피 100               2000.03.02  2000.01.04  1000.0   2489.34  1277592989
+            코스피 50                2000.03.02  2000.01.04  1000.0   2205.53  1102490712
+        """
+    market = {"KRX": 2, "KOSPI": 3, "KOSDAQ": 4}.get(market, 3)
+    df = MKD80002().read(fromdate, todate, market)
+    df = df[['kor_indx_ind_nm', 'indx', 'prv_dd_indx', 'updn_rate', 'tr_vl', 'tr_amt']]
+    df.columns = ['지수명', '시가', '종가', '등락률', '거래량', '거래대금']
+    df = df.set_index('지수명')
+    df = df.replace(',', '', regex=True)
+    df = df.replace('', 0)
+    df = df.astype({"시가": float, "종가": float, "등락률": float, "거래량": np.int64, "거래대금": np.int64})
     return df
 
 
@@ -416,7 +439,8 @@ if __name__ == "__main__":
     # df = get_index_portfolio_deposit_file("20190410", "001", "KOSDAQ")
     # df = get_index_portfolio_deposit_file("20190410", "028", "KOSPI")
     # df = get_index_status_by_group("20190410", "KOSPI")
-    # print(df)
+    df = get_index_price_change_by_name("20200520", "20200527", "KOSDAQ")
+    print(df)
 
     # shoring
     # df = get_shorting_status_by_date("20190401", "20190405", "KR7005930003")

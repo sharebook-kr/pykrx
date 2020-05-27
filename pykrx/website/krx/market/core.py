@@ -204,6 +204,29 @@ class MKD20011_PDF(KrxWebIo):
         return DataFrame(result['output'])
 
 
+class MKD80002(KrxWebIo):
+    @property
+    def bld(self):
+        return "MKD/13/1301/13010101/mkd13010101"
+
+    def read(self, fromdate, todate, market):
+        """전체지수 등락률
+        :param fromdate : 조회 시작 일자 (YYMMDD)
+        :param todate   : 조회 마지막 일자 (YYMMDD)
+        :param market: KRX (2) / KOSPI (3) / KOSDAQ (4)
+        :return      : PDF DataFrame
+                group_code group_name kor_indx_ind_nm     indx     prv_dd_indx  prv_dd_cmpr  fluc_tp  prv_dd_cmpr_chart updn_rate  updn_flag       tr_vl            tr_amt
+            0          3        KRX         KRX 300     1,207.80    1,236.27       28.47       1               28.47      2.36         3      1,439,933,029  55,545,303,395,341
+            1          3        KRX         KRX 100     4,234.80    4,335.24      100.44       1              100.44      2.37         3        500,776,865  32,360,209,330,383
+            2          3        KRX         KTOP 30     6,740.79    6,965.40      224.61       1              224.61      3.33         3        267,094,630  22,349,375,479,336
+            3          3        KRX         KRX 자동차  1,128.89    1,156.61       27.72       1               27.72      2.46         3         68,136,810   2,085,570,910,980
+            4          3        KRX         KRX 반도체  2,510.86    2,602.63       91.77       1               91.77      3.65         3        211,516,546   4,892,632,198,230
+        """
+
+        result = self.post(marketTp=market, period_strt_dd=fromdate, period_end_dd=todate)
+        return DataFrame(result['block1'])
+
+
 ################################################################################
 # Sorting
 class ShortHttp(KrxWebIo):
@@ -387,12 +410,12 @@ if __name__ == "__main__":
     # df = MKD80037().read("ALL", "20180501", "20180515")
 
     # index
-    df = MKD20011_PDF().read("20190412", "001", 2)
+    # df = MKD20011_PDF().read("20190412", "001", 2)
     # df = MKD20011().read("20190413", "03")
     # df = MKD20011_SUB().read("20190408", "20190412", "001", 1)
     # df = MKD20011_SUB().read("20190408", "20190412", "001", 2)
     # print(MKD30009_1().read('20190322', '20190329', 'ALL', 'KR7005930003'))
-
+    df = MKD80002().read("20200520", "20200527", 2)
     # shorting
     # print(SRT02010100.read("KR7005930003", "20181205", "20181207"))
     # print(SRT02020100.read("20190402", "20190402", market=1))
