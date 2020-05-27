@@ -139,7 +139,7 @@ def get_market_trading_volume_by_date(fromdate, todate, market):
     """거래실적 추이(거래량)
     :param fromdate: 조회 시작 일자 (YYYYMMDD)
     :param todate  : 조회 종료 일자 (YYYYMMDD)
-    :param market  :  KRX / KOSPI / KOSDQA
+    :param market  :  KOSPI / KOSDQA / KONEX
     :return        : 거래실적 추이 DataFrame
                           전체        주권   투자회사  부동산투자회사
         2020-05-26  1017804023  1008972681   6436255  1438271
@@ -159,7 +159,7 @@ def get_market_trading_value_by_date(fromdate, todate, market):
     """거래실적 추이 (거래대금)
     :param fromdate: 조회 시작 일자 (YYYYMMDD)
     :param todate  : 조회 종료 일자 (YYYYMMDD)
-    :param market  :  KRX / KOSPI / KOSDQA
+    :param market  :  KOSPI / KOSDQA / KONEX
     :return        : 거래실적 추이 DataFrame (단위:원)
                           전체        주권   투자회사  부동산투자회사
         2020-05-26  12545313579  12524370281   3260524   7982490

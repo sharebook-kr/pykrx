@@ -139,20 +139,39 @@ def get_market_fundamental_by_ticker(date, market="ALL"):
     return df
 
 
-def get_market_trading_volume_by_date(fromdate, todate, market="KOSPI"):
+def get_market_trading_volume_by_date(fromdate, todate, market="KOSPI", freq='d'):
+    """
+    :param fromdate: 조회 시작 일자 (YYYYMMDD)
+    :param todate  : 조회 종료 일자 (YYYYMMDD)
+    :param market  : KOSPI / KOSDAQ / KONEX
+    :param freq    : d - 일 / m - 월 / y - 년
+    :return        : 거래실적(거래량) 추이 DataFrame
+    """
     if isinstance(fromdate, datetime.datetime):
         fromdate = _datetime2string(fromdate)
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
-    return krx.get_market_trading_volume_by_date(fromdate, todate, market)
+    df = krx.get_market_trading_volume_by_date(fromdate, todate, market)
+    how = {'전체': 'sum', '주권': 'sum', '투자회사': 'sum', '부동산투자회사': 'sum'}
+    return resample_ohlcv(df, freq, how)
 
 
-def get_market_trading_value_by_date(fromdate, todate, market="KOSPI"):
+def get_market_trading_value_by_date(fromdate, todate, market="KOSPI", freq='d'):
+    """
+    :param fromdate: 조회 시작 일자 (YYYYMMDD)
+    :param todate  : 조회 종료 일자 (YYYYMMDD)
+    :param market  : KOSPI / KOSDAQ / KONEX
+    :param freq    : d - 일 / m - 월 / y - 년
+    :return        : 거래실적(거래대금) 추이 DataFrame
+    """
     if isinstance(fromdate, datetime.datetime):
         fromdate = _datetime2string(fromdate)
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
-    return krx.get_market_trading_value_by_date(fromdate, todate, market)
+
+    df = krx.get_market_trading_value_by_date(fromdate, todate, market)
+    how = {'전체': 'sum', '주권': 'sum', '투자회사': 'sum', '부동산투자회사': 'sum'}
+    return resample_ohlcv(df, freq, how)
 
 
 # -----------------------------------------------------------------------------
@@ -290,8 +309,9 @@ if __name__ == "__main__":
     # df = get_market_ticker_name("000660")
     # df = get_market_fundamental_by_date("20180301", "20180320", '005930')
     # df = get_market_fundamental_by_date("20180301", "20180320", '005930')
-    # df = get_market_trading_volume_by_date("20200519", "20200526", 'KOSPI')
-    # df = get_market_trading_value_by_date("20200519", "20200526", 'KOSPI')
+    # df = get_market_trading_volume_by_date("20190101", "20200430", 'KOSPI', 'm')
+    df = get_market_trading_value_by_date("20190101", "20200430", 'KOSPI', 'm')
+
     # tickers = get_index_ticker_list("20190225", "KOSDAQ")
     # print(tickers)
     # df = get_shorting_status_by_date("20181210", "20181212", "005930")
