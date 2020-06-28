@@ -10,8 +10,7 @@ class MKD60003(KrxWebIo):
     def bld(self):
         return "MKD/08/0801/08012001/mkd08012001_01"
 
-    def read(self, date):
-
+    def fetch(self, date):
         result = self.post(type_gubun="00", isur_cd="00000", trd_dd=date)
         return DataFrame(result['block1'])
 
@@ -24,7 +23,7 @@ class MKD60004(KrxWebIo):
     def bld(self):
         return "COM/etf_combo"
 
-    def read(self):
+    def fetch(self):
         """ETF 티커 조회
         :return: 티커와 ISIN 값 반환
 
@@ -45,7 +44,7 @@ class MKD60005(KrxWebIo):
     def bld(self):
         return "MKD/08/0801/08010500/mkd08010500_02"
 
-    def read(self, fromdate, todate):
+    def fetch(self, fromdate, todate):
         result = self.post(trd_dd=todate, fromdate=fromdate, todate=todate, date=todate, gubun2=2,
                            acsString=0, domforn="01", uly_gubun="02", gubun="00", isu_cd="KR7114820004")
         return DataFrame(result['block1'])
@@ -56,7 +55,7 @@ class MKD60007(KrxWebIo):
     def bld(self):
         return "MKD/08/0801/08010700/mkd08010700_04"
 
-    def read(self, fromdate, todate, isin):
+    def fetch(self, fromdate, todate, isin):
         """ 종목의 NAV와 OHLCV
         :param fromdate: 조회 시작 일자 (YYYYMMDD)
         :param todate: 조회 종료 일자 (YYYYMMDD)
@@ -78,7 +77,7 @@ class MKD60015(KrxWebIo):
     def bld(self):
         return "MKD/08/0801/08011402/mkd08011402_02"
 
-    def read(self, date, isin):
+    def fetch(self, date, isin):
         """ PDF (Portfolio Deposit File)
         :param date: 조회 일자 (YYYYMMDD)
         :param isin: 조회할 종목의 ISIN 번호
@@ -100,7 +99,7 @@ class MKD81010(KrxWebIo):
     def bld(self):
         return "MKD/13/1304/13040102/mkd13040102_01"
 
-    def read(self, fromdate, todate, isin):
+    def fetch(self, fromdate, todate, isin):
         """개별 종목 시세 추이
            fluc_tp_cd isu_end_pr isu_hg_pr isu_lw_pr isu_opn_pr  last_indx    last_nav prv_dd_cmpr tot_tr_amt tot_tr_vl     work_dt
             2    110,040   110,070   109,980    110,055  10,647.21  110,018.70          15      3,410    30,987  2019/04/05
@@ -120,7 +119,7 @@ class MKD80118(KrxWebIo):
     def bld(self):
         return "MKD/10/1006/10060502/mkd10060502"
 
-    def read(self, fromdate, todate, isin):
+    def fetch(self, fromdate, todate, isin):
         """개별 종목 시세 추이
                   work_dt    fluc_tp_cd   isu_end_pr     last_nav    diff_rt_9
             1   2020/04/08        2         8,335        7,968.69      4.60
@@ -142,7 +141,7 @@ class MKD80117(KrxWebIo):
     def bld(self):
         return "MKD/10/1006/10060501/mkd10060501"
 
-    def read(self, fromdate, todate, isin):
+    def fetch(self, fromdate, todate, isin):
         """개별 종목 시세 추이
               work_dt   mktd_nav  nav_chg_rt trc_tgt_indx  stkprc_idx_chg_rt etf_trace_yd_mult  trc_err_rt
         0   2020/04/09  7,057.83     2.24       956.77           0.97              2.00            7.75
@@ -160,13 +159,13 @@ class MKD80117(KrxWebIo):
 if __name__ == "__main__":
     import pandas as pd
     pd.set_option('display.width', None)
-    # df = MKD60003().read("20190409")
-    # df = MKD60004().read()
-    # df = MKD60005().read("20190211", "20190311")
-    # df = MKD60007().read("20190228", "20190329", "KR7152100004")
-    # df = MKD60007().read("20200101", "20200410", "KR7346000003")
-    # df = MKD60015().read("20190329", "KR7152100004")
-    # df = MKD81010().read("20180301", "20190329", "KR7114820004")
-    # df = MKD80118().read("20200309", "20200409", "KR7233740000")
-    df = MKD80117().read("20200309", "20200409", "KR7152100004")
+    # df = MKD60003().fetch("20190409")
+    # df = MKD60004().fetch()
+    # df = MKD60005().fetch("20190211", "20190311")
+    # df = MKD60007().fetch("20190228", "20190329", "KR7152100004")
+    # df = MKD60007().fetch("20200101", "20200410", "KR7346000003")
+    # df = MKD60015().fetch("20190329", "KR7152100004")
+    # df = MKD81010().fetch("20180301", "20190329", "KR7114820004")
+    # df = MKD80118().fetch("20200309", "20200409", "KR7233740000")
+    df = MKD80117().fetch("20200309", "20200409", "KR7152100004")
     print(df)

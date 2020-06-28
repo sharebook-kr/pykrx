@@ -22,10 +22,8 @@ def resample_ohlcv(df, freq, how):
     if freq != 'd' and len(df) > 0:
         if freq == 'm':
             df = df.resample('M').apply(how)
-            #df.index = df.index.strftime('%Y%m')
         elif freq == 'y':
             df = df.resample('Y').apply(how)
-            #df.index = df.index.strftime('%Y')
         else:
             print("choose a freq parameter in ('m', 'y', 'd')")
             raise RuntimeError
@@ -71,9 +69,30 @@ def get_market_ohlcv_by_date(fromdate, todate, ticker, freq='d', adjusted=True):
         df = naver.get_market_ohlcv_by_date(fromdate, todate, ticker)
     else:
         df = krx.get_market_ohlcv_by_date(fromdate, todate, ticker)
+
     how = {'시가': 'first', '고가': 'max', '저가': 'min', '종가': 'last',
            '거래량': 'sum'}
     return resample_ohlcv(df, freq, how)
+
+
+def get_market_cap_by_date(fromdate, todate, ticker, freq='d'):
+    if isinstance(fromdate, datetime.datetime):
+        fromdate = _datetime2string(fromdate)
+
+    if isinstance(todate, datetime.datetime):
+        todate = _datetime2string(todate)
+
+    df = krx.get_market_cap_by_date(fromdate, todate, ticker)
+
+    how = {'시가총액': 'last', '거래량': 'sum', '거래대금': 'sum', '상장주식수': 'last'}
+    return resample_ohlcv(df, freq, how)
+
+
+def get_market_cap_by_ticker(date, market="ALL"):
+    if isinstance(date, datetime.datetime):
+        date = _datetime2string(date)
+
+    return krx.get_market_cap_by_ticker(date, market)
 
 
 def get_market_price_change_by_ticker(fromdate, todate):
@@ -151,6 +170,7 @@ def get_market_trading_volume_by_date(fromdate, todate, market="KOSPI", freq='d'
         fromdate = _datetime2string(fromdate)
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
+
     df = krx.get_market_trading_volume_by_date(fromdate, todate, market)
     how = {'전체': 'sum', '주권': 'sum', '투자회사': 'sum', '부동산투자회사': 'sum'}
     return resample_ohlcv(df, freq, how)
@@ -238,8 +258,21 @@ def get_shorting_status_by_date(fromdate, todate, ticker):
     return krx.get_shorting_status_by_date(fromdate, todate, isin)
 
 
-def get_shorting_volume_by_ticker(date, market):    
+def get_shorting_volume_by_ticker(date, market="KOSPI"):
+    if isinstance(date, datetime.datetime):
+        date = _datetime2string(date)
+
     return krx.get_shorting_volume_by_ticker(date, market)
+
+
+def get_shorting_volume_by_date(fromdate, todate, ticker, market="KOSPI"):
+    if isinstance(fromdate, datetime.datetime):
+        fromdate = _datetime2string(fromdate)
+    if isinstance(todate, datetime.datetime):
+        todate = _datetime2string(todate)
+
+    isin = krx.get_stock_ticker_isin(ticker)
+    return krx.get_shorting_volume_by_date(fromdate, todate, isin, market)
 
 
 def get_shorting_investor_volume_by_date(fromdate, todate, market):
@@ -254,10 +287,10 @@ def get_shorting_volume_top50(date, market):
     return krx.get_shorting_volume_top50(date, market)
 
 
-def get_shorting_balance_by_ticker(fromdate, todate, ticker):
+def get_shorting_balance_by_date(fromdate, todate, ticker):
     isin = krx.get_stock_ticker_isin(ticker)
     mark = krx.get_stock_market_from(ticker)
-    return krx.get_shorting_balance_by_ticker(fromdate, todate, isin, mark)
+    return krx.get_shorting_balance_by_date(fromdate, todate, isin, mark)
 
 
 def get_shorting_balance_top50(date, market):
@@ -310,11 +343,13 @@ if __name__ == "__main__":
     # df = get_market_fundamental_by_date("20180301", "20180320", '005930')
     # df = get_market_fundamental_by_date("20180301", "20180320", '005930')
     # df = get_market_trading_volume_by_date("20190101", "20200430", 'KOSPI', 'm')
-    df = get_market_trading_value_by_date("20190101", "20200430", 'KOSPI', 'm')
+    # df = get_market_trading_value_by_date("20190101", "20200430", 'KOSPI', 'm')
+    # df = get_market_cap_by_date("20190101", "20190131", "005930")
+    # df = get_market_cap_by_date("20200101", "20200430", "005930", "m")
+    df = get_market_cap_by_ticker("20200625")
 
     # tickers = get_index_ticker_list("20190225", "KOSDAQ")
     # print(tickers)
-    # df = get_shorting_status_by_date("20181210", "20181212", "005930")
     # df = get_index_ohlcv_by_date("20190101", "20190228", "코스닥 150")
     # df = get_index_ohlcv_by_date("20190101", "20190228", "코스피")
     # df = get_index_ohlcv_by_date("20190101", "20190228", "코스닥")
@@ -323,10 +358,14 @@ if __name__ == "__main__":
     # df = get_index_portfolio_deposit_file("20190412", "코스피 소형주")
     # df = krx.IndexTicker().get_id("코스피 200", "20000201")
     # df = get_index_portfolio_deposit_file("20000201", "코스피 소형주")
+    # df = get_shorting_status_by_date("20181210", "20181212", "005930")
     # df = get_shorting_investor_volume_by_date("20190401", "20190405", "KOSPI")
     # df = get_shorting_investor_price_by_date("20190401", "20190405", "KOSPI")
+    # df = get_shorting_volume_by_ticker("20190211", "KOSPI")
+    # df = get_shorting_volume_by_date("20200101", "20200115", "005930")
+
     # df = get_shorting_volume_top50("20190401", "KOSPI")
-    # df = get_shorting_balance_by_ticker("20190401", "20190405", "005930")
+    # df = get_shorting_balance_by_date("20190401", "20190405", "005930")
     # df = get_shorting_balance_top50("20190401", "KOSDAQ")
     # df = get_etf_ticker_list()
     # df = get_etf_isin("346000")

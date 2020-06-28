@@ -8,7 +8,6 @@ class Get:
         return resp
 
     @property
-    @abstractmethod
     def headers(self):
         return {"User-Agent": "Mozilla/5.0"}
 
@@ -32,3 +31,5 @@ class Post:
     @abstractmethod
     def url(self):
         return NotImplementedError
+
+

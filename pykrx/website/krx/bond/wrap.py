@@ -5,7 +5,7 @@ from pykrx.website.comm import dataframe_empty_handler
 class KrxBond:
     @dataframe_empty_handler
     def get_treasury_yields_in_kerb_market(self, date):
-        df = MKD40013().read(date)
+        df = MKD40013().fetch(date)
         df = df[['str_const_val', 'lst_ord_bas_yd', 'fluc_chgrng']]
         df.columns = ['채권종류', '수익률', '등락폭']
         df = df.astype({"수익률": float, "등락폭": float})
@@ -14,7 +14,7 @@ class KrxBond:
 
     @staticmethod
     def get_treasury_yields_in_bond_index(fromdate, todate):
-        df = MKD40038().scraping(fromdate, todate)  # .reset_index(drop=True)
+        df = MKD40038().fetch(fromdate, todate)  # .reset_index(drop=True)
         if df is None:
             return None
 

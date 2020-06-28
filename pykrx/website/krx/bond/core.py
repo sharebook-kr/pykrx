@@ -9,7 +9,7 @@ class MKD40038(KrxWebIo):
     def bld(self):
         return "MKD/05/0503/05030403/mkd05030403"
 
-    def scraping(self, fromdate, todate):
+    def fetch(self, fromdate, todate):
         try:
             result = self.post(fr_work_dt=fromdate, to_work_dt=todate)
             if len(result['block1']) == 0:
@@ -36,7 +36,7 @@ class MKD40013(KrxWebIo):
     def bld(self):
         return "MKD/05/0503/05030401/mkd05030401"
 
-    def read(self, date):
+    def fetch(self, date):
         """
         :param date:
         :return:
@@ -56,5 +56,5 @@ if __name__ == "__main__":
     import pandas as pd
     pd.set_option('display.width', None)
 
-    df = MKD40013().read("20190211")
+    df = MKD40013().fetch("20190211")
     print(df)

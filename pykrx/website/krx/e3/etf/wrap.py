@@ -20,7 +20,7 @@ def get_etf_ohlcv_by_date(fromdate, todate, ticker):
         20180205     99400   99600   97200   97700   745562
     """
     isin = EtfTicker().get_isin(ticker)
-    df = MKD60007().read(fromdate, todate, isin)
+    df = MKD60007().fetch(fromdate, todate, isin)
     df = df[['work_dt', 'last_nav', 'isu_opn_pr', 'isu_hg_pr', 'isu_lw_pr',
              'isu_end_pr', 'tot_tr_vl', 'tot_tr_amt', 'last_indx']]
     df.columns = ['날짜', 'NAV', '시가', '고가', '저가', '종가', '거래량',
@@ -53,7 +53,7 @@ def get_etf_portfolio_deposit_file(ticker, date):
 
     """
     isin = EtfTicker().get_isin(ticker)
-    df = MKD60015().read(date, isin)
+    df = MKD60015().fetch(date, isin)
     df = df[['isu_kor_nm', 'cu1_shrs', 'compst_amt', 'compst_amt_rt']]
     df.columns = ['종목', '계약수', '금액', '비중']
     df = df.set_index('종목')
@@ -87,7 +87,7 @@ def get_etf_price_deviation(fromdate, todate, ticker):
 
     """
     isin = EtfTicker().get_isin(ticker)
-    df = MKD80118().read(fromdate, todate, isin)
+    df = MKD80118().fetch(fromdate, todate, isin)
     df = df[['work_dt', 'isu_end_pr', 'last_nav', 'diff_rt_9']]
     df.columns = ['날짜', '종가', 'NAV', '괴리율']
     df = df.set_index('날짜')
@@ -117,7 +117,7 @@ def get_etf_tracking_error(fromdate, todate, ticker):
 
     """
     isin = EtfTicker().get_isin(ticker)
-    df = MKD80117().read(fromdate, todate, isin)
+    df = MKD80117().fetch(fromdate, todate, isin)
     df = df[['work_dt', 'mktd_nav', 'trc_tgt_indx', 'trc_err_rt']]
     df.columns = ['날짜', 'NAV', '지수', '추적오차']
     df = df.set_index('날짜')

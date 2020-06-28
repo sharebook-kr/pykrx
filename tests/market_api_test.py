@@ -7,17 +7,42 @@ import numpy as np
 class KrxMarketBasicTest(unittest.TestCase):
     def test_not_empty_result(self):
         df = stock.get_market_ohlcv_by_date("20190225", "20190228", "000660")
-        self.assertNotEqual(df.empty, True)
+        self.assertTrue(df.empty)
+
+        df = stock.get_market_cap_by_date("20190101", "20190131", "005930")
+        self.assertTrue(df.empty)
+
+        df = stock.get_market_cap_by_ticker("20200625")
+        self.assertTrue(df.empty)
 
         df = stock.get_market_price_change_by_ticker("20180301", "20180320")
-        self.assertNotEqual(df.empty, True)
+        self.assertTrue(df.empty)
 
         df = stock.get_market_fundamental_by_ticker("20180305", "KOSPI")
-        self.assertNotEqual(df.empty, True)
+        self.assertTrue(df.empty)
 
-        df = stock.get_market_fundamental_by_date("20180301", "20180320",
-                                                  '005930')
-        self.assertNotEqual(df.empty, True)
+        df = stock.get_market_fundamental_by_date("20180301", "20180320", '005930')
+        self.assertTrue(df.empty)
+
+
+class StockCapTest(unittest.TestCase):
+    def test_cap_by_ticker_query(self):
+        # holiday
+        df = stock.get_market_cap_by_ticker("20200101")
+        self.assertTrue(df.empty)
+
+        df = stock.get_market_cap_by_ticker("20200625")
+        self.assertFalse(df.empty)
+        for col in df.columns:
+            self.assertEqual(type(df[col].iloc[0]), np.int64)
+
+    def test_cap_by_date_query(self):
+        # holiday
+        df = stock.get_market_cap_by_date("20200101", "20200102", "005930")
+        self.assertTrue(len(df) == 1)
+
+        for col in df.columns:
+            self.assertEqual(type(df[col].iloc[0]), np.int64)
 
 
 class StockPriceChangeTest(unittest.TestCase):
@@ -42,7 +67,7 @@ class StockOhlcvTest(unittest.TestCase):
     def test_ohlcv_query(self):
         # 1 business day
         df = stock.get_market_ohlcv_by_date("20180208", "20180208", "066570")
-        self.assertEqual(len(df), 1)
+        self.assertTrue(len(df) == 1)
 
         # one more business days
         df = stock.get_market_ohlcv_by_date("20180101", "20180208", "066570")

@@ -11,7 +11,7 @@ class _StockFinder(KrxWebIo):
     def bld(self):
         return "COM/finder_stkisu"
 
-    def read(self, market="ALL", name=""):
+    def fetch(self, market="ALL", name=""):
         """30040 일자별 시세 스크래핑에서 종목 검색기
         http://marketdata.krx.co.kr/mdi#document=040204
         :param market: 조회 시장 (STK/KSQ/ALL)
@@ -27,7 +27,7 @@ class _DelistingFinder(KrxWebIo):
     def bld(self):
         return "COM/finder_dellist_isu"
 
-    def read(self, market="ALL", name=""):
+    def fetch(self, market="ALL", name=""):
         """30031 상장 폐지 종목에서 종목 검색기
         http://marketdata.krx.co.kr/mdi#document=040603
         :param market: 조회 시장 (STK/KSQ/ALL)
@@ -62,7 +62,7 @@ class _StockTicker:
             006840      AK홀딩스  KR7006840003   KOSPI
         """
         market = {"코스피": "STK", "코스닥": "KSQ", "코넥스": "KNX", "전체": "ALL"}.get(market, "ALL")
-        df = _StockFinder().read(market)
+        df = _StockFinder().fetch(market)
         df.rename(columns = {'full_code': 'ISIN', 'short_code': '티커', 'codeName': '종목', 'marketName': '시장'}, inplace=True)
         # - 증권(7)과 사용자 영역 선택
         df = df[(df.ISIN.str[2] >= '7')]
@@ -83,7 +83,7 @@ class _StockTicker:
             BHK보통주            KR7003990009  KOSPI    A003990  20090430
         """
         market = {"코스피": "STK", "코스닥": "KSQ", "코넥스": "KNX", "전체": "ALL"}.get(market, "ALL")
-        df = _DelistingFinder().read(market)
+        df = _DelistingFinder().fetch(market)
 
         df = df[['shrt_isu_cd', 'isu_nm', 'isu_cd', 'market_name', 'delist_dd']]
         df.columns = ['티커', '종목', 'ISIN', '시장', '상폐일']
@@ -172,7 +172,7 @@ class IndexTicker:
     def _download_ticker(self, date):
         if 'date' not in self.df.columns or len(self.df[self.df['date'].dt.day == date.day]) == 0:
             for index in {"KOSPI": "02", "KOSDAQ": "03"}.values():
-                df = MKD20011().read(date, index)
+                df = MKD20011().fetch(date, index)
                 if len(df) == 0:
                     continue
 

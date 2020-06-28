@@ -1,4 +1,5 @@
-from pykrx.website.krx.krxio import KrxWebIo
+from pykrx.website.krx.krxio import KrxWebIo, KrxFileIo, SrtWebIo
+import pandas as pd
 from pandas import DataFrame
 import time
 
@@ -10,7 +11,7 @@ class MKD30030(KrxWebIo):
     def bld(self):
         return "MKD/04/0406/04060200/mkd04060200"
 
-    def read(self, date):
+    def fetch(self, date):
         """30030 상장 종목 검색
         :param date: 조회 일자 (YYMMDD)
         :return: 일자별 시세 조회 결과 DataFrame
@@ -31,7 +32,7 @@ class MKD30040(KrxWebIo):
     def bld(self):
         return "MKD/04/0402/04020100/mkd04020100t3_02"
 
-    def read(self, fromdate, todate, isin):
+    def fetch(self, fromdate, todate, isin):
         """30040 일자별 시세 조회 (수정종가 아님)
         :param fromdate: 조회 시작 일자
         :param todate: 조회 마지막 일자
@@ -49,12 +50,33 @@ class MKD30040(KrxWebIo):
         return DataFrame(result['block1'])
 
 
+class MKD30015(KrxFileIo):
+    @property
+    def bld(self):
+        return "MKD/04/0404/04040200/mkd04040200_01"
+
+    def fetch(self, date, market):
+        """30015 시가총액 상/하위
+        :param date: 조회 시작 일자
+        :param market: 조회 시장 (STK/KSQ/KNX/ALL)
+        :return: 시가총액 DataFrame
+            종목코드   종목명       현재가      대비   등락률        거래량             거래대금       시가       고가       저가                 시가총액  시가총액비중(%)        상장주식수      외국인 보유주식수  외국인 지분율(%)
+        0   005930    삼성전자     45,050     400   0.9   7,362,129    332,300,460,800    45,200    45,450    44,850    268,938,703,877,500      15.88     5,969,782,550     3,392,279,209      56.82
+        1   000660  SK하이닉스     76,600   2,400   3.2   3,579,070    273,797,653,100    75,600    77,100    75,500     55,764,981,159,000       3.29       728,002,365       369,317,688      50.73
+        2   005935  삼성전자우     36,400    150     0.4   1,329,707     48,399,005,925    36,450    36,600    36,250     29,953,075,880,000       1.77       822,886,700       761,104,261      92.49
+        3   051910    LG화학     370,500   4,500   1.2     170,894     63,586,807,000   367,000   376,000   366,500     26,154,463,081,500       1.54        70,592,343        27,377,609      38.78
+        4   005380     현대차  	120,500   1,000   0.8     363,959     43,797,875,448   120,000   121,000   119,000     25,747,016,533,500       1.52       213,668,187        95,237,158      44.57
+        """
+        result = self.post(market_gubun=market, schdate=date)
+        return pd.read_excel(result)
+
+
 class MKD30009_0(KrxWebIo):
     @property
     def bld(self):
         return "MKD/13/1302/13020401/mkd13020401"
 
-    def read(self, date, market):
+    def fetch(self, date, market):
         """30009 PER/PBR/배당수익률 (개별종목)
         :param date: 조회 일자 (YYMMDD)
         :param market: 조회 시장 (STK/KSQ/ALL)
@@ -75,7 +97,7 @@ class MKD30009_1(KrxWebIo):
     def bld(self):
         return "MKD/13/1302/13020401/mkd13020401"
 
-    def read(self, fromdate, todate, market, isin):
+    def fetch(self, fromdate, todate, market, isin):
         """30009 PER/PBR/배당수익률 (개별종목)
         :param market: 조회 시장 (STK/KSQ/ALL)
         :param fromdate: 조회 시작 일자 (YYMMDD)
@@ -101,7 +123,7 @@ class MKD01023(KrxWebIo):
     def bld(self):
         return "MKD/01/0110/01100305/mkd01100305_01"
 
-    def read(self, date):
+    def fetch(self, date):
         result = self.post(search_bas_yy=date)
         return DataFrame(result['block1'])
 
@@ -111,7 +133,7 @@ class MKD80037(KrxWebIo):
     def bld(self):
         return "MKD/13/1302/13020102/mkd13020102"
 
-    def read(self, market, fromdate, todate):
+    def fetch(self, market, fromdate, todate):
         """80037 전체종목 등락률 (수정종가로 비교)
         :param market  : 조회 시장 (STK/KSQ/ALL)
         :param fromdate: 조회 시작 일자 (YYMMDD)
@@ -126,8 +148,8 @@ class MKD80037(KrxWebIo):
         5          116,500          1  000070   30,956,512,000      270,219           삼양홀딩스       111,000       5,500      4.95
         6           56,300          1  000075      502,884,700        9,140          삼양홀딩스우        53,300       3,000      5.63
         """
-        result = self.post(ind_tp=market, adj_stkprc="Y",
-                           period_strt_dd=fromdate, period_end_dd=todate)
+        result = self.post(ind_tp=market, adj_stkprc="Y", period_strt_dd=fromdate,
+                           period_end_dd=todate)
         return DataFrame(result['block1'])
 
 
@@ -138,15 +160,14 @@ class MKD20011(KrxWebIo):
     def bld(self):
         return "/MKD/03/0304/03040100/mkd03040100"
 
-    def read(self, date, index='02'):
+    def fetch(self, date, index='02'):
         """주가 지수 (http://marketdata.krx.co.kr/mdi#document=030403)
         :param date : 조회 일자
         :param index: 코스피 지수 (02)
                       코스닥 지수 (03)
         :return: 주가지수 DataFrame
         """
-        result = self.post(idx_upclss_cd='01', idx_midclss_cd=index, lang='ko',
-                           bz_dd=date)
+        result = self.post(idx_upclss_cd='01', idx_midclss_cd=index, lang='ko', bz_dd=date)
         return DataFrame(result['output'])
 
 
@@ -155,7 +176,7 @@ class MKD20011_SUB(KrxWebIo):
     def bld(self):
         return "MKD/03/0304/03040101/mkd03040101T2_02"
 
-    def read(self, fromdate, todate, index, market):
+    def fetch(self, fromdate, todate, index, market):
         """코스피 주가 지수
         :param index    : 종합지수 - 코스피          (001)
                           종합지수 - 코스피 벤치마크 (100)
@@ -176,10 +197,8 @@ class MKD20011_SUB(KrxWebIo):
             3   7,065,652    410,002   2,177.73         32.70   1.81    1.52          1  2,178.01  2,146.64  1,437,842,917   2,147.92  2019/01/25  10.23                  0.93
         """
         idx_cd = "1{}".format(index)
-        result = self.post(idx_cd=idx_cd, ind_tp_cd=market, idx_ind_cd=index,
-                           bz_dd=todate, chartType="line",
-                           chartStandard="srate",
-                           fromdate=fromdate, todate=todate)
+        result = self.post(idx_cd=idx_cd, ind_tp_cd=market, idx_ind_cd=index, bz_dd=todate,
+                           chartType="line", chartStandard="srate", fromdate=fromdate, todate=todate)
         return DataFrame(result['output'])
 
 
@@ -188,7 +207,7 @@ class MKD20011_PDF(KrxWebIo):
     def bld(self):
         return "MKD/03/0304/03040101/mkd03040101T3_01"
 
-    def read(self, date, index, market):
+    def fetch(self, date, index, market):
         """주가지수 구성 항목
         :param date  : 조회 일자 (YYMMDD)
         :param index : KRX 웹에서 정의하는 index 번호
@@ -199,8 +218,7 @@ class MKD20011_PDF(KrxWebIo):
             1  1,197,049,750           100          2  068400    AJ렌터카  260,219,025,000     11,750      0.84
             2    239,250,000         1,500          1  001460         BYC  158,339,902,500    253,500      0.60
         """
-        result = self.post(ind_tp_cd=market, idx_ind_cd=index, lang="ko",
-                           schdate=date)
+        result = self.post(ind_tp_cd=market, idx_ind_cd=index, lang="ko", schdate=date)
         return DataFrame(result['output'])
 
 
@@ -209,7 +227,7 @@ class MKD80002(KrxWebIo):
     def bld(self):
         return "MKD/13/1301/13010101/mkd13010101"
 
-    def read(self, fromdate, todate, market):
+    def fetch(self, fromdate, todate, market):
         """전체지수 등락률
         :param fromdate : 조회 시작 일자 (YYMMDD)
         :param todate   : 조회 마지막 일자 (YYMMDD)
@@ -232,7 +250,7 @@ class MDK80033_0(KrxWebIo):
     def bld(self):
         return "MKD/13/1302/13020301/mkd13020301_01"
 
-    def read(self, fromdate, todate, market):
+    def fetch(self, fromdate, todate, market):
         """거래실적 추이 (거래량)
         :param fromdate : 조회 시작 일자 (YYMMDD)
         :param todate   : 조회 마지막 일자 (YYMMDD)
@@ -254,7 +272,7 @@ class MDK80033_1(KrxWebIo):
     def bld(self):
         return "MKD/13/1302/13020301/mkd13020301_02"
 
-    def read(self, fromdate, todate, market):
+    def fetch(self, fromdate, todate, market):
         """거래실적 추이 (거래대금)
         :param fromdate : 조회 시작 일자 (YYMMDD)
         :param todate   : 조회 마지막 일자 (YYMMDD)
@@ -273,28 +291,14 @@ class MDK80033_1(KrxWebIo):
 
 
 ################################################################################
-# Sorting
-class ShortHttp(KrxWebIo):
-    @property
-    def otp_url(self):
-        return "http://short.krx.co.kr/contents/COM/GenerateOTP.jspx"
-
-    @property
-    def base_url(self):
-        return "http://short.krx.co.kr/contents"
-
-    @property
-    def uri(self):
-        return "/SRT/99/SRT99000001.jspx"
-
-
-class SRT02010100(ShortHttp):
+# Shorting
+class SRT02010100(KrxWebIo):
     @property
     def bld(self):
         return "SRT/02/02010100/srt02010100"
 
     @staticmethod
-    def read(fromdate, todate, isin):
+    def fetch(fromdate, todate, isin):
         """02010100 공매도 종합 현황
            http://short.krx.co.kr/contents/SRT/02/02010100/SRT02010100.jsp
         :param fromdate: 조회 시작 일자 (YYMMDD)
@@ -306,46 +310,32 @@ class SRT02010100(ShortHttp):
         return DataFrame(result['block1'])
 
 
-class SRT02020100(ShortHttp):
+class SRT02020100(KrxFileIo):
     @property
     def bld(self):
         return "SRT/02/02020100/srt02020100"
 
-    @staticmethod
-    def read(fromdate, todate, market=1, isin=""):
+    def fetch(self, fromedata, todate, market, isin):
         """02020100 공매도 거래 현황
            http://short.krx.co.kr/contents/SRT/02/02020100/SRT02020100.jsp
         :param fromdate: 조회 시작 일자 (YYMMDD)
         :param todate: 조회 마지막 일자 (YYMMDD)
         :param market: 1 (코스피) / 3 (코스닥) / 4 (코넥스)
-        :param isin: 종목의 ISIN 값 - 입력하지 않을 경우 전체 종목 검색
+        :param isin: 종목의 ISIN
         :return:  종목별 공매도 거래 현황 DataFrame
         """
-        df = DataFrame()
-        page = 1
-        while True:
-            result = SRT02020100().post(mkt_tp_cd=market, isu_cd=isin, strt_dd=fromdate, end_dd=todate, curPage=page)
-            if len(result['block1']) == 0 :
-                return df
-            df = df.append(DataFrame(result['block1']))
-            # exit condition
-            load_data_idx = int(result['block1'][-1]['rn'])
-            total_data_cnt = int(result['block1'][0]['totCnt'])
-            if load_data_idx == total_data_cnt:
-                break
 
-            page += 1
-            time.sleep(0.2)
-        return df
+        result = self.post(mkt_tp_cd=market, isu_cd=isin, strt_dd=fromedata, end_dd=todate)
+        return pd.read_excel(result)
 
 
-class SRT02020300(ShortHttp):
+class SRT02020300(KrxWebIo):
     @property
     def bld(self):
         return "SRT/02/02020300/srt02020300"
 
     @staticmethod
-    def read(fromdate, todate, market=1, inquery=1):
+    def fetch(fromdate, todate, market=1, inquery=1):
         """02020300 공매도 거래 현황
            http://short.krx.co.kr/contents/SRT/02/02020300/SRT02020300.jsp
         :param fromdate: 조회 시작 일자 (YYMMDD)
@@ -362,13 +352,13 @@ class SRT02020300(ShortHttp):
         return DataFrame(result['block1'])
 
 
-class SRT02020400(ShortHttp):
+class SRT02020400(KrxWebIo):
     @property
     def bld(self):
         return "SRT/02/02020400/srt02020400"
 
     @staticmethod
-    def read(date, market=1):
+    def fetch(date, market=1):
         """02020400 공매도 거래 현황
            http://short.krx.co.kr/contents/SRT/02/02010100/SRT02010100.jsp
         :param date  : 조회 일자 (YYMMDD)
@@ -384,13 +374,12 @@ class SRT02020400(ShortHttp):
         return DataFrame(result['block1'])
 
 
-class SRT02030100(ShortHttp):
+class SRT02030100(KrxFileIo):
     @property
     def bld(self):
         return "SRT/02/02030100/srt02030100"
 
-    @staticmethod
-    def read(fromdate, todate, market=1, isin=""):
+    def fetch(self, fromdate, todate, market, isin):
         """02030100 공매도 잔고 현황
            http://short.krx.co.kr/contents/SRT/02/02010100/SRT02010100.jsp
         :param fromdate: 조회 시작 일자 (YYMMDD)
@@ -404,32 +393,18 @@ class SRT02030100(ShortHttp):
             2  13,297,270,800  183,158    0.02    SK하이닉스  KR7000660001  728,002,365  52,852,971,699,000  3      7  2018/01/11
             3  14,594,580,000  200,200    0.03    SK하이닉스  KR7000660001  728,002,365  53,071,372,408,500  4      7  2018/01/10
         """
-        df = DataFrame()
-        page = 1
 
-        while True:
-            result = SRT02030100().post(mkt_tp_cd=market, strt_dd=fromdate, end_dd=todate,
-                                        isu_cd=isin, curPage=page)
-            df = df.append(DataFrame(result['block1']))
-
-            # exit condition
-            load_data_idx = int(result['block1'][-1]['rn'])
-            total_data_cnt = int(result['block1'][0]['totCnt'])
-            if load_data_idx == total_data_cnt:
-                break
-
-            page += 1
-            time.sleep(0.2)
-        return df
+        result = self.post(mkt_tp_cd=market, strt_dd=fromdate, end_dd=todate, isu_cd=isin)
+        return pd.read_excel(result)
 
 
-class SRT02030400(ShortHttp):
+class SRT02030400(KrxWebIo):
     @property
     def bld(self):
         return "SRT/02/02030400/srt02030400"
 
     @staticmethod
-    def read(date, market=1):
+    def fetch(date, market=1):
         """02030400 공매도 잔고 현황
            http://short.krx.co.kr/contents/SRT/02/02020300/SRT02020300.jsp
         :param date  : 조회 일자 (YYMMDD)
@@ -446,28 +421,29 @@ class SRT02030400(ShortHttp):
 
 
 if __name__ == "__main__":
-    import pandas as pd
     pd.set_option('display.width', None)
 
     # stock
-    # df = MKD80037().read("ALL", "20180501", "20180801")
-    # df = MKD80037().read("ALL", "20180501", "20180515")
+    # df = MKD80037().fetch("ALL", "20180501", "20180801")
+    # df = MKD80037().fetch("ALL", "20180501", "20180515")
+    # df = MKD30015().fetch("20190401", "ALL")
+
     # index
-    # df = MKD20011_PDF().read("20190412", "001", 2)
-    # df = MKD20011().read("20190413", "03")
-    # df = MKD20011_SUB().read("20190408", "20190412", "001", 1)
-    # df = MKD20011_SUB().read("20190408", "20190412", "001", 2)
-    # print(MKD30009_1().read('20190322', '20190329', 'ALL', 'KR7005930003'))
-    # df = MKD80002().read("20200520", "20200527", 2)
-    # df = MDK80033_0().read("20200519", "20200526", 'kospi')
-    # df = MDK80033_1().read("20200519", "20200526", 'kospi')
+    # df = MKD20011_PDF().fetch("20190412", "001", 2)
+    # df = MKD20011().fetch("20190413", "03")
+    # df = MKD20011_SUB().fetch("20190408", "20190412", "001", 1)
+    # df = MKD20011_SUB().fetch("20190408", "20190412", "001", 2)
+    # print(MKD30009_1().fetch('20190322', '20190329', 'ALL', 'KR7005930003'))
+    # df = MKD80002().fetch("20200520", "20200527", 2)
+    # df = MDK80033_0().fetch("20200519", "20200526", 'kospi')
+    # df = MDK80033_1().fetch("20200519", "20200526", 'kospi')
     # shorting
-    # print(SRT02010100.read("KR7005930003", "20181205", "20181207"))
-    # print(SRT02020100.read("20190402", "20190402", market=1))
-    # print(SRT02020100.read("20181207", "20181212", "코스피", "KR7005930003"))
-    # print(SRT02020300.read("20181207", "20181212", "코스피", "거래대금"))
-    # print(SRT02020400.read("20181212", "코스피"))
-    # print(SRT02030100.read("20181212", "20181212", 1, "KR7210980009"))
-    # print(SRT02030100.read("20181207", "20181212", "코스피", "KR7210980009"))
-    # print(SRT02030400.read("20181214", 1))
-    print(df.head())
+    # print(SRT02010100().fetch("KR7005930003", "20181205", "20181207"))
+    # print(SRT02020100().fetch("20200525", "20200531", 1, "KR7210980009"))
+    # print(SRT02020100().fetch("20181207", 1, "KR7005930003"))
+    # print(SRT02020300().fetch("20181207", "20181212", "kospi", "거래대금"))
+    # print(SRT02020400().fetch("20181212", "코스피"))
+    # print(SRT02030100().fetch("20200101", "20200531", 1, "KR7210980009"))
+    # print(SRT02030100().fetch("20181207", "20181212", "kospi", "KR7210980009"))
+    # print(SRT02030400().fetch("20181214", 1))
+    # print(df)

@@ -1,6 +1,6 @@
 from pykrx.website.comm import dataframe_empty_handler
 from pykrx.website.krx.market.ticker import get_stock_ticker_isin
-from pykrx.website.krx.market.core import (MKD30040, MKD80037, MKD30009_0,
+from pykrx.website.krx.market.core import (MKD30040, MKD80037, MKD30009_0, MKD30015,
                                            MKD30009_1, MKD20011, MKD20011_SUB,
                                            MKD20011_PDF, SRT02010100, MKD80002,
                                            SRT02020100, SRT02020300, MDK80033_0, MDK80033_1,
@@ -20,6 +20,7 @@ def get_market_ohlcv_by_date(fromdate, todate, ticker):
     :param todate  : 조회 마지막 일자 (YYYYMMDD)
     :param isin    : 조회 종목의 ticker
     :return        : OHLCV DataFrame
+
                      시가     고가    저가    종가   거래량
         20180208     97200   99700   97100   99300   813467
         20180207     98000  100500   96000   96500  1082264
@@ -27,7 +28,7 @@ def get_market_ohlcv_by_date(fromdate, todate, ticker):
         20180205     99400   99600   97200   97700   745562
     """
     isin = get_stock_ticker_isin(ticker)
-    df = MKD30040().read(fromdate, todate, isin)
+    df = MKD30040().fetch(fromdate, todate, isin)
 
     df = df[['trd_dd', 'tdd_opnprc', 'tdd_hgprc', 'tdd_lwprc',
              'tdd_clsprc', 'acc_trdvol']]
@@ -39,6 +40,63 @@ def get_market_ohlcv_by_date(fromdate, todate, ticker):
     df.index = pd.to_datetime(df.index, format='%Y%m%d')
     return df.sort_index()
 
+@dataframe_empty_handler
+def get_market_cap_by_date(fromdate, todate, ticker):
+    """일자별 OHLCV
+    :param fromdate: 조회 시작 일자   (YYYYMMDD)
+    :param todate  : 조회 마지막 일자 (YYYYMMDD)
+    :param isin    : 조회 종목의 ticker
+    :return        : 시가총액 DataFrame
+
+                    시가총액    상장주식수
+        날짜
+        2015-07-20  187806655  147299337
+        2015-07-21  186039063  147299337
+        2015-07-22  184566069  147299337
+        2015-07-23  181767382  147299337
+        2015-07-24  181030885  147299337
+        """
+    isin = get_stock_ticker_isin(ticker)
+    df = MKD30040().fetch(fromdate, todate, isin)
+
+    df = df[['trd_dd', 'mktcap', 'acc_trdvol', 'acc_trdval', 'list_shrs']]
+    df.columns = ['날짜', '시가총액', '거래량', '거래대금', '상장주식수']
+
+    df = df.replace('/', '', regex=True)
+    df = df.replace(',', '', regex=True)
+    df = df.set_index('날짜')
+    df = df.astype(np.int64)
+    df.index = pd.to_datetime(df.index, format='%Y%m%d')
+    return df.sort_index()
+
+
+@dataframe_empty_handler
+def get_market_cap_by_ticker(date, market="ALL"):
+    """시가 총액
+    :param date    : 조회 일자 (YYYYMMDD)
+    :param market  : 조회 시장      (KOSPI/KOSDAQ/ALL)
+    :return        : DataFrame
+
+                  종목명     시가    종가   대비   등락률   거래량      거래대금
+        티커
+        000020   동화약품   11550   11250   -300    -2.60   1510666   16851737550
+        000030   우리은행   16050   15400   -650    -4.05  11623346  181243425100
+        000040   KR모터스     667     717     50     7.50   9521456    6506765090
+        000050       경방   14900   14200   -700    -4.70    526376    7608850250
+        000060  메리츠화재  20950   20350   -600    -2.86   1094745   22498470632
+    """
+    market = {"ALL": "ALL", "KOSPI": "STK", "KOSDAQ": "KSQ", "KONEX": "KNX"}.get(market, "ALL")
+    df = MKD30015().fetch(date, market)
+    df = df[['종목코드', '시가총액', '거래량', '거래대금', '상장주식수', '외국인 보유주식수']]
+    df.columns = ['종목코드', '시가총액', '거래량', '거래대금', '상장주식수', '외국인보유주식수']
+
+    df = df.set_index('종목코드')
+    df = df.replace(np.NaN, 0)
+    df = df.replace('/', '', regex=True)
+    df = df.replace(',', '', regex=True)
+    df = df.astype(np.int64)
+
+    return df
 
 @dataframe_empty_handler
 def get_market_price_change_by_ticker(fromdate, todate, market="ALL"):
@@ -47,6 +105,7 @@ def get_market_price_change_by_ticker(fromdate, todate, market="ALL"):
     :param todate  : 조회 종료 일자 (YYYYMMDD)
     :param market  : 조회 시장      (KOSPI/KOSDAQ/ALL)
     :return        : DataFrame
+
               종목명     시가    종가   대비   등락률   거래량      거래대금
     티커
     000020   동화약품   11550   11250   -300    -2.60   1510666   16851737550
@@ -57,7 +116,7 @@ def get_market_price_change_by_ticker(fromdate, todate, market="ALL"):
     """
     market = {"ALL": "ALL", "KOSPI": "STK", "KOSDAQ": "KSQ", "KONEX": "KNX"}.\
         get(market, "ALL")    
-    df = MKD80037().read(market, fromdate, todate)    
+    df = MKD80037().fetch(market, fromdate, todate)    
     
 
     df = df[['kor_shrt_isu_nm', 'isu_cd', 'opn_dd_end_pr', 'end_dd_end_pr',
@@ -89,7 +148,7 @@ def get_market_fundamental_by_ticker(date, market="ALL"):
     """
     market = {"ALL": "ALL", "KOSPI": "STK", "KOSDAQ": "KSQ", "KONEX": "KNX"}.\
         get(market, "ALL")    
-    df = MKD30009_0().read(date, market)
+    df = MKD30009_0().fetch(date, market)
 
     df = df[['isu_nm', 'isu_cd', 'dvd_yld', 'bps', 'per', 'prv_eps']]
     df.columns = ['종목명', '티커', 'DIV', 'BPS', 'PER', 'EPS']
@@ -119,7 +178,7 @@ def get_market_fundamental_by_date(fromdate, todate, isin, market="ALL"):
     """
     market = {"ALL": "ALL", "KOSPI": "STK", "KOSDAQ": "KSQ", "KONEX": "KNX"}.\
         get(market, "ALL")    
-    df = MKD30009_1().read(fromdate, todate, market, isin)
+    df = MKD30009_1().fetch(fromdate, todate, market, isin)
     df = df[['work_dt', 'dvd_yld', 'bps', 'per', 'prv_eps']]
     df.columns = ['날짜', 'DIV', 'BPS', 'PER', 'EPS']
     
@@ -150,7 +209,7 @@ def get_market_trading_volume_by_date(fromdate, todate, market):
         2020-05-19   773414630   768223852   2757578  1388145
     """
     market = {"KOSPI": 'kospi', "KOSDAQ": 'kosdaq', 'KONEX': 'konex'}.get(market, 'kospi')
-    df = MDK80033_0().read(fromdate, todate, market)
+    df = MDK80033_0().fetch(fromdate, todate, market)
     return _get_index_volume_by_date(df)
 
 
@@ -170,7 +229,7 @@ def get_market_trading_value_by_date(fromdate, todate, market):
         2020-05-19  11918300290  11900636354   1651565   6939447
     """
     market = {"KOSPI": 'kospi', "KOSDAQ": 'kosdaq', 'KONEX': 'konex'}.get(market, 'kospi')
-    df = MDK80033_1().read(fromdate, todate, market)
+    df = MDK80033_1().fetch(fromdate, todate, market)
     df = _get_index_volume_by_date(df)
     return df * 1000
 
@@ -204,7 +263,7 @@ def get_index_ohlcv_by_date(fromdate, todate, id, market):
         20190131  2222.879883  2222.879883  2201.219971  2204.850098  545248000
     """
     market = {"KOSPI": 1, "KOSDAQ": 2}.get(market, 1)
-    df = MKD20011_SUB().read(fromdate, todate, id, market)
+    df = MKD20011_SUB().fetch(fromdate, todate, id, market)
     df = df[['trd_dd', 'opnprc_idx', 'hgprc_idx', 'lwprc_idx',
              'clsprc_idx', 'acc_trdvol']]
     df.columns = ['날짜', '시가', '고가', '저가', '종가', '거래량']
@@ -234,7 +293,7 @@ def get_index_status_by_group(date, market):
         코스피 50                2000.03.02  2000.01.04  1000.0   2205.53  1102490712
     """
     market = {"KOSPI": "02", "KOSDAQ": "03"}.get(market, "02")
-    df = MKD20011().read(date, market)
+    df = MKD20011().fetch(date, market)
     df = df[['idx_nm', 'annc_tm', 'bas_tm', 'bas_idx', 'prsnt_prc', 'idx_mktcap']]
     df.columns = ['지수명', '기준시점', '발표시점', '기준지수', '현재지수', '시가총액']
     df = df.set_index('지수명')
@@ -259,7 +318,7 @@ def get_index_price_change_by_name(fromdate, todate, market):
         섬유·의류             141.03    147.24   4.40    107124162    449845448978
     """
     market = {"KRX": 2, "KOSPI": 3, "KOSDAQ": 4}.get(market, 3)
-    df = MKD80002().read(fromdate, todate, market)
+    df = MKD80002().fetch(fromdate, todate, market)
     df = df[['kor_indx_ind_nm', 'indx', 'prv_dd_indx', 'updn_rate', 'tr_vl', 'tr_amt']]
     df.columns = ['지수명', '시가', '종가', '등락률', '거래량', '거래대금']
     df = df.set_index('지수명')
@@ -285,7 +344,7 @@ def _get_index_volume_by_date(df):
 @dataframe_empty_handler
 def get_index_portfolio_deposit_file(date, id, market):
     market = {"KOSPI": 1, "KOSDAQ": 2}.get(market, 1)
-    df = MKD20011_PDF().read(date, id, market)
+    df = MKD20011_PDF().fetch(date, id, market)
     return df['isu_cd'].tolist()
 
 
@@ -304,7 +363,7 @@ def get_shorting_status_by_date(fromdate, todate, isin):
         20180108   32411  167754   2528196100  13118362800
         20180109   50486  175261   3885385100  13477570900
     """
-    df = SRT02010100().read(fromdate, todate, isin)
+    df = SRT02010100().fetch(fromdate, todate, isin)
 
     # (T+2)일 이전의 제공하기 때문에 (T), (T+1)의 비어있는 데이터를 제거
     today = datetime.datetime.now()
@@ -330,6 +389,31 @@ def get_shorting_status_by_date(fromdate, todate, isin):
 
 
 @dataframe_empty_handler
+def get_shorting_volume_by_date(fromdate, todate, isin, market):
+    """종목별 공매도 거래 현황 조회
+    :param date: 조회 일자 (YYYYMMDD)
+    :param market  : 코스피/코스닥
+    :return        : 거래 현황 DataFrame
+                       종목명   수량  거래량   비중
+        000020       동화약품    454  196429   0.23
+        000030       우리은행      0       0   0.00
+        000040       KR모터스     69  175740   0.04
+        000042   KR모터스 1WR      0    2795   0.00
+        000050           경방    264   39956   0.66
+    """
+    market = {"KOSPI": 1, "KOSDAQ": 3, "KONEX": 6}.get(market, 1)
+    df = SRT02020100().fetch(fromdate, todate, market, isin)
+
+    df = df[['일자', '공매도거래량', '총거래량', '비중', '공매도거래대금']]
+    df = df.replace('/', '', regex=True)
+    df = df.replace(',', '', regex=True)
+    df = df.set_index('일자')
+    df = df.astype({"공매도거래량": np.int64, "총거래량": np.int64,
+                    "공매도거래대금": np.int64, "비중": np.float64})
+    return df.sort_index()
+
+
+@dataframe_empty_handler
 def get_shorting_volume_by_ticker(date, market="코스피"):
     """종목별 공매도 거래 현황 조회
     :param date: 조회 일자 (YYYYMMDD)
@@ -342,18 +426,17 @@ def get_shorting_volume_by_ticker(date, market="코스피"):
         000042   KR모터스 1WR      0    2795   0.00
         000050           경방    264   39956   0.66
     """
-    market = {"코스피": 1, "코스닥": 3, "코넥스": 4}.get(market, 1)
-    df = SRT02020100().read(date, date, market)
-    df = df[
-        ['isu_cd', 'isu_abbrv', 'cvsrtsell_trdvol', 'acc_trdvol', 'trdvol_wt']]
-    df.columns = ['티커', '종목명', '수량', '거래량', '비중']
+    market = {"KOSPI": 1, "KOSDAQ": 3, "KONEX": 6}.get(market, 1)
+    df = SRT02020100().fetch(date, date, market, "")
 
+    df = df[['종목코드', '공매도거래량', '총거래량', '비중', '공매도거래대금']]
     df = df.replace('/', '', regex=True)
     df = df.replace(',', '', regex=True)
-    df = df.set_index('티커')
+    df = df.set_index('종목코드')
     df.index = df.index.str[3:9]
-    df = df.astype({"수량": np.int32, "거래량": np.int32, "비중": np.float64})
-    return df.sort_index()
+    df = df.astype({"공매도거래량": np.int64, "총거래량": np.int64,
+                    "공매도거래대금": np.int64, "비중": np.float64})
+    return df
 
 
 @dataframe_empty_handler
@@ -370,9 +453,9 @@ def get_shorting_investor_by_date(fromdate, todate, market, inquery="거래량")
         20180118   970406  41242  8018997  13141   9043786
         20180117  1190006  28327  8274090   6465   9498888
     """
-    market = {"코스피": 1, "코스닥": 2, "코넥스": 6}.get(market, 1)
+    market = {"KOSPI": 1, "KOSDAQ": 3, "KONEX": 6}.get(market, 1)
     inquery = {"거래량": 1, "거래대금": 2}.get(inquery, 1)
-    df = SRT02020300().read(fromdate, todate, market, inquery)
+    df = SRT02020300().fetch(fromdate, todate, market, inquery)
 
     df = df[
         ['str_const_val1', 'str_const_val2', 'str_const_val3', 'str_const_val4',
@@ -398,8 +481,8 @@ def get_shorting_volume_top50(date, market="코스피"):
         한샘              3   9034795500  27690715500  32.628   2131924250       4.238        21.142     1.543 -5.233
         동서              4    701247550   2444863350  28.682    255763771       2.742        10.172     2.820 -0.530
     """
-    market = {"코스피": 1, "코스닥": 2, "코넥스": 6}.get(market, 1)
-    df = SRT02020400().read(date, market)
+    market = {"KOSPI": 1, "KOSDAQ": 3, "KONEX": 6}.get(market, 1)
+    df = SRT02020400().fetch(date, market)
 
     df = df[['isu_abbrv', 'rank', 'cvsrtsell_trdval', 'acc_trdval',
              'tdd_srtsell_wt',
@@ -420,7 +503,7 @@ def get_shorting_volume_top50(date, market="코스피"):
 
 
 @dataframe_empty_handler
-def get_shorting_balance_by_ticker(fromdate, todate, isin, market="KOSPI"):
+def get_shorting_balance_by_date(fromdate, todate, isin, market="KOSPI"):
     """종목별 공매도 잔고 현황
     :param fromdate: 조회 시작 일자   (YYYYMMDD)
     :param todate  : 조회 마지막 일자 (YYYYMMDD)
@@ -433,18 +516,17 @@ def get_shorting_balance_by_ticker(fromdate, todate, isin, market="KOSPI"):
         2018/01/11        183158   728002365  13297270800  52852971699000  0.02
         2018/01/10        200200   728002365  14594580000  53071372408500  0.03
     """
-    market = {"KOSPI": 1, "KOSDAQ": 2, "KONEX": 6}.get(market, 1)
-    df = SRT02030100().read(fromdate, todate, market, isin)
+    market = {"KOSPI": 1, "KOSDAQ": 3, "KONEX": 6}.get(market, 1)
+    df = SRT02030100().fetch(fromdate, todate, market, isin)
 
-    df = df[['trd_dd', 'bal_qty', 'list_shrs', 'bal_amt', 'mktcap', 'bal_rto']]
+    df = df[['공시의무발생일', '공매도잔고수량', '상장주식수', '공매도잔고금액', '시가총액', '비중']]
     df.columns = ['날짜', '공매도잔고', '상장주식수', '공매도금액', '시가총액', '비중']
 
     df = df.replace('/', '', regex=True)
     df = df.replace(',', '', regex=True)
     df = df.set_index('날짜')
     df = df.astype({"공매도잔고": np.int32, "상장주식수": np.int64, "공매도금액": np.int64,
-                    "시가총액": np.int64,
-                    "비중": np.float64})
+                    "시가총액": np.int64, "비중": np.float64})
     df.index = pd.to_datetime(df.index, format='%Y/%m/%d')
     return df.sort_index()
 
@@ -462,8 +544,8 @@ def get_shorting_balance_top50(date, market="KOSPI"):
         008770        호텔신라    3085595   39248121   223397078000   2841563960400   7.86
         001820       삼화콘덴서    617652   10395000    39220902000    660082500000   5.94
     """
-    market = {"KOSPI": 1, "KOSDAQ": 2, "KONEX": 6}.get(market, 1)
-    df = SRT02030400().read(date, market)
+    market = {"KOSPI": 1, "KOSDAQ": 3, "KONEX": 6}.get(market, 1)
+    df = SRT02030400().fetch(date, market)
 
     df = df[["isu_cd", 'isu_abbrv', 'rank', 'bal_qty', 'list_shrs', 'bal_amt',
              'mktcap', 'bal_rto']]
@@ -485,6 +567,8 @@ if __name__ == "__main__":
     # df = get_market_price_change_by_ticker("20040418", "20040418")
     # df = get_market_price_change_by_ticker("20040418", "20040430")
     # df = get_market_fundamental_by_date("20150720", "20150810", "KR7005930003")
+    # df = get_market_cap_by_date("20150720", "20150810", "005930")
+    df = get_market_cap_by_ticker("20200625", "ALL")
 
     # index
     # df = get_index_ohlcv_by_date("20190408", "20190412", "001", "KOSDAQ")
@@ -494,14 +578,15 @@ if __name__ == "__main__":
     # df = get_index_status_by_group("20190410", "KOSPI")
     # df = get_index_price_change_by_name("20200520", "20200527", "KOSDAQ")
     # df = get_market_trading_volume_by_date("20200519", "20200526", 'kospi')
-    df = get_market_trading_value_by_date("20200519", "20200526", 'kospi')
+    # df = get_market_trading_value_by_date("20200519", "20200526", 'kospi')
 
     # shoring
     # df = get_shorting_status_by_date("20190401", "20190405", "KR7005930003")
-    # df = get_shorting_volume_by_ticker("20190211", "코스닥")
-    # df = get_shorting_investor_by_date("20190401", "20190405", "KR7005930003")
+    # df = get_shorting_volume_by_ticker("20190211", "KOSPI")
+    # df = get_shorting_volume_by_date("20200101", "20200115", "KR7005930003", "KOSPI")
+    # df = get_shorting_investor_by_date("20190401", "20190405", "KR7005930003", "거래량")
     # df = get_shorting_investor_by_date("20190401", "20190405", "KR7005930003", "거래대금")
     # df = get_shorting_volume_top50("20190211")
-    # df = get_shorting_balance_by_ticker("20190211", "20190215", "KR7005930003")
+    # df = get_shorting_balance_by_date("20190211", "20190215", "KR7005930003")
     # df = get_shorting_balance_top50("20190401")
-    print(df)
+    print(df.head())

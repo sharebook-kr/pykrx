@@ -11,7 +11,7 @@ def get_market_ohlcv_by_date(fromdate, todate, ticker):
     lastd = datetime.strptime(todate, '%Y%m%d')
     today = datetime.now()
     elapsed = today - strtd
-    xml = Sise().read(ticker, elapsed.days)
+    xml = Sise().fetch(ticker, elapsed.days)
 
     result = []
     for node in et.fromstring(xml).iter(tag='item'):
