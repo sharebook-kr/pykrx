@@ -294,6 +294,38 @@ print(df.head())
 2020-03-31  285057117  856741868  42269216023680  5969782550
 2020-04-30  298489128  424101937  20785194256247  5969782550
 ```  
+
+#### 2.1.1.10 외국인 보유량 및 외국인 한도소진률
+
+get_exhaustion_rates_of_foreign_investment_by_ticker() 함수는 상장주식수/외국인한도수량/외국인보유수량/외국인한도소진률 정보를 
+조회합니다. 외국인 보유수량 및 한도소진율은 장개시 시점 기준(금융감독원 외국인투자 관리시스템 제공 전일자 확정치)입니다.
+
+```python
+df = stock.get_exhaustion_rates_of_foreign_investment_by_ticker('20200703')
+print(df.head())
+```
+  
+```text
+        상장주식수   한도수량  보유수량      소진률                               
+000020   27931470   27931470   1400966   5.019531
+000040   91661018   91661018  43190959  47.125000
+000050   27415270   27415270    773627   2.820312
+000060  113680000  113680000  12968255  11.406250
+000070    8564271    8564271    661240   7.718750
+```  
+
+두 번째 파라미터 `market`은 코스피(KOSPI)/코스닥(KOSDAQ)/코넥스(KONEX) 시장을 지정해서 조회할 수 있습니다. 
+```python
+df = stock.get_exhaustion_rates_of_foreign_investment_by_ticker('20200703', "KOSPI")
+print(df.head())
+```  
+  
+세 번째 파라미터 `balance_limit`을 `True`로 지정하면 외국인 보유한도의 제한 종목만 검색할 수 있습니다. 지정하지 않으면 `False` 입니다. 
+ ```python
+df = stock.get_exhaustion_rates_of_foreign_investment_by_ticker('20200703', "KOSPI", 
+balance_limit=True)
+print(df.head())
+```  
   
 ### 2.1.2 인덱스 조회 API
 코스피 인덱스를 조회합니다.

@@ -153,6 +153,28 @@ class MKD80037(KrxWebIo):
         return DataFrame(result['block1'])
 
 
+class MKD81006(KrxFileIo):
+    @property
+    def bld(self):
+        return "MKD/13/1302/13020402/mkd13020402"
+
+    def fetch(self, date, market, position_limit):
+        """81006 외국인 보유량 (개별종목)
+        :param date           : 조회 일자 (YYMMDD)
+        :param market         : 조회 시장 (STK/KSQ/KNX/ALL)
+        :param position_limit : 1(전체) / 2(제한종목)
+        :return               : 등락률 DataFrame
+                  종목코드     종목명    상장주식수   외국인한도수량   외국인보유수량  외국인한도소진률(%)
+            0     000020     동화약품    27,931,470     27,931,470       1,400,966         5.02
+            1     000040     KR모터스    91,661,018     91,661,018      43,190,959        47.12
+            2     000050         경방    27,415,270     27,415,270         773,627         2.82
+            3     000060   메리츠화재   113,680,000    113,680,000      12,968,255        11.41
+            4     000070   삼양홀딩스     8,564,271      8,564,271         661,240         7.72
+        """
+        result = self.post(market_gubun=market, lmt_tp=position_limit, schdate=date)
+        return pd.read_excel(result)
+
+
 ################################################################################
 # index
 class MKD20011(KrxWebIo):
@@ -427,7 +449,7 @@ if __name__ == "__main__":
     # df = MKD80037().fetch("ALL", "20180501", "20180801")
     # df = MKD80037().fetch("ALL", "20180501", "20180515")
     # df = MKD30015().fetch("20190401", "ALL")
-
+    df = MKD81006().fetch("20200703", "ALL", 2)
     # index
     # df = MKD20011_PDF().fetch("20190412", "001", 2)
     # df = MKD20011().fetch("20190413", "03")
@@ -446,4 +468,4 @@ if __name__ == "__main__":
     # print(SRT02030100().fetch("20200101", "20200531", 1, "KR7210980009"))
     # print(SRT02030100().fetch("20181207", "20181212", "kospi", "KR7210980009"))
     # print(SRT02030400().fetch("20181214", 1))
-    # print(df)
+    print(df)

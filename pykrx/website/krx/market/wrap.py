@@ -1,6 +1,6 @@
 from pykrx.website.comm import dataframe_empty_handler
 from pykrx.website.krx.market.ticker import get_stock_ticker_isin
-from pykrx.website.krx.market.core import (MKD30040, MKD80037, MKD30009_0, MKD30015,
+from pykrx.website.krx.market.core import (MKD30040, MKD80037, MKD30009_0, MKD30015, MKD81006,
                                            MKD30009_1, MKD20011, MKD20011_SUB,
                                            MKD20011_PDF, SRT02010100, MKD80002,
                                            SRT02020100, SRT02020300, MDK80033_0, MDK80033_1,
@@ -232,6 +232,33 @@ def get_market_trading_value_by_date(fromdate, todate, market):
     df = MDK80033_1().fetch(fromdate, todate, market)
     df = _get_index_volume_by_date(df)
     return df * 1000
+
+
+@dataframe_empty_handler
+def get_exhaustion_rates_of_foreign_investment_by_ticker(date, market, balance_limit):
+    """거래실적 추이 (거래대금)
+    :param date           : 조회 일자 (YYMMDD)
+    :param market         : 조회 시장 (STK/KSQ/KNX/ALL)
+    :param balance_limit : False(전체) / True(제한종목)
+    :return               : 외국인 보유량 (단위:원)
+                 상장주식수   한도수량   보유수량     소진률
+        003490   94844634   47412833   12350096  26.049999
+        003495    1110794     555286      29061   5.230000
+        015760  641964077  256785631  127919592  49.820000
+        017670   80745711   39565398   28962369  73.199997
+        020560  223235294  111595323   13871465  12.430000
+    """
+    market = {"ALL": "ALL", "KOSPI": "STK", "KOSDAQ": "KSQ", "KONEX": "KNX"}.get(market, "ALL")
+    balance_limit = 2 if balance_limit is True else 1
+    df = MKD81006().fetch(date, market, balance_limit)
+    df = df[['종목코드', '상장주식수', '외국인한도수량', '외국인보유수량', '외국인한도소진률(%)']]
+    df.columns = ['종목코드', '상장주식수', '한도수량', '보유수량', '소진률']
+    df = df.replace('/', '', regex=True)
+    df = df.replace(',', '', regex=True)
+    df = df.astype(
+        {'종목코드': str, '상장주식수': np.int64, '한도수량': np.int64, '보유수량': np.int64, '소진률': np.float16})
+    df['종목코드'] = df['종목코드'].apply(lambda x: x.zfill(6))
+    return df.set_index('종목코드')
 
 
 ################################################################################
@@ -568,7 +595,8 @@ if __name__ == "__main__":
     # df = get_market_price_change_by_ticker("20040418", "20040430")
     # df = get_market_fundamental_by_date("20150720", "20150810", "KR7005930003")
     # df = get_market_cap_by_date("20150720", "20150810", "005930")
-    df = get_market_cap_by_ticker("20200625", "ALL")
+    # df = get_market_cap_by_ticker("20200625", "ALL")
+    df = get_exhaustion_rates_of_foreign_investment_by_ticker("20200703", "ALL", 2)
 
     # index
     # df = get_index_ohlcv_by_date("20190408", "20190412", "001", "KOSDAQ")

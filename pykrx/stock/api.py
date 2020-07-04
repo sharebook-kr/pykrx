@@ -95,6 +95,13 @@ def get_market_cap_by_ticker(date, market="ALL"):
     return krx.get_market_cap_by_ticker(date, market)
 
 
+def get_exhaustion_rates_of_foreign_investment_by_ticker(date, market="ALL", balance_limit=False):
+    if isinstance(date, datetime.datetime):
+        date = _datetime2string(date)
+
+    return krx.get_exhaustion_rates_of_foreign_investment_by_ticker(date, market, balance_limit)
+
+
 def get_market_price_change_by_ticker(fromdate, todate):
     if isinstance(fromdate, datetime.datetime):
         fromdate = _datetime2string(fromdate)
@@ -346,7 +353,8 @@ if __name__ == "__main__":
     # df = get_market_trading_value_by_date("20190101", "20200430", 'KOSPI', 'm')
     # df = get_market_cap_by_date("20190101", "20190131", "005930")
     # df = get_market_cap_by_date("20200101", "20200430", "005930", "m")
-    df = get_market_cap_by_ticker("20200625")
+    # df = get_market_cap_by_ticker("20200625")
+    df = get_exhaustion_rates_of_foreign_investment_by_ticker("20200703")
 
     # tickers = get_index_ticker_list("20190225", "KOSDAQ")
     # print(tickers)
