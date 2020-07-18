@@ -11,7 +11,7 @@ class EtfTicker:
 
     @dataframe_empty_handler
     def _get_tickers(self, date):
-        df = MKD60003().read(date)
+        df = MKD60003().fetch(date)
         df['ticker'] = df['isu_cd'].str[3:9]
         df = df.set_index('ticker')
         df = df[['isu_cd', 'isu_abbrv']]
@@ -49,7 +49,7 @@ class EtfTicker:
     def _get_closest_business_day():
         now = datetime.datetime.now()
         past = now - datetime.timedelta(days=14)
-        df = MKD60007().read(past.strftime("%Y%m%d"), now.strftime("%Y%m%d"), "KR7069500007")
+        df = MKD60007().fetch(past.strftime("%Y%m%d"), now.strftime("%Y%m%d"), "KR7069500007")
         return df['work_dt'].iloc[0].replace("/", "")
 
 
@@ -69,6 +69,6 @@ def get_etf_ticker_list(date):
 if __name__ == "__main__":
     import pandas as pd
     pd.set_option('display.width', None)
-    print(get_etf_ticker_list())
+    print(get_etf_ticker_list("20200717"))
     print(get_etf_isin("346000"))
     print(get_etf_name("346000"))

@@ -606,9 +606,9 @@ df = stock.get_shorting_balance_top50("20190401", "KOSDAQ")
 
 ### 2.2.1 ETF 
 #### 2.2.1.1 ETF 티커
-get_etf_ticker_list() 함수는 ETF에서 사용할 수 있는 티커를 리스트로 반환합니다.
+get_etf_ticker_list() 함수는 입력된 날짜에 해당하는 ETF 티커를 리스트로 반환합니다. 날짜는 유효한 영업일이여야 올바른 값이 출력됩니다.    
 ```python
-tickers = stock.get_etf_ticker_list()
+tickers = stock.get_etf_ticker_list("20200717")
 print(tickers[:10])
 ```
 ```text

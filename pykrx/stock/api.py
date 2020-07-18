@@ -30,6 +30,18 @@ def resample_ohlcv(df, freq, how):
     return df
 
 
+def get_recent_business_day():
+    curr = datetime.datetime.now()
+    prev = curr - datetime.timedelta(days=7)
+
+    curr = _datetime2string(curr)
+    prev = _datetime2string(prev)
+
+    df = krx.get_index_ohlcv_by_date(prev, curr, "001", "KOSPI")
+    return df.index[-1].strftime("%Y%m%d")
+
+
+
 # -----------------------------------------------------------------------------
 # 주식 API
 # -----------------------------------------------------------------------------
@@ -309,8 +321,7 @@ def get_shorting_balance_top50(date, market):
 # -----------------------------------------------------------------------------
 def get_etf_ticker_list(date=None):
     if date is None:
-        date = datetime.datetime.now()
-        date = _datetime2string(date)
+        date = get_recent_business_day()
     return krx.get_etf_ticker_list(date)
 
 
@@ -324,8 +335,7 @@ def get_etf_ohlcv_by_date(fromdate, todate, ticker):
 
 def get_etf_portfolio_deposit_file(ticker, date=None):
     if date is None:
-        date = datetime.datetime.now()
-        date = _datetime2string(date)
+        date = get_recent_business_day()
     return krx.get_etf_portfolio_deposit_file(ticker, date)
 
 
@@ -354,7 +364,7 @@ if __name__ == "__main__":
     # df = get_market_cap_by_date("20190101", "20190131", "005930")
     # df = get_market_cap_by_date("20200101", "20200430", "005930", "m")
     # df = get_market_cap_by_ticker("20200625")
-    df = get_exhaustion_rates_of_foreign_investment_by_ticker("20200703")
+    # df = get_exhaustion_rates_of_foreign_investment_by_ticker("20200703")
 
     # tickers = get_index_ticker_list("20190225", "KOSDAQ")
     # print(tickers)
@@ -375,7 +385,8 @@ if __name__ == "__main__":
     # df = get_shorting_volume_top50("20190401", "KOSPI")
     # df = get_shorting_balance_by_date("20190401", "20190405", "005930")
     # df = get_shorting_balance_top50("20190401", "KOSDAQ")
-    # df = get_etf_ticker_list()
+
+    df = get_etf_ticker_list()
     # df = get_etf_isin("346000")
     # df = get_etf_ohlcv_by_date("20200101", "20200401", "295820")
     # df = get_etf_portfolio_deposit_file("252650", "20190329")
