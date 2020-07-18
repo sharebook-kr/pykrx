@@ -1,7 +1,6 @@
 from pykrx.website.krx.krxio import KrxWebIo, KrxFileIo, SrtWebIo
 import pandas as pd
 from pandas import DataFrame
-import time
 
 
 ################################################################################
@@ -268,9 +267,16 @@ class MKD80002(KrxWebIo):
 
 
 class MDK80033_0(KrxWebIo):
+    def __init__(self):
+        self.__bld = "MKD/13/1302/13020301/mkd13020301_01"
+
     @property
     def bld(self):
-        return "MKD/13/1302/13020301/mkd13020301_01"
+        return self.__bld
+
+    @bld.setter
+    def bld(self, value):
+        self.__bld = value
 
     def fetch(self, fromdate, todate, market):
         """거래실적 추이 (거래량)
@@ -286,13 +292,26 @@ class MDK80033_0(KrxWebIo):
                 4  2020/05/21    601,199,346    596,327,758   2,325,716  1,780,149    588,696,773        0   426,864        0         0  2,359,680    368,345        0   9,347,684        0    60,969,199        1,050,550     283,828,511  192,808,025  62,543,061    52,553,279        1,177,388     293,822,455  194,186,529  59,459,695
 
         """
+        if market == "kosdaq":
+            self.bld = "MKD/13/1302/13020301/mkd13020301_03"
+        elif market == "konex":
+            self.bld = "MKD/13/1302/13020301/mkd13020301_05"
+
         result = self.post(ind_tp=market, fr_work_dt=fromdate, to_work_dt=todate)
         return DataFrame(result['block1'])
 
+
 class MDK80033_1(KrxWebIo):
+    def __init__(self):
+        self.__bld = "MKD/13/1302/13020301/mkd13020301_02"
+
     @property
     def bld(self):
-        return "MKD/13/1302/13020301/mkd13020301_02"
+        return self.__bld
+
+    @bld.setter
+    def bld(self, value):
+        self.__bld = value
 
     def fetch(self, fromdate, todate, market):
         """거래실적 추이 (거래대금)
@@ -306,8 +325,13 @@ class MDK80033_1(KrxWebIo):
                 2  2020/05/25    641,458,990    612,379,841  27,522,107  1,021,316    629,592,119        0     9,539        0         0  2,069,182    393,961        0   9,394,189        0    46,899,361        1,141,784     306,793,497  235,845,426  50,778,922    44,817,143        1,167,310     306,395,061  234,893,243  54,186,233
                 3  2020/05/22    847,467,288    830,997,456  13,472,156  2,173,679    832,046,355        0   245,749        0         0  3,101,995  3,094,402  382,092   8,596,695        0    63,527,104        1,580,861     382,694,417  312,464,634  87,200,272    54,102,924        1,552,136     413,978,629  315,154,794  62,678,805
                 4  2020/05/21    601,199,346    596,327,758   2,325,716  1,780,149    588,696,773        0   426,864        0         0  2,359,680    368,345        0   9,347,684        0    60,969,199        1,050,550     283,828,511  192,808,025  62,543,061    52,553,279        1,177,388     293,822,455  194,186,529  59,459,695
-
         """
+
+        if market == "kosdaq":
+            self.bld = "MKD/13/1302/13020301/mkd13020301_04"
+        elif market == "konex":
+            self.bld = "MKD/13/1302/13020301/mkd13020301_06"
+
         result = self.post(ind_tp=market, fr_work_dt=fromdate, to_work_dt=todate)
         return DataFrame(result['block1'])
 
@@ -362,7 +386,7 @@ class SRT02020300(KrxWebIo):
            http://short.krx.co.kr/contents/SRT/02/02020300/SRT02020300.jsp
         :param fromdate: 조회 시작 일자 (YYMMDD)
         :param todate  : 조회 마지막 일자 (YYMMDD)
-        :param market  : 1 (코스피) / 3 (코스닥) / 6 (코넥스)
+        :param market  : 1 (코스피) / 2 (코스닥) / 6 (코넥스)
         :param inquery : 1 (거래대금) / 2 (거래량)
         :return: 투자자별 공매도 거래 현황 DataFrame
            str_const_val1 str_const_val2 str_const_val3 str_const_val4 str_const_val5      trd_dd
@@ -449,7 +473,7 @@ if __name__ == "__main__":
     # df = MKD80037().fetch("ALL", "20180501", "20180801")
     # df = MKD80037().fetch("ALL", "20180501", "20180515")
     # df = MKD30015().fetch("20190401", "ALL")
-    df = MKD81006().fetch("20200703", "ALL", 2)
+    # df = MKD81006().fetch("20200703", "ALL", 2)
     # index
     # df = MKD20011_PDF().fetch("20190412", "001", 2)
     # df = MKD20011().fetch("20190413", "03")
@@ -458,14 +482,15 @@ if __name__ == "__main__":
     # print(MKD30009_1().fetch('20190322', '20190329', 'ALL', 'KR7005930003'))
     # df = MKD80002().fetch("20200520", "20200527", 2)
     # df = MDK80033_0().fetch("20200519", "20200526", 'kospi')
+    # df = MDK80033_0().fetch("20200519", "20200526", 'kosdaq')
     # df = MDK80033_1().fetch("20200519", "20200526", 'kospi')
     # shorting
     # print(SRT02010100().fetch("KR7005930003", "20181205", "20181207"))
     # print(SRT02020100().fetch("20200525", "20200531", 1, "KR7210980009"))
     # print(SRT02020100().fetch("20181207", 1, "KR7005930003"))
-    # print(SRT02020300().fetch("20181207", "20181212", "kospi", "거래대금"))
+    print(SRT02020300().fetch("20181207", "20181212", 1, 1))
     # print(SRT02020400().fetch("20181212", "코스피"))
     # print(SRT02030100().fetch("20200101", "20200531", 1, "KR7210980009"))
     # print(SRT02030100().fetch("20181207", "20181212", "kospi", "KR7210980009"))
     # print(SRT02030400().fetch("20181214", 1))
-    print(df)
+    # print(df)

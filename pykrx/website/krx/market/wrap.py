@@ -356,14 +356,41 @@ def get_index_price_change_by_name(fromdate, todate, market):
 
 
 def _get_index_volume_by_date(df):
-    df = df[['dt', 'tot', 'stk', 'sect', 'reit']]
-    df.columns = ['날짜', '전체', '주권', '투자회사', '부동산투자회사']
-    df = df.set_index('날짜')
-    # df.columns = pd.MultiIndex.from_arrays([['전체', '종류별', '종류별', '종류별'], ['', '주권', '투자회사',
-    # '부동산투자회사']])
+    if 'stk' in df.columns:
+        sort_idx = ['tot', 'stk', 'sect', 'reit', 'fm', 'rpt_mass', 'mktd_mass', 'mktd_bsk',
+                    'mktd_dkpl', 'tme_end_pr', 'tme_mass', 'tme_bsk', 'tme_unit', 'tme_dkpl',
+                    'bz_termnl_ask', 'cable_termnl_ask', 'wrls_termnl_ask', 'hts_ask', 'etc_ask',
+                    'bz_termnl_bid', 'cable_termnl_bid', 'wrls_termnl_bid', 'hts_bid', 'etc_bid']
+        category = ['전체', '종류', '종류', '종류', '세션', '세션', '세션', '세션', '세션', '세션', '세션',
+                    '세션', '세션', '세션', '매도', '매도', '매도', '매도', '매도', '매수', '매수', '매수', '매수',
+                    '매수', ]
+
+        columns = ['전체', '주권', '투자회사', '부동산투자회사', '정규매매', '정규신고대량', '장중대량', '장중바스켓', '장중경쟁대량',
+                   '시간외종가', '시간외대량', '시간외바스켓', '시간외단일가', '시간외경쟁대량', '영업단말', '유선단말', '무선단말', 'HTS',
+                   '기타', '영업단말', '유선단말', '무선단말', 'HTS', '기타']
+
+    else:
+        sort_idx = ['tot', 'fm', 'rpt_mass', 'mktd_mass', 'mktd_bsk',
+                    'mktd_dkpl', 'tme_end_pr', 'tme_mass', 'tme_bsk', 'tme_unit', 'tme_dkpl',
+                    'bz_termnl_ask', 'cable_termnl_ask', 'wrls_termnl_ask', 'hts_ask', 'etc_ask',
+                    'bz_termnl_bid', 'cable_termnl_bid', 'wrls_termnl_bid', 'hts_bid', 'etc_bid']
+
+        category = ['전체', '세션', '세션', '세션', '세션', '세션', '세션', '세션',
+                    '세션', '세션', '세션', '매도', '매도', '매도', '매도', '매도', '매수', '매수', '매수', '매수',
+                    '매수', ]
+
+        columns = ['전체', '정규매매', '정규신고대량', '장중대량', '장중바스켓', '장중경쟁대량',
+                   '시간외종가', '시간외대량', '시간외바스켓', '시간외단일가', '시간외경쟁대량', '영업단말', '유선단말', '무선단말', 'HTS',
+                   '기타', '영업단말', '유선단말', '무선단말', 'HTS', '기타']
+
+    df = df.set_index('dt')
+    df.index.name = "날짜"
+    df = df[sort_idx]
+    df.columns = pd.MultiIndex.from_tuples(list(zip(category, columns)))
+
     df = df.replace(',', '', regex=True)
     df = df.replace('', 0)
-    df = df.astype({"전체": np.int64, "주권": np.int64, "투자회사": np.int64, "부동산투자회사": np.int64})
+    df = df.astype(np.int64)
     df.index = pd.to_datetime(df.index, format='%Y/%m/%d')
     return df
 
@@ -480,8 +507,9 @@ def get_shorting_investor_by_date(fromdate, todate, market, inquery="거래량")
         20180118   970406  41242  8018997  13141   9043786
         20180117  1190006  28327  8274090   6465   9498888
     """
-    market = {"KOSPI": 1, "KOSDAQ": 3, "KONEX": 6}.get(market, 1)
+    market = {"KOSPI": 1, "KOSDAQ": 2, "KONEX": 6}.get(market, 1)
     inquery = {"거래량": 1, "거래대금": 2}.get(inquery, 1)
+
     df = SRT02020300().fetch(fromdate, todate, market, inquery)
 
     df = df[
@@ -521,6 +549,8 @@ def get_shorting_volume_top50(date, market="코스피"):
     df = df.set_index('종목명')
 
     df = df.replace(',', '', regex=True)
+    df = df.replace(r'^\s*$', 0, regex=True)
+
     df = df.astype({"순위": np.int32, "공매도거래대금": np.int64, "총거래대금": np.int64,
                     "직전40일거래대금평균": np.int64, "공매도비중": np.float64,
                     "공매도거래대금증가율": np.float64,
@@ -571,7 +601,7 @@ def get_shorting_balance_top50(date, market="KOSPI"):
         008770        호텔신라    3085595   39248121   223397078000   2841563960400   7.86
         001820       삼화콘덴서    617652   10395000    39220902000    660082500000   5.94
     """
-    market = {"KOSPI": 1, "KOSDAQ": 3, "KONEX": 6}.get(market, 1)
+    market = {"KOSPI": 1, "KOSDAQ": 2, "KONEX": 6}.get(market, 1)
     df = SRT02030400().fetch(date, market)
 
     df = df[["isu_cd", 'isu_abbrv', 'rank', 'bal_qty', 'list_shrs', 'bal_amt',
@@ -596,7 +626,7 @@ if __name__ == "__main__":
     # df = get_market_fundamental_by_date("20150720", "20150810", "KR7005930003")
     # df = get_market_cap_by_date("20150720", "20150810", "005930")
     # df = get_market_cap_by_ticker("20200625", "ALL")
-    df = get_exhaustion_rates_of_foreign_investment_by_ticker("20200703", "ALL", 2)
+    # df = get_exhaustion_rates_of_foreign_investment_by_ticker("20200703", "ALL", 2)
 
     # index
     # df = get_index_ohlcv_by_date("20190408", "20190412", "001", "KOSDAQ")
@@ -605,14 +635,15 @@ if __name__ == "__main__":
     # df = get_index_portfolio_deposit_file("20190410", "028", "KOSPI")
     # df = get_index_status_by_group("20190410", "KOSPI")
     # df = get_index_price_change_by_name("20200520", "20200527", "KOSDAQ")
-    # df = get_market_trading_volume_by_date("20200519", "20200526", 'kospi')
+    # df = get_market_trading_volume_by_date("20200519", "20200526", 'KOSDAQ')
+    # df = get_market_trading_volume_by_date("20200519", "20200526", 'KOSDAQ')
     # df = get_market_trading_value_by_date("20200519", "20200526", 'kospi')
 
     # shoring
     # df = get_shorting_status_by_date("20190401", "20190405", "KR7005930003")
     # df = get_shorting_volume_by_ticker("20190211", "KOSPI")
     # df = get_shorting_volume_by_date("20200101", "20200115", "KR7005930003", "KOSPI")
-    # df = get_shorting_investor_by_date("20190401", "20190405", "KR7005930003", "거래량")
+    df = get_shorting_investor_by_date("20190401", "20190405", "KOSDAQ", "거래량")
     # df = get_shorting_investor_by_date("20190401", "20190405", "KR7005930003", "거래대금")
     # df = get_shorting_volume_top50("20190211")
     # df = get_shorting_balance_by_date("20190211", "20190215", "KR7005930003")

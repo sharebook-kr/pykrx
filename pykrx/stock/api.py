@@ -41,7 +41,6 @@ def get_recent_business_day():
     return df.index[-1].strftime("%Y%m%d")
 
 
-
 # -----------------------------------------------------------------------------
 # 주식 API
 # -----------------------------------------------------------------------------
@@ -122,6 +121,9 @@ def get_market_price_change_by_ticker(fromdate, todate):
         todate = _datetime2string(todate)
 
     df_a = krx.get_market_price_change_by_ticker(fromdate, todate)
+    if df_a.empty:
+        return df_a
+
     # MKD80037는 상장 폐지 종목은 제외한 정보를 전달하기 때문에, 시작일의 가격
     # 정보 중에서 시가를 가져온다.
     # - 시작일이 주말일 경우를 고려해서 가까운 미래의 평일의 날짜를 얻어온다.
@@ -177,11 +179,12 @@ def get_market_fundamental_by_ticker(date, market="ALL"):
     return df
 
 
-def get_market_trading_volume_by_date(fromdate, todate, market="KOSPI", freq='d'):
+def get_market_trading_volume_by_date(fromdate, todate, market="KOSPI", on="세션", freq='d'):
     """
     :param fromdate: 조회 시작 일자 (YYYYMMDD)
     :param todate  : 조회 종료 일자 (YYYYMMDD)
     :param market  : KOSPI / KOSDAQ / KONEX
+    :param on      : 세션/종류/매수/매도/전체
     :param freq    : d - 일 / m - 월 / y - 년
     :return        : 거래실적(거래량) 추이 DataFrame
     """
@@ -191,11 +194,17 @@ def get_market_trading_volume_by_date(fromdate, todate, market="KOSPI", freq='d'
         todate = _datetime2string(todate)
 
     df = krx.get_market_trading_volume_by_date(fromdate, todate, market)
-    how = {'전체': 'sum', '주권': 'sum', '투자회사': 'sum', '부동산투자회사': 'sum'}
-    return resample_ohlcv(df, freq, how)
+
+    if on == "전체":
+        return resample_ohlcv(df, freq, sum)
+    else:
+        if on not in df.columns.get_level_values(0):
+            return None
+        df = pd.concat([df['전체'], df[on]], axis=1)
+        return resample_ohlcv(df, freq, sum)
 
 
-def get_market_trading_value_by_date(fromdate, todate, market="KOSPI", freq='d'):
+def get_market_trading_value_by_date(fromdate, todate, market="KOSPI", on="세션", freq='d'):
     """
     :param fromdate: 조회 시작 일자 (YYYYMMDD)
     :param todate  : 조회 종료 일자 (YYYYMMDD)
@@ -209,14 +218,20 @@ def get_market_trading_value_by_date(fromdate, todate, market="KOSPI", freq='d')
         todate = _datetime2string(todate)
 
     df = krx.get_market_trading_value_by_date(fromdate, todate, market)
-    how = {'전체': 'sum', '주권': 'sum', '투자회사': 'sum', '부동산투자회사': 'sum'}
-    return resample_ohlcv(df, freq, how)
+
+    if on == "전체":
+        return resample_ohlcv(df, freq, sum)
+    else:
+        df = pd.concat([df['전체'], df[on]], axis=1)
+        return resample_ohlcv(df, freq, sum)
 
 
 # -----------------------------------------------------------------------------
 # 지수(INDEX) API
 # -----------------------------------------------------------------------------
-def get_index_ticker_list(date, market="KOSPI"):
+def get_index_ticker_list(date=None, market="KOSPI"):
+    if date is None:
+        date = get_recent_business_day()
     return krx.IndexTicker().get_ticker(market, date)
 
     
@@ -359,7 +374,7 @@ if __name__ == "__main__":
     # df = get_market_ticker_name("000660")
     # df = get_market_fundamental_by_date("20180301", "20180320", '005930')
     # df = get_market_fundamental_by_date("20180301", "20180320", '005930')
-    # df = get_market_trading_volume_by_date("20190101", "20200430", 'KOSPI', 'm')
+    df = get_market_trading_volume_by_date("20200322", "20200430", 'KOSPI', '세션', 'm')
     # df = get_market_trading_value_by_date("20190101", "20200430", 'KOSPI', 'm')
     # df = get_market_cap_by_date("20190101", "20190131", "005930")
     # df = get_market_cap_by_date("20200101", "20200430", "005930", "m")
@@ -376,6 +391,7 @@ if __name__ == "__main__":
     # df = get_index_portfolio_deposit_file("20190412", "코스피 소형주")
     # df = krx.IndexTicker().get_id("코스피 200", "20000201")
     # df = get_index_portfolio_deposit_file("20000201", "코스피 소형주")
+
     # df = get_shorting_status_by_date("20181210", "20181212", "005930")
     # df = get_shorting_investor_volume_by_date("20190401", "20190405", "KOSPI")
     # df = get_shorting_investor_price_by_date("20190401", "20190405", "KOSPI")
@@ -386,7 +402,7 @@ if __name__ == "__main__":
     # df = get_shorting_balance_by_date("20190401", "20190405", "005930")
     # df = get_shorting_balance_top50("20190401", "KOSDAQ")
 
-    df = get_etf_ticker_list()
+    # df = get_etf_ticker_list()
     # df = get_etf_isin("346000")
     # df = get_etf_ohlcv_by_date("20200101", "20200401", "295820")
     # df = get_etf_portfolio_deposit_file("252650", "20190329")

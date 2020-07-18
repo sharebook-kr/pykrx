@@ -25,6 +25,11 @@ class KrxWebIo(Post):
     def bld(self):
         return NotImplementedError
 
+    @bld.setter
+    @abstractmethod
+    def bld(self, val):
+        pass
+
     @property
     @abstractmethod
     def read(self, **params):

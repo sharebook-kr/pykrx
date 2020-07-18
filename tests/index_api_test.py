@@ -17,5 +17,17 @@ class KrxIndexBasicTest(unittest.TestCase):
         self.assertNotEqual(df.empty, True)
 
 
+class IndexTickerListTest(unittest.TestCase):
+    def test_io_with_default_param(self):
+        tickers = stock.get_index_ticker_list()
+        self.assertIsInstance(tickers, list)
+        self.assertNotEqual(len(tickers), 0)
+
+    def test_io_with_business_date(self):
+        tickers = stock.get_market_ticker_list("20170717")
+        self.assertIsInstance(tickers, list)
+        self.assertNotEqual(len(tickers), 0)
+
+
 if __name__ == '__main__':
     unittest.main()
