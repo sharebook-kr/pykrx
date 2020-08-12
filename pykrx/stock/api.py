@@ -269,7 +269,7 @@ def get_index_ohlcv_by_date(fromdate, todate, ticker, freq='d'):
     return _get_index_ohlcv_by_date(fromdate, todate, ticker, freq)
 
 
-def get_index_status_by_group(date, market):
+def get_index_status_by_group(date, market="KOSPI"):
     if isinstance(date, datetime.datetime):
         date = _datetime2string(date)
     return krx.get_index_status_by_group(date, market)

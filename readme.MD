@@ -194,7 +194,7 @@ d는 일자, m은 월, y는 연도를 의미합니다.
 다음은 20190101부터 20200430까지의 코스피 시장의 월별 거래량을 조회합니다. 
 조회 기간이 길 수록 데이터를 획득하기 까지의 시간이 오래 걸립니다.
 ```python
-df = stock.get_market_trading_volume_by_date("20190101", "20200430", 'KOSPI', 'm')
+df = stock.get_market_trading_volume_by_date("20190101", "20200430", 'KOSPI', freq='m')
 print(df.head())
 ```
 ```text
@@ -372,7 +372,7 @@ print(tickers)
 #### 2.1.2.2 인덱스 종류 조회
 get_index_ohlcv_by_date() 함수는 입력된 기간 동안의 인덱스 OHLCV를 조회합니다. 다음은 20190101-20190228 동안의 "코스피 200" 인덱스의 OHLCV를 조회합니다.
 ```python
-df = get_index_ohlcv_by_date("20190101", "20190228", "코스피 200")
+df = stock.get_index_ohlcv_by_date("20190101", "20190228", "코스피 200")
 print(df.head(2))
 ```
 ```text
@@ -383,7 +383,7 @@ print(df.head(2))
 get_index_ohlcv_by_date() 함수에 frequency 파라미터(d/m/y)를 추가할 수 있습니다. 
 d는 일자, m은 월, y는 연도를 의미합니다. 다음은 20190101부터 20190228까지의 "코스피 200"의 월별 OHLCV를 출력합니다. 
 ```python
-df = get_index_ohlcv_by_date("20190101", "20190228", "코스피 200", "m")
+df = stock.get_index_ohlcv_by_date("20190101", "20190228", "코스피 200", "m")
 print(df.head(2))
 ```
 ```text
@@ -405,6 +405,19 @@ print(df.head())
 코스피 100            2000.03.02  2000.01.04  1000.0   2152.14  1135924335
 코스피 50             2000.03.02  2000.01.04  1000.0   1884.17   960728527
 코스피 200 중소형주    2015.07.13  2010.01.04  1000.0   1011.56   118938839
+```
+두 번째 파라미터에 시장 정보를 추가할 수 있습니다. 다음은 코스닥 시장의 지수 정보를 출력합니다.
+```python
+df = stock.get_index_status_by_group("20190228", "KOSDAQ")
+print(df.head())
+```
+```text
+                            기준시점       발표시점  기준지수  현재지수  시가총액                                                                                         
+코스닥                       1997.01.03  1996.07.01  1000.0   731.25  249196922
+코스닥 150                   2015.07.13  2010.01.04  1000.0  1235.26  125083558
+코스닥 150 정보기술           2016.07.11  2010.01.04  1000.0   557.56   22063096
+코스닥 150 헬스케어           2016.07.11  2010.01.04  1000.0  4154.27   48499634
+코스닥 150 커뮤니케이션서비스  2016.07.11  2010.01.04  1000.0  2398.96   12856320
 ```
 
 #### 2.1.2.4 인덱스 등락률 조회
@@ -487,7 +500,7 @@ get_shorting_investor_volume_by_date() 함수는 시작일/종료일 두 개의 
 
 ```python
 df = stock.get_shorting_investor_volume_by_date("20190401", "20190405", "KOSPI")
-print(df.head())
+print(df.head())    print(df)
 ```
 
 ```text
@@ -613,6 +626,7 @@ print(df.head())
 코스닥 또한 거래량을 조회할 수 있습니다.  
  ```python
 df = stock.get_shorting_balance_top50("20190401", "KOSDAQ")
+print(df.head())
 ```
 ```text
            종목명 순위  잔고수량    주식수      잔고금액        시가총액   비중
@@ -700,7 +714,7 @@ print(df.head())
 get_etf_price_deviation() 함수는 ETF의 종가/순자산가치/괴리율 정보를 얻어옵니다.
 다음은 ARIRANG 200동일가중(295820) 종목의 괴리율을 출력합니다. 
 ```python
-df = get_etf_price_deviation("20200101", "20200401", "295820")
+df = stock.get_etf_price_deviation("20200101", "20200401", "295820")
 print(df.head())
 ``` 
 ```text
