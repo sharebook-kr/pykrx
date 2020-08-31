@@ -26,13 +26,12 @@ class KrxWebIo(Post):
         return NotImplementedError
 
     @bld.setter
-    @abstractmethod
     def bld(self, val):
         pass
 
     @property
     @abstractmethod
-    def read(self, **params):
+    def fetch(self, **params):
         return NotImplementedError
 
 
@@ -52,7 +51,8 @@ class KrxFileIo(Post):
         return NotImplementedError
 
     @property
-    def read(self, **params):
+    @abstractmethod
+    def fetch(self, **params):
         return NotImplementedError
 
     @property

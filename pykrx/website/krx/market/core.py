@@ -174,6 +174,27 @@ class MKD81006(KrxFileIo):
         return pd.read_excel(result)
 
 
+class MKD99000001(KrxWebIo):
+    @property
+    def bld(self):
+        return "MKD/13/1302/13020101/mkd13020101"
+
+    def fetch(self, date, market):
+        """81004 전체종목 시세
+        :param date: 조회 일자 (YYMMDD)
+        :param market: 조회 시장 (STK/KSQ/KNX/ALL)
+        :return:
+                     cur_pr_tot_amt fluc_tp_cd    hgprc  isu_cd isu_cur_pr       isu_tr_amt   isu_tr_vl kor_shrt_isu_nm   lst_stk_vl    lwprc   opnprc prv_dd_cmpr   rn totCnt tot_amt_per updn_rate
+            0       654,992,971,500          1   24,000  000020     23,450   18,488,865,200     786,605            동화약품   27,931,470   23,000   23,200         400    1   2489        0.03       1.7
+            1        64,621,017,690          1      750  000040        705    2,291,451,896   3,172,595           KR모터스   91,661,018      690      701          19    2   2489        0.00       2.8
+            2       289,231,098,500          1   10,850  000050     10,550      250,412,000      23,905              경방   27,415,270   10,350   10,600          50    3   2489        0.02       0.5
+            3     1,449,420,000,000          2   12,900  000060     12,750    2,306,209,250     181,382           메리츠화재  113,680,000   12,600   12,750          50    4   2489        0.08      -0.4
+            4       551,539,052,400          3   65,600  000070     64,400    1,371,218,100      21,257           삼양홀딩스    8,564,271   63,700   64,400           0    5   2489        0.03       0.0
+        """
+        result = self.post(market_gubun=market, schdate=date)
+        return DataFrame(result['시가총액 상하위'])
+
+
 ################################################################################
 # index
 class MKD20011(KrxWebIo):
@@ -474,6 +495,7 @@ if __name__ == "__main__":
     # df = MKD80037().fetch("ALL", "20180501", "20180515")
     # df = MKD30015().fetch("20190401", "ALL")
     # df = MKD81006().fetch("20200703", "ALL", 2)
+    # df = MKD99000001().fetch("20200831", "ALL")
     # index
     # df = MKD20011_PDF().fetch("20190412", "001", 2)
     # df = MKD20011().fetch("20190413", "03")
@@ -488,9 +510,9 @@ if __name__ == "__main__":
     # print(SRT02010100().fetch("KR7005930003", "20181205", "20181207"))
     # print(SRT02020100().fetch("20200525", "20200531", 1, "KR7210980009"))
     # print(SRT02020100().fetch("20181207", 1, "KR7005930003"))
-    print(SRT02020300().fetch("20181207", "20181212", 1, 1))
+    # print(SRT02020300().fetch("20181207", "20181212", 1, 1))
     # print(SRT02020400().fetch("20181212", "코스피"))
     # print(SRT02030100().fetch("20200101", "20200531", 1, "KR7210980009"))
     # print(SRT02030100().fetch("20181207", "20181212", "kospi", "KR7210980009"))
     # print(SRT02030400().fetch("20181214", 1))
-    # print(df)
+    print(df)

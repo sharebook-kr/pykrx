@@ -13,7 +13,7 @@ setup(
     url             = 'https://github.com/sharebook-kr/pykrx',
     author          = 'Brayden Jo, Jonghun Yoo',
     author_email    = 'brayden.jo@outlook.com, jonghun.yoo@outlook.com, pystock@outlook.com',
-    install_requires= ['requests', 'pandas', 'datetime', 'numpy'],
+    install_requires= ['requests', 'pandas', 'datetime', 'numpy', 'xlrd'],
     license         = 'MIT',
     packages        = find_packages(include=['pykrx', 'pykrx.*', 'pykrx.stock.*']),
     python_requires = '>=3',

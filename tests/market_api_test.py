@@ -71,6 +71,21 @@ class StockOhlcvByDateTest(unittest.TestCase):
         self.assertEqual(len(df), 6)
 
 
+class StockOhlcvByTickerTest(unittest.TestCase):
+    def test_io(self):
+        df = stock.get_market_ohlcv_by_ticker("20180212")
+        self.assertIsInstance(df.index[0], str)
+        self.assertIsInstance(df['종목명'].iloc[0], str)
+        self.assertIsInstance(df['시가'].iloc[0], np.int32)
+        self.assertIsInstance(df['고가'].iloc[0], np.int32)
+        self.assertIsInstance(df['저가'].iloc[0], np.int32)
+        self.assertIsInstance(df['종가'].iloc[0], np.int32)
+        self.assertIsInstance(df['거래량'].iloc[0], np.int64)
+        self.assertIsInstance(df['시가총액'].iloc[0], np.int64)
+        self.assertIsInstance(df['거래대금'].iloc[0], np.int64)
+        self.assertIsInstance(df['시총비중'].iloc[0], np.float16)
+        self.assertIsInstance(df['상장주식수'].iloc[0], np.int32)
+
 class StockPriceChangeByTickerTest(unittest.TestCase):
     def test_io_for_holiday(self):
         df = stock.get_market_price_change_by_ticker("20040418", "20040418")
@@ -121,25 +136,20 @@ class StockTradingVolumeTest(unittest.TestCase):
         df = stock.get_market_trading_volume_by_date("20200519", "20200526", "KOSPI")
         self.assertIsNotNone(df)
         self.assertIsInstance(df['전체'].iloc[0], np.int64)
-        self.assertIsInstance(df['주권'].iloc[0], np.int64)
-        self.assertIsInstance(df['투자회사'].iloc[0], np.int64)
-        self.assertIsInstance(df['부동산투자회사'].iloc[0], np.int64)
+        self.assertIsInstance(df['정규매매'].iloc[0], np.int64)
 
     def test_io_for_kosdaq(self):
         df = stock.get_market_trading_volume_by_date("20200519", "20200526", "KOSDAQ")
+        print(df)
         self.assertIsNotNone(df)
         self.assertIsInstance(df['전체'].iloc[0], np.int64)
-        self.assertIsInstance(df['주권'].iloc[0], np.int64)
-        self.assertIsInstance(df['투자회사'].iloc[0], np.int64)
-        self.assertIsInstance(df['부동산투자회사'].iloc[0], np.int64)
+        self.assertIsInstance(df['정규매매'].iloc[0], np.int64)
 
     def test_io_for_kosdaq(self):
         df = stock.get_market_trading_volume_by_date("20200519", "20200526", "KONEX")
         self.assertIsNotNone(df)
         self.assertIsInstance(df['전체'].iloc[0], np.int64)
-        self.assertIsInstance(df['주권'].iloc[0], np.int64)
-        self.assertIsInstance(df['투자회사'].iloc[0], np.int64)
-        self.assertIsInstance(df['부동산투자회사'].iloc[0], np.int64)
+        self.assertIsInstance(df['정규매매'].iloc[0], np.int64)
 
     def test_io_for_month(self):
         df = stock.get_market_trading_volume_by_date("20200101", "20200331", "KOSPI", freq="m")
@@ -184,7 +194,6 @@ class StockExhaustionRatesOfForeignInvestmentByTicker(unittest.TestCase):
         kospi = stock.get_exhaustion_rates_of_foreign_investment_by_ticker('20200703', "KOSPI")
         kosdaq = stock.get_exhaustion_rates_of_foreign_investment_by_ticker('20200703', "KOSDAQ")
         self.assertNotEqual(kospi.iloc[0][1], kosdaq.iloc[0][1])
-
 
 
 if __name__ == '__main__':

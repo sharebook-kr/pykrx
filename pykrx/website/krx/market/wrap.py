@@ -1,7 +1,7 @@
 from pykrx.website.comm import dataframe_empty_handler
 from pykrx.website.krx.market.ticker import get_stock_ticker_isin
 from pykrx.website.krx.market.core import (MKD30040, MKD80037, MKD30009_0, MKD30015, MKD81006,
-                                           MKD30009_1, MKD20011, MKD20011_SUB,
+                                           MKD30009_1, MKD20011, MKD20011_SUB, MKD99000001,
                                            MKD20011_PDF, SRT02010100, MKD80002,
                                            SRT02020100, SRT02020300, MDK80033_0, MDK80033_1,
                                            SRT02020400, SRT02030100, SRT02030400
@@ -39,6 +39,24 @@ def get_market_ohlcv_by_date(fromdate, todate, ticker):
     df = df.astype(np.int32)
     df.index = pd.to_datetime(df.index, format='%Y%m%d')
     return df.sort_index()
+
+
+@dataframe_empty_handler
+def get_market_ohlcv_by_ticker(date, market):
+    market = {"ALL": "ALL", "KOSPI": "STK", "KOSDAQ": "KSQ", "KONEX": "KNX"}.get(market, "ALL")
+    df = MKD99000001().fetch(date, market)
+    df = df[['isu_cd', 'kor_shrt_isu_nm', 'opnprc', 'hgprc', 'lwprc', 'isu_cur_pr', 'isu_tr_vl',
+             'isu_tr_amt', 'cur_pr_tot_amt', 'tot_amt_per', 'lst_stk_vl']]
+    df.columns = ['종목코드', '종목명', '시가', '고가', '저가', '종가', '거래량', '거래대금', '시가총액', '시총비중', '상장주식수']
+    df = df.replace(',', '', regex=True)
+    df = df.replace('', '0', regex=True)
+    df = df.replace('/', '', regex=True)
+    df = df.astype({'종목코드': str, '종목명': str, '시가': np.int32, '고가': np.int32,
+                    '저가': np.int32, '종가': np.int32, '거래량': np.int64, '거래대금': np.int64,
+                    '시가총액': np.int64, '시총비중': np.float16, '상장주식수': np.int32})
+    df = df.set_index('종목코드')
+    return df
+
 
 @dataframe_empty_handler
 def get_market_cap_by_date(fromdate, todate, ticker):
@@ -621,6 +639,7 @@ if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
     # df = get_market_fundamental_by_ticker("20190401", "ALL")
     # df = get_market_ohlcv_by_date("20150720", "20150810", "005930")
+    df = get_market_ohlcv_by_ticker("20200831", "ALL")
     # df = get_market_price_change_by_ticker("20040418", "20040418")
     # df = get_market_price_change_by_ticker("20040418", "20040430")
     # df = get_market_fundamental_by_date("20150720", "20150810", "KR7005930003")
@@ -643,7 +662,7 @@ if __name__ == "__main__":
     # df = get_shorting_status_by_date("20190401", "20190405", "KR7005930003")
     # df = get_shorting_volume_by_ticker("20190211", "KOSPI")
     # df = get_shorting_volume_by_date("20200101", "20200115", "KR7005930003", "KOSPI")
-    df = get_shorting_investor_by_date("20190401", "20190405", "KOSDAQ", "거래량")
+    # df = get_shorting_investor_by_date("20190401", "20190405", "KOSDAQ", "거래량")
     # df = get_shorting_investor_by_date("20190401", "20190405", "KR7005930003", "거래대금")
     # df = get_shorting_volume_top50("20190211")
     # df = get_shorting_balance_by_date("20190211", "20190215", "KR7005930003")

@@ -86,6 +86,18 @@ def get_market_ohlcv_by_date(fromdate, todate, ticker, freq='d', adjusted=True):
     return resample_ohlcv(df, freq, how)
 
 
+def get_market_ohlcv_by_ticker(date, market="ALL"):
+    """"
+    :param date    : 조회  일자 (YYYYMMDD)
+    :param market  : KOSPI / KOSDAQ / KONEX
+    :return        : OHLCV DataFrame
+    """
+    if isinstance(date, datetime.datetime):
+        date = _datetime2string(date)
+
+    return krx.get_market_ohlcv_by_ticker(date, market)
+
+
 def get_market_cap_by_date(fromdate, todate, ticker, freq='d'):
     if isinstance(fromdate, datetime.datetime):
         fromdate = _datetime2string(fromdate)
@@ -367,6 +379,8 @@ if __name__ == "__main__":
     # df = get_market_ohlcv_by_date("20190225", "20190228", "000660")
     # df = get_market_ohlcv_by_date("20190225", "20190228", "000660", adjusted=False)
     # df = get_market_ohlcv_by_date("20040418", "20140418", "000020")
+    df = get_market_ohlcv_by_ticker("20200831", "KOSPI")
+    # df = get_market_ohlcv_by_ticker("20200831", "KOSDAQ")
     # df = get_market_price_change_by_ticker("20190624", "20190630")
     # df = get_market_ohlcv_by_date("20180101", "20181231", "000660", "y")
     # df = get_market_fundamental_by_ticker("20180305")
@@ -374,8 +388,8 @@ if __name__ == "__main__":
     # df = get_market_ticker_name("000660")
     # df = get_market_fundamental_by_date("20180301", "20180320", '005930')
     # df = get_market_fundamental_by_date("20180301", "20180320", '005930')
-    df = get_market_trading_volume_by_date("20200322", "20200430", 'KOSPI', '세션', 'm')
-    # df = get_market_trading_value_by_date("20190101", "20200430", 'KOSPI', 'm')
+    # df = get_market_trading_volume_by_date("20200322", "20200430", 'KOSPI', '세션', 'm')
+    # df = get_market_trading_value_by_date("20190101", "20200430", 'KOSPI')
     # df = get_market_cap_by_date("20190101", "20190131", "005930")
     # df = get_market_cap_by_date("20200101", "20200430", "005930", "m")
     # df = get_market_cap_by_ticker("20200625")
