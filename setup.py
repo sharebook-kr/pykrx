@@ -9,7 +9,7 @@ with open(ver_path) as ver_file:
 setup(
     name            = 'pykrx',
     version         = main_ns['__version__'],
-    description     = 'KRX scraping',
+    description     = 'KRX data scraping',
     url             = 'https://github.com/sharebook-kr/pykrx',
     author          = 'Brayden Jo, Jonghun Yoo',
     author_email    = 'brayden.jo@outlook.com, jonghun.yoo@outlook.com, pystock@outlook.com',

@@ -45,15 +45,14 @@ def get_market_ohlcv_by_date(fromdate, todate, ticker):
 def get_market_ohlcv_by_ticker(date, market):
     market = {"ALL": "ALL", "KOSPI": "STK", "KOSDAQ": "KSQ", "KONEX": "KNX"}.get(market, "ALL")
     df = MKD99000001().fetch(date, market)
-    df = df[['isu_cd', 'kor_shrt_isu_nm', 'opnprc', 'hgprc', 'lwprc', 'isu_cur_pr', 'isu_tr_vl',
-             'isu_tr_amt', 'cur_pr_tot_amt', 'tot_amt_per', 'lst_stk_vl']]
+    df = df[['종목코드', '종목명', '시가', '고가', '저가', '현재가', '거래량', '거래대금', '시가총액', '시가총액비중(%)', '상장주식수']]
     df.columns = ['종목코드', '종목명', '시가', '고가', '저가', '종가', '거래량', '거래대금', '시가총액', '시총비중', '상장주식수']
     df = df.replace(',', '', regex=True)
     df = df.replace('', '0', regex=True)
     df = df.replace('/', '', regex=True)
     df = df.astype({'종목코드': str, '종목명': str, '시가': np.int32, '고가': np.int32,
                     '저가': np.int32, '종가': np.int32, '거래량': np.int64, '거래대금': np.int64,
-                    '시가총액': np.int64, '시총비중': np.float16, '상장주식수': np.int32})
+                    '시가총액': np.int64, '시총비중': np.float16, '상장주식수': np.int64})
     df = df.set_index('종목코드')
     return df
 
