@@ -174,7 +174,7 @@ class MKD81006(KrxFileIo):
         return pd.read_excel(result)
 
 
-class MKD99000001(KrxFileIo):
+class MKD81004(KrxFileIo):
     @property
     def bld(self):
         return "MKD/13/1302/13020101/mkd13020101"
@@ -192,6 +192,47 @@ class MKD99000001(KrxFileIo):
                4     000070    삼양홀딩스    64,400      0     0.0     64,400   65,600   63,700      21,257    1,371,218,100     551,539,052,400       0.03            8,564,271
         """
         result = self.post(market_gubun=market, schdate=date)
+        return pd.read_excel(result)
+
+
+class MKD30017(KrxFileIo):
+    @property
+    def bld(self):
+        return "MKD/04/0404/04040400/mkd04040400"
+
+    def fetch(self, date, market, investor, market_detail):
+        """30017 투자자별 순위
+        :param date: 조회 일자 (YYMMDD)
+        :param market: ALL, STK, KSQ, KNX
+        :param investor:
+            1000 - 금융투자
+            2000 - 보험
+            3000 - 투신
+            3100 - 사모
+            4000 - 은행
+            5000 - 기타금융
+            6000 - 연기금
+            7050 - 기관합계
+            7100 - 기타법인
+            8000 - 개인
+            9000 - 외국인
+            9001 - 기타외국인
+            9999 - 전체
+        :param market_detail:
+            ST - 주식시장
+            EF - ETF시장
+            EW - ELW시장
+            EN - ETN시장
+        :return:
+                종목코드         종목명    매수거래량  매도거래량   순매수거래량     매수거래대금      매도거래대금    순매수거래대금                     업종명
+            0     034020      두산중공업  3,540,069     610,138     2,929,931   55,633,172,300    9,686,899,000   45,946,273,300      일반 목적용 기계 제조업
+            1     000990       DB하이텍     127,925      17,277      110,648    4,654,909,150      631,044,350    4,023,864,800                반도체 제조업
+            2     009150        삼성전기     55,264      26,928       28,336    7,607,226,500    3,709,793,500    3,897,433,000              전자부품 제조업
+            3     006800    미래에셋대우    719,993     338,792      381,201    6,889,092,730    3,237,202,050    3,651,890,680           금융 지원 서비스업
+            4     017670       SK텔레콤     59,002       46,357       12,645   14,195,725,500   11,129,812,500    3,065,913,000                 전기 통신업
+        """
+        result = self.post(stctype=market, var_invr_cd=investor, schdate=date,
+                           etctype=market_detail)
         return pd.read_excel(result)
 
 
@@ -495,7 +536,8 @@ if __name__ == "__main__":
     # df = MKD80037().fetch("ALL", "20180501", "20180515")
     # df = MKD30015().fetch("20190401", "ALL")
     # df = MKD81006().fetch("20200703", "ALL", 2)
-    df = MKD99000001().fetch("20200831", "ALL")
+    # df = MKD81004().fetch("20200831", "ALL")
+    df = MKD30017().fetch("20200907", "ALL", "1000", ["ST", "EF", "EW", "EN"])
     # index
     # df = MKD20011_PDF().fetch("20190412", "001", 2)
     # df = MKD20011().fetch("20190413", "03")

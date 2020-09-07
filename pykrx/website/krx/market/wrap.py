@@ -1,7 +1,7 @@
 from pykrx.website.comm import dataframe_empty_handler
 from pykrx.website.krx.market.ticker import get_stock_ticker_isin
 from pykrx.website.krx.market.core import (MKD30040, MKD80037, MKD30009_0, MKD30015, MKD81006,
-                                           MKD30009_1, MKD20011, MKD20011_SUB, MKD99000001,
+                                           MKD30009_1, MKD20011, MKD20011_SUB, MKD81004, MKD30017,
                                            MKD20011_PDF, SRT02010100, MKD80002,
                                            SRT02020100, SRT02020300, MDK80033_0, MDK80033_1,
                                            SRT02020400, SRT02030100, SRT02030400
@@ -44,7 +44,7 @@ def get_market_ohlcv_by_date(fromdate, todate, ticker):
 @dataframe_empty_handler
 def get_market_ohlcv_by_ticker(date, market):
     market = {"ALL": "ALL", "KOSPI": "STK", "KOSDAQ": "KSQ", "KONEX": "KNX"}.get(market, "ALL")
-    df = MKD99000001().fetch(date, market)
+    df = MKD81004().fetch(date, market)
     df = df[['종목코드', '종목명', '시가', '고가', '저가', '현재가', '거래량', '거래대금', '시가총액', '시가총액비중(%)', '상장주식수']]
     df.columns = ['종목코드', '종목명', '시가', '고가', '저가', '종가', '거래량', '거래대금', '시가총액', '시총비중', '상장주식수']
     df = df.replace(',', '', regex=True)
@@ -252,10 +252,66 @@ def get_market_trading_value_by_date(fromdate, todate, market):
 
 
 @dataframe_empty_handler
+def get_market_trading_value_and_volume_by_ticker(date, market, investor, market_detail):
+    """거래실적 추이 (거래대금)
+    :param date           : 조회 일자 (YYMMDD)
+    :param market         : 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
+    :param investor       : 투자주체
+        1000 - 금융투자
+        2000 - 보험
+        3000 - 투신
+        3100 - 사모
+        4000 - 은행
+        5000 - 기타금융
+        6000 - 연기금
+        7050 - 기관합계
+        7100 - 기타법인
+        8000 - 개인
+        9000 - 외국인
+        9001 - 기타외국인
+        9999 - 전체
+    :param market_detail   : 세부검색항목
+        복수 선택 가능 : ["주식", "ETF", "ELW", "ETN"]
+        ST - STC
+        EF - ETF
+        EW - ELW
+        EN - ETN
+    :return              :
+                                  종목명  매수거래량  매도거래량   순매수거래량   매수거래대금    매도거래대금  순매수거래대금
+        034020                두산중공업    3540069     610138      2929931     55633172300     9686899000    45946273300
+        069500                KODEX 200    5169740    4230962       938778     161877705700   132616689635    29261016065
+        233740  KODEX 코스닥150 레버리지    1934459    106592       1827867      26822115070    1474326130     25347788940
+        122630           KODEX 레버리지    3778502    2157651       1620851     56537672200    32152356945    24385315255
+        102110               TIGER 200     574050     166359        407691      17971019205    5200620380     12770398825
+    """
+    market = {"ALL": "ALL", "KOSPI": "STK", "KOSDAQ": "KSQ", "KONEX": "KNX"}.get(market, "ALL")
+    investor = {"금융투자": 1000, "보험": 2000, "투신": 3000, "사모": 3100, "은행": 4000,
+                "은행": 4000, "기타금융": 5000, "기관": 7050, "기타법인": 7100,
+                "개인": 8000, "기타외국인": 9001, "전체": 9999}.get(investor, "ALL")
+
+    market_convertor = lambda x:{"STC": "ST", "ETF": "EF", "ELW": "EW", "ETN": "EN"}.get(x, "ST")
+    if isinstance(market_detail, list):
+        market_detail = [market_convertor(x) for x in market_detail]
+    else:
+        market_detail = market_convertor(market_detail)
+
+    df = MKD30017().fetch(date, market, investor, market_detail)
+    df = df[df.columns[:-1]]
+    df = df.replace('/', '', regex=True)
+    df = df.replace(',', '', regex=True)
+    df = df.astype(
+        {'종목코드': str, '종목명': str, '매수거래량': np.int32, '매도거래량': np.int32,
+         '순매수거래량': np.int32, '매수거래대금': np.int64, '매도거래대금': np.int64,
+         '순매수거래대금': np.int64})
+    df['종목코드'] = df['종목코드'].apply(lambda x: x.zfill(6))
+    return df.set_index('종목코드')
+
+
+@dataframe_empty_handler
 def get_exhaustion_rates_of_foreign_investment_by_ticker(date, market, balance_limit):
     """거래실적 추이 (거래대금)
     :param date           : 조회 일자 (YYMMDD)
-    :param market         : 조회 시장 (STK/KSQ/KNX/ALL)
+    :param market         : 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
     :param balance_limit : False(전체) / True(제한종목)
     :return               : 외국인 보유량 (단위:원)
                  상장주식수   한도수량   보유수량     소진률
@@ -638,13 +694,14 @@ if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
     # df = get_market_fundamental_by_ticker("20190401", "ALL")
     # df = get_market_ohlcv_by_date("20150720", "20150810", "005930")
-    df = get_market_ohlcv_by_ticker("20200831", "ALL")
+    # df = get_market_ohlcv_by_ticker("20200831", "ALL")
     # df = get_market_price_change_by_ticker("20040418", "20040418")
     # df = get_market_price_change_by_ticker("20040418", "20040430")
     # df = get_market_fundamental_by_date("20150720", "20150810", "KR7005930003")
     # df = get_market_cap_by_date("20150720", "20150810", "005930")
     # df = get_market_cap_by_ticker("20200625", "ALL")
     # df = get_exhaustion_rates_of_foreign_investment_by_ticker("20200703", "ALL", 2)
+    df = get_market_trading_value_and_volume_by_ticker("20200907", "KOSPI", "전체", ["주식", "ETF", "ELW", "ETN"])
 
     # index
     # df = get_index_ohlcv_by_date("20190408", "20190412", "001", "KOSDAQ")
@@ -667,3 +724,4 @@ if __name__ == "__main__":
     # df = get_shorting_balance_by_date("20190211", "20190215", "KR7005930003")
     # df = get_shorting_balance_top50("20190401")
     print(df.head())
+    print(len(df))

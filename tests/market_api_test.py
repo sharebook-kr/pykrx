@@ -185,6 +185,12 @@ class StockCapByDateTest(unittest.TestCase):
             self.assertEqual(type(df[col].iloc[0]), np.int64)
 
 
+class StockMarketTradingValueAndVolumeByTicker(unittest.TestCase):
+    def test_io(self):
+        df = stock.get_market_trading_value_and_volume_by_ticker("20200907")
+        self.assertFalse(df.empty)
+
+
 class StockExhaustionRatesOfForeignInvestmentByTicker(unittest.TestCase):
     def test_io(self):
         df = stock.get_exhaustion_rates_of_foreign_investment_by_ticker('20200703')

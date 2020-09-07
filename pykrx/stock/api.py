@@ -238,6 +238,45 @@ def get_market_trading_value_by_date(fromdate, todate, market="KOSPI", on="세�
         return resample_ohlcv(df, freq, sum)
 
 
+def get_market_trading_value_and_volume_by_ticker(date, market="KOSPI", investor="전체", market_detail="ST"):
+    """거래실적 추이 (거래대금)
+    :param date           : 조회 일자 (YYMMDD)
+    :param market         : 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
+    :param investor       : 투자주체
+        1000 - 금융투자
+        2000 - 보험
+        3000 - 투신
+        3100 - 사모
+        4000 - 은행
+        5000 - 기타금융
+        6000 - 연기금
+        7050 - 기관
+        7100 - 기타법인
+        8000 - 개인
+        9000 - 외국인
+        9001 - 기타외국인
+        9999 - 전체
+    :param market_detail   : 세부검색항목
+        복수 선택 가능 : ["주식", "ETF", "ELW", "ETN"]
+        ST - STC
+        EF - ETF
+        EW - ELW
+        EN - ETN
+    :return              :
+                                  종목명  매수거래량  매도거래량   순매수거래량   매수거래대금    매도거래대금  순매수거래대금
+        034020                두산중공업    3540069     610138      2929931     55633172300     9686899000    45946273300
+        069500                KODEX 200    5169740    4230962       938778     161877705700   132616689635    29261016065
+        233740  KODEX 코스닥150 레버리지    1934459    106592       1827867      26822115070    1474326130     25347788940
+        122630           KODEX 레버리지    3778502    2157651       1620851     56537672200    32152356945    24385315255
+        102110               TIGER 200     574050     166359        407691      17971019205    5200620380     12770398825
+    """
+    if isinstance(date, datetime.datetime):
+        date = _datetime2string(date)
+
+    df = krx.get_market_trading_value_and_volume_by_ticker(date, market, investor, market_detail)
+    return df
+
+
 # -----------------------------------------------------------------------------
 # 지수(INDEX) API
 # -----------------------------------------------------------------------------
@@ -379,7 +418,7 @@ if __name__ == "__main__":
     # df = get_market_ohlcv_by_date("20190225", "20190228", "000660")
     # df = get_market_ohlcv_by_date("20190225", "20190228", "000660", adjusted=False)
     # df = get_market_ohlcv_by_date("20040418", "20140418", "000020")
-    df = get_market_ohlcv_by_ticker("20200831", "KOSPI")
+    # df = get_market_ohlcv_by_ticker("20200831", "KOSPI")
     # df = get_market_ohlcv_by_ticker("20200831", "KOSDAQ")
     # df = get_market_price_change_by_ticker("20190624", "20190630")
     # df = get_market_ohlcv_by_date("20180101", "20181231", "000660", "y")
@@ -390,6 +429,9 @@ if __name__ == "__main__":
     # df = get_market_fundamental_by_date("20180301", "20180320", '005930')
     # df = get_market_trading_volume_by_date("20200322", "20200430", 'KOSPI', '세션', 'm')
     # df = get_market_trading_value_by_date("20190101", "20200430", 'KOSPI')
+    # df = get_market_trading_value_and_volume_by_ticker("20200907", "KOSPI", "전체")
+    df = get_market_trading_value_and_volume_by_ticker("20200907", market="KOSPI", investor="전체",
+                                                       market_detail=['STC', 'ELW'])
     # df = get_market_cap_by_date("20190101", "20190131", "005930")
     # df = get_market_cap_by_date("20200101", "20200430", "005930", "m")
     # df = get_market_cap_by_ticker("20200625")

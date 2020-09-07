@@ -344,7 +344,48 @@ print(df.head())
 2020-04-30  298489128  424101937  20785194256247  5969782550
 ```  
 
-#### 2.1.1.11 외국인 보유량 및 외국인 한도소진률
+#### 2.1.1.11 투자자별 거래정보
+조회 일자를 입력받아 미거래 종목을 포함한 투자자별 거래 정보를 반환합니다. 기본적으로 KOSPI 시장의 주식시장 정보를 조회합니다.  
+```python
+df = get_market_trading_value_and_volume_by_ticker("20200907")
+print(df.head())
+```
+```text
+               종목명   매수거래량  매도거래량  순매수거래량   매수거래대금  매도거래대금  순매수거래대금                                                                              
+000020       동화약품      813108      813108       0        20647345250   20647345250        0
+000040       KR모터스     8363034     8363034       0         8205581530    8205581530        0
+000050           경방       18137       18137       0          199704150     199704150        0
+000060      메리츠화재     157583      157583       0         2000837650    2000837650        0
+000070      삼양홀딩스      14115       14115       0          951039300     951039300        0
+```
+
+`market` 옵션을 추가해서 특정 시장(`KOSPI`/`KOSDAQ`/`KONEX`)을 조회하거나 전체 시장(`ALL`)을 한 번에 검색할 수 있습니다. 입력하지 않으면 `KOSPI` 시장을 조회합니다.   
+```python
+df = get_market_trading_value_and_volume_by_ticker("20200907", market="KOSDAQ")
+print(df.head())
+```
+`investror` 옵션은 투자자 정보를 입력합니다. 입력하지 않으면 `전체` 데이터를 조회합니다.  
++ 금융투자 / 보험 / 투신 / 사모 / 은행 / 기타금융 / 연기금 / 기관 / 기타법인 / 개인 / 외국인 /기타외국인 / 전체
+```python
+df = get_market_trading_value_and_volume_by_ticker("20200907", market="KOSDAQ", investor="전체")
+print(df.head())
+```
+`market_detail` 옵션은 세부 검색항목을 지정합니다. 입력하지 않으면 주식시장(`STC`)을 선택합니다.
++ STC / ETF / ETN / ELW
+```python
+df = get_market_trading_value_and_volume_by_ticker("20200907", market="KOSDAQ", investor="전체", market_detail="ELW")
+print(df.head())
+```
+여러 개의 `market_detail`을 리스트로 지정해서 한 번에 조회할 수 있습니다. 
+```python
+interest_market = ["ETF", "ELW"] 
+df = get_market_trading_value_and_volume_by_ticker("20200907", market="KOSDAQ", investor="전체", market_detail=interest_market)
+print(df.head())
+```
+
+당일 매매내역은 당일 정규시장 마감 이후(오후 3시 45분 예정) 반영되며, 시간외 등의 매매내역이 포함된 최종 매매내역은 당일자 마감 이후(오후 6시 예정) 제공됩니다. 
+
+#### 2.1.1.12 외국인 보유량 및 외국인 한도소진률
 
 get_exhaustion_rates_of_foreign_investment_by_ticker() 함수는 상장주식수/외국인한도수량/외국인보유수량/외국인한도소진률 정보를 
 조회합니다. 외국인 보유수량 및 한도소진율은 장개시 시점 기준(금융감독원 외국인투자 관리시스템 제공 전일자 확정치)입니다.
