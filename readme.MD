@@ -436,7 +436,7 @@ tickers = stock.get_index_ticker_list("20200717")
 print(tickers)
 ```
 
-#### 2.1.2.2 인덱스 종류 조회
+#### 2.1.2.2 인덱스 OHLCV 조회
 get_index_ohlcv_by_date() 함수는 입력된 기간 동안의 인덱스 OHLCV를 조회합니다. 다음은 20190101-20190228 동안의 "코스피 200" 인덱스의 OHLCV를 조회합니다.
 ```python
 df = stock.get_index_ohlcv_by_date("20190101", "20190228", "코스피 200")
@@ -459,7 +459,7 @@ print(df.head(2))
 201902  287.070007  290.320007  280.019989  283.799988  1498968000
 ```
 
-#### 2.1.2.3 인덱스 종류 조회
+#### 2.1.2.3 인덱스 기준 지수 조회
 get_index_kospi_by_group() 함수는 코스피 인덱스별로 기준지수와 현재지수를 출력합니다. 
 ```python
 df = stock.get_index_kospi_by_group("20190228")
