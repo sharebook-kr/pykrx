@@ -143,23 +143,22 @@ class IndexTicker:
     def get_ticker(self, market, date=None):
         date = IndexTicker._get_datetime(date)
         self._download_ticker(date)
-        cond = (self.df['date'] == date) & (self.df['ind_tp_cd'] == market)
-        return self.df[cond].index.tolist()
+        return self.df.loc[(date, market)].index.tolist()
 
     def get_id(self, ticker, date=None):
         date = IndexTicker._get_datetime(date)
         self._download_ticker(date)
-        cond = (self.df.index == ticker) & (self.df['date'] == date)
-        if len(self.df[cond]) == 0:
+        result = self.df.loc[(date, slice(None), ticker)]
+        if len(result) == 0:
             print("NOT FOUND")
             return None
-        return self.df.loc[cond, 'idx_ind_cd'][0]
+        return result['idx_ind_cd'].iloc[0]
 
     def get_market(self, ticker, date=None):
         date = IndexTicker._get_datetime(date)
         self._download_ticker(date)
-        cond = self.df.index == ticker
-        return self.df.loc[cond, 'ind_tp_cd'][0]
+        result = self.df.loc[(date, slice(None), ticker)]
+        return result.index[0][1]
 
     @staticmethod
     def _get_datetime(date):
@@ -176,9 +175,9 @@ class IndexTicker:
                 if len(df) == 0:
                     continue
 
-                df = df.set_index('idx_nm')
                 df['date'] = date
                 df['ind_tp_cd'] = df['ind_tp_cd'].apply(lambda x: "KOSPI" if x == "1" else "KOSDAQ")
+                df = df.set_index(['date', 'ind_tp_cd', 'idx_nm'])
                 self.df = self.df.append(df)
 
 
