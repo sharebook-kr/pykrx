@@ -178,6 +178,7 @@ class IndexTicker:
                 df['date'] = date
                 df['ind_tp_cd'] = df['ind_tp_cd'].apply(lambda x: "KOSPI" if x == "1" else "KOSDAQ")
                 df = df.set_index(['date', 'ind_tp_cd', 'idx_nm'])
+                df = df.sort_index()
                 self.df = self.df.append(df)
 
 
