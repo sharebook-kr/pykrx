@@ -36,6 +36,19 @@ class StockTickerListTest(unittest.TestCase):
         self.assertIsInstance(tickers, list)
         self.assertNotEqual(len(tickers), 0)
 
+    def test_io_with_specific_market(self):
+        tickers = stock.get_market_ticker_list("20190225", "KOSDAQ")
+        self.assertIsInstance(tickers, list)
+        self.assertNotEqual(len(tickers), 0)
+
+    def test_io_with_specific_business_date_and_market(self):
+        tickers = stock.get_market_ticker_list("20190225")
+        self.assertEqual(len(tickers), 788)
+        tickers = stock.get_market_ticker_list("20190225", "KOSDAQ")
+        self.assertEqual(len(tickers), 1325)
+        tickers = stock.get_market_ticker_list("20190225", "ALL")
+        self.assertEqual(len(tickers), 2266)
+
 
 class StockTickerNameTest(unittest.TestCase):
     def test_io(self):
@@ -43,6 +56,19 @@ class StockTickerNameTest(unittest.TestCase):
         self.assertIsInstance(name, str)
         self.assertNotEqual(len(name), 0)
 
+    def test_io_in_kospi_market(self):
+        tickers = stock.get_market_ticker_list("20190225")
+        for ticker in tickers:
+            name = stock.get_market_ticker_name(ticker)
+            self.assertIsInstance(name, str)
+            self.assertNotEqual(len(name), 0)
+
+    def test_io_in_kosdaq_market(self):
+        tickers = stock.get_market_ticker_list("20190225", market="KOSDAQ")
+        for ticker in tickers:
+            name = stock.get_market_ticker_name(ticker)
+            self.assertIsInstance(name, str)
+            self.assertNotEqual(len(name), 0)
 
 class StockOhlcvByDateTest(unittest.TestCase):
     def test_io_for_1_day(self):

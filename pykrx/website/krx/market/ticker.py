@@ -3,6 +3,7 @@ from pykrx.website.krx.krxio import KrxWebIo
 from pykrx.website.krx.market.core import MKD20011
 from pandas import DataFrame
 from datetime import datetime
+import numpy as np
 import pandas as pd
 
 
@@ -44,7 +45,7 @@ class _StockTicker:
         # 조회일 기준의 상장/상폐 종목 리스트
         df_listed = self._get_stock_info_listed()
         df_delisted = self._get_stock_info_delisted()
-        self.df_delisted = df_delisted                ## DEBUG !!
+
         # Merge two DataFrame
         self.df = pd.merge(df_listed, df_delisted, how='outer')
         self.df = self.df.set_index('티커')
@@ -64,8 +65,6 @@ class _StockTicker:
         market = {"코스피": "STK", "코스닥": "KSQ", "코넥스": "KNX", "전체": "ALL"}.get(market, "ALL")
         df = _StockFinder().fetch(market)
         df.rename(columns = {'full_code': 'ISIN', 'short_code': '티커', 'codeName': '종목', 'marketName': '시장'}, inplace=True)
-        # - 증권(7)과 사용자 영역 선택
-        df = df[(df.ISIN.str[2] >= '7')]
         # - 티커 축약 (A037440 -> 037440)
         df['티커'] = df['티커'].apply(lambda x: x[1:7])
         df = df.drop_duplicates(['ISIN'])
@@ -87,8 +86,6 @@ class _StockTicker:
 
         df = df[['shrt_isu_cd', 'isu_nm', 'isu_cd', 'market_name', 'delist_dd']]
         df.columns = ['티커', '종목', 'ISIN', '시장', '상폐일']
-        # - 증권(7)과 사용자 영역 선택
-        df = df[(df.ISIN.str[2] == '7') | (df.ISIN.str[2] == '9')]
         # - 티커 축약 (A037440 -> 037440)
         df['티커'] = df['티커'].apply(lambda x: x[1:7])
         df = df.drop_duplicates(['ISIN'])
@@ -97,7 +94,7 @@ class _StockTicker:
 
 @dataframe_empty_handler
 def get_stock_name(ticker):
-    df  = _StockTicker().df
+    df = _StockTicker().df
     return df[df.index == ticker]['종목'].iloc[0]
 
 
@@ -135,51 +132,65 @@ def get_stock_ticker_delist(todate, fromdate=None):
 
 
 ################################################################################
+
+def convert_date_string(method):
+    def func_wrapper(self, dedicated, date=None):
+        if date is None:
+            date = datetime.now()
+        if not isinstance(date, datetime):
+            date = datetime.strptime(date, "%Y%m%d")
+        return method(self, dedicated, date)
+    return func_wrapper
+
+
+def fetch_index_df(method):
+    def func_wrapper(self, dedicated, date=None):
+        if 'date' not in self.df.columns or np.count_nonzero(
+                self.df.index.levels[0].day == date.day) == 0:
+
+            # 02 : KOSPI / 03 : KOSDAQ
+            for index in ["02", "03"]:
+                df = MKD20011().fetch(date, index)
+                if len(df) == 0:
+                    continue
+
+                # data formatting
+                # - 3 level index : (날짜, 시장, 지수명)
+                df['date'] = date
+                df['ind_tp_cd'] = df['ind_tp_cd'].apply(
+                    lambda x: "KOSPI" if x == "1" else "KOSDAQ")
+                df = df.set_index(['date', 'ind_tp_cd', 'idx_nm'])
+                self.df = self.df.append(df)
+
+            self.df = self.df.sort_index()
+        return method(self, dedicated, date)
+    return func_wrapper
+
+
 @singleton
 class IndexTicker:
     def __init__(self):
         self.df = DataFrame()
 
+    @convert_date_string
+    @fetch_index_df
     def get_ticker(self, market, date=None):
-        date = IndexTicker._get_datetime(date)
-        self._download_ticker(date)
         return self.df.loc[(date, market)].index.tolist()
 
+    @convert_date_string
+    @fetch_index_df
     def get_id(self, ticker, date=None):
-        date = IndexTicker._get_datetime(date)
-        self._download_ticker(date)
         result = self.df.loc[(date, slice(None), ticker)]
         if len(result) == 0:
             print("NOT FOUND")
             return None
         return result['idx_ind_cd'].iloc[0]
 
+    @convert_date_string
+    @fetch_index_df
     def get_market(self, ticker, date=None):
-        date = IndexTicker._get_datetime(date)
-        self._download_ticker(date)
         result = self.df.loc[(date, slice(None), ticker)]
         return result.index[0][1]
-
-    @staticmethod
-    def _get_datetime(date):
-        if date is None:
-            date = datetime.now()
-        if not isinstance(date, datetime):
-            date = datetime.strptime(date, "%Y%m%d")
-        return date
-
-    def _download_ticker(self, date):
-        if 'date' not in self.df.columns or len(self.df[self.df['date'].dt.day == date.day]) == 0:
-            for index in {"KOSPI": "02", "KOSDAQ": "03"}.values():
-                df = MKD20011().fetch(date, index)
-                if len(df) == 0:
-                    continue
-
-                df['date'] = date
-                df['ind_tp_cd'] = df['ind_tp_cd'].apply(lambda x: "KOSPI" if x == "1" else "KOSDAQ")
-                df = df.set_index(['date', 'ind_tp_cd', 'idx_nm'])
-                df = df.sort_index()
-                self.df = self.df.append(df)
 
 
 if __name__ == "__main__":

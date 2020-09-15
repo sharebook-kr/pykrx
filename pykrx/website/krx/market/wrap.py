@@ -2,7 +2,7 @@ from pykrx.website.comm import dataframe_empty_handler
 from pykrx.website.krx.market.ticker import get_stock_ticker_isin
 from pykrx.website.krx.market.core import (MKD30040, MKD80037, MKD30009_0, MKD30015, MKD81006,
                                            MKD30009_1, MKD20011, MKD20011_SUB, MKD81004, MKD30017,
-                                           MKD20011_PDF, SRT02010100, MKD80002,
+                                           MKD20011_PDF, SRT02010100, MKD80002, MKD30030,
                                            SRT02020100, SRT02020300, MDK80033_0, MDK80033_1,
                                            SRT02020400, SRT02030100, SRT02030400
                                            )
@@ -112,8 +112,8 @@ def get_market_cap_by_ticker(date, market="ALL"):
     df = df.replace('/', '', regex=True)
     df = df.replace(',', '', regex=True)
     df = df.astype(np.int64)
-
     return df
+
 
 @dataframe_empty_handler
 def get_market_price_change_by_ticker(fromdate, todate, market="ALL"):
@@ -211,6 +211,28 @@ def get_market_fundamental_by_date(fromdate, todate, isin, market="ALL"):
 
 
 @dataframe_empty_handler
+def get_market_ticker_and_name(date, market):
+    """티커목록 반환
+        :param date    : 조회 일자 (YYYYMMDD)
+                          20000101 이후의 데이터 제공
+        :param market  : 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
+        :return        : Series
+
+            60310        3S
+            95570    AJ네트웍스
+            68400     AJ렌터카
+            6840      AK홀딩스
+            54620    APS홀딩스
+            Name: 종목명, dtype:
+    """
+    market = {"ALL": "", "KOSPI": "1001", "KOSDAQ": "2001", "KONEX": "N001"}. \
+        get(market, "")
+    df = MKD30030().fetch(date, market, "ST", 0)
+    df = df.set_index('종목코드')
+    return df['종목명']
+
+
+@dataframe_empty_handler
 def get_market_trading_volume_by_date(fromdate, todate, market):
     """거래실적 추이(거래량)
     :param fromdate: 조회 시작 일자 (YYYYMMDD)
@@ -287,7 +309,7 @@ def get_market_trading_value_and_volume_by_ticker(date, market, investor, market
     market = {"ALL": "ALL", "KOSPI": "STK", "KOSDAQ": "KSQ", "KONEX": "KNX"}.get(market, "ALL")
     investor = {"금융투자": 1000, "보험": 2000, "투신": 3000, "사모": 3100, "은행": 4000,
                 "은행": 4000, "기타금융": 5000, "기관": 7050, "기타법인": 7100,
-                "개인": 8000, "외국인": 9000, "기타외국인": 9001, "전체": 9999}.get(investor, "ALL")
+                "개인": 8000, "외국인": 9000, "기타외국인": 9001, "전체": 9999}.get(investor, "9999")
 
     market_convertor = lambda x:{"STC": "ST", "ETF": "EF", "ELW": "EW", "ETN": "EN"}.get(x, "ST")
     if isinstance(market_detail, list):
@@ -692,6 +714,7 @@ def get_shorting_balance_top50(date, market="KOSPI"):
 
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
+    df = get_market_ticker_and_name("20190405", "STK")
     # df = get_market_fundamental_by_ticker("20190401", "ALL")
     # df = get_market_ohlcv_by_date("20150720", "20150810", "005930")
     # df = get_market_ohlcv_by_ticker("20200831", "ALL")
@@ -701,7 +724,7 @@ if __name__ == "__main__":
     # df = get_market_cap_by_date("20150720", "20150810", "005930")
     # df = get_market_cap_by_ticker("20200625", "ALL")
     # df = get_exhaustion_rates_of_foreign_investment_by_ticker("20200703", "ALL", 2)
-    df = get_market_trading_value_and_volume_by_ticker("20200907", "KOSPI", "전체", ["주식", "ETF", "ELW", "ETN"])
+    # df = get_market_trading_value_and_volume_by_ticker("20200907", "KOSPI", "전체", ["주식", "ETF", "ELW", "ETN"])
 
     # index
     # df = get_index_ohlcv_by_date("20190408", "20190412", "001", "KOSDAQ")

@@ -44,8 +44,25 @@ def get_recent_business_day():
 # -----------------------------------------------------------------------------
 # 주식 API
 # -----------------------------------------------------------------------------
-def get_market_ticker_list(date=None):
-    return krx.get_stock_ticker_list(date)
+def get_market_ticker_list(date=None, market="KOSPI"):
+    """티커 목록 조회
+    :param date: 조회 일자 (YYYYMMDD)
+    :param market: 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
+    :return: ticker 리스트
+    """
+    if date is None:
+        # 조회 시작일 / 조회 종료일
+        todate = datetime.datetime.now()
+        fromdate = todate - datetime.timedelta(days=7)
+        todate = _datetime2string(todate)
+        fromdate = _datetime2string(fromdate)
+
+        # 삼성전자 최근 가격 정보 조회
+        df = get_market_ohlcv_by_date(fromdate, todate, "005930")
+        date = _datetime2string(df.index[-1])
+
+    s = krx.get_market_ticker_and_name(date, market)
+    return s.index.to_list()
 
 
 def get_market_ticker_name(ticker):
@@ -62,7 +79,7 @@ def get_business_days(year, mon):
 
 
 def get_market_ohlcv_by_date(fromdate, todate, ticker, freq='d', adjusted=True):
-    """
+    """지정된 일자의 OHLCV 조회
     :param fromdate: 조회 시작 일자 (YYYYMMDD)
     :param todate  : 조회 종료 일자 (YYYYMMDD)
     :param ticker  : 조회할 종목의 티커
@@ -415,6 +432,12 @@ def get_etf_tracking_error(fromdate, todate, ticker):
 
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
+    # tickers = get_market_ticker_list("20190225")
+    # tickers = get_market_ticker_list()
+    # tickers = get_market_ticker_list("20190225", "KOSDAQ")
+    # tickers = get_market_ticker_list("20190225", "ALL")
+    # print(tickers)
+    # df = get_market_ticker_name("000660")
     # df = get_market_ohlcv_by_date("20190225", "20190228", "000660")
     # df = get_market_ohlcv_by_date("20190225", "20190228", "000660", adjusted=False)
     # df = get_market_ohlcv_by_date("20040418", "20140418", "000020")
@@ -424,14 +447,13 @@ if __name__ == "__main__":
     # df = get_market_ohlcv_by_date("20180101", "20181231", "000660", "y")
     # df = get_market_fundamental_by_ticker("20180305")
     # df = get_market_fundamental_by_date("20000101", "20181231", "092970", "m")
-    # df = get_market_ticker_name("000660")
     # df = get_market_fundamental_by_date("20180301", "20180320", '005930')
     # df = get_market_fundamental_by_date("20180301", "20180320", '005930')
     # df = get_market_trading_volume_by_date("20200322", "20200430", 'KOSPI', '세션', 'm')
     # df = get_market_trading_value_by_date("20190101", "20200430", 'KOSPI')
     # df = get_market_trading_value_and_volume_by_ticker("20200907", "KOSPI", "전체")
-    df = get_market_trading_value_and_volume_by_ticker("20200907", market="KOSPI", investor="전체",
-                                                       market_detail=['STC', 'ELW'])
+    # df = get_market_trading_value_and_volume_by_ticker("20200907", market="KOSPI", investor="전체",
+    #                                                    market_detail=['STC', 'ELW'])
     # df = get_market_cap_by_date("20190101", "20190131", "005930")
     # df = get_market_cap_by_date("20200101", "20200430", "005930", "m")
     # df = get_market_cap_by_ticker("20200625")
@@ -464,6 +486,7 @@ if __name__ == "__main__":
     # df = get_etf_portfolio_deposit_file("252650", "20190329")
     # df = get_etf_price_deviation("20200101", "20200401", "295820")
     # df = get_etf_tracking_error("20200101", "20200401", "295820")
-    print(df)
+    # print(df)
+    pass
 
 

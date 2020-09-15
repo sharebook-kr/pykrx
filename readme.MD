@@ -24,26 +24,35 @@ from pykrx import stock
 ### 2.1.1 MarketData API
 코스피 종목의 주가 관련 정보를 얻는 API 입니다.  
 
-#### 2.1.1.1 Ticker 
-get_market_ticker_list() 메서드는 전 종목의 ticker를 리스트로 반환합니다. 
+#### 2.1.1.1 Ticker 조회
+get_market_ticker_list() 메서드는 지정한 일자(YYMMDD)의 코스피 시장에 상장된 ticker를 리스트로 반환합니다.
+```python
+tickers = stock.get_market_ticker_list("20190225")
+print(tickers)
+```
+```text
+['095570', '068400', '006840', '027410', '282330', ...]
+```   
+
+날짜를 지정하지 않으면 내부적으로 최근 영업일을 계산해서 ticker 반환합니다. 최근 영업일을 조회하는 시간이 추가로 소모됩니다.  
 
 ```python
 tickers = stock.get_market_ticker_list()
 print(tickers)
 ```
-###### 실행결과 
 ```text
-['060310', '095570', '068400', '006840', '054620', ...]
+['095570', '006840', '027410', '282330', '138930', ...]
 ```        
-날짜(YYMMDD)를 추가로 입력하면 해당 일자의 ticker를 얻을 수 있습니다. 
+
+`market` 옵션을 추가하면 조회 시장을 지정할 수 있습니다. `KOSPI`, `KOSDAQ`, `KONEX` 시장을 지정할 수 있으며, `ALL`은 모든 시장에서 티커를 조회합니다. 입력하지 않을 경우 `KOSPI` 시장을 조회합니다.  
 ```python
-tickers = stock.get_market_ticker_list("29100404")
+tickers = stock.get_market_ticker_list("20190225", market="KOSDAQ")
 print(tickers)
 ```
-###### 실행결과 
 ```text
-2394
-```   
+['095570', '006840', '027410', '282330', '138930', ...]
+```        
+
 <br/>
 
 get_market_ticker_name() 함수로 티커를 입력하면 종목이름을 반환합니다. 
@@ -51,8 +60,6 @@ get_market_ticker_name() 함수로 티커를 입력하면 종목이름을 반환
 종목 = stock.get_market_ticker_name("000660")
 print(종목)
 ```
-
-###### 실행결과 
 ```text
 SK하이닉스
 ```   

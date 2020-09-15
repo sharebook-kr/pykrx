@@ -5,25 +5,42 @@ from pandas import DataFrame
 
 ################################################################################
 # Market
-class MKD30030(KrxWebIo):
+class MKD30030(KrxFileIo):
     @property
     def bld(self):
         return "MKD/04/0406/04060200/mkd04060200"
 
-    def fetch(self, date):
+    def fetch(self, date, market, market_detail, stock_type):
         """30030 상장 종목 검색
         :param date: 조회 일자 (YYMMDD)
+
+        :param market: 조회 시장
+             ' ' - 전체
+            1001 - 코스피
+            2001 - 코스닥
+            N001 - 코넥스
+
+        :param market_detail:
+            ST - 주식시장
+            EF - ETF시장
+            EW - ELW시장
+            EN - ETN시장
+
+        :param stock_type: 주식종류
+            ON - 전체
+            0 - 보통주
+            9 - 종류주식
+
         :return: 일자별 시세 조회 결과 DataFrame
-                  bid_fst_qot_pr curr_iso fluc_tp_cd  isu_cd isu_cur_pr isu_hg_pr isu_lw_pr isu_opn_pr      isu_tr_amt isu_tr_vl kor_shrt_isu_nm    lst_stk_amt   lst_stk_vl ofr_fst_qot_pr par_pr prv_dd_cmpr totCnt updn_rate
-        0          2,325   원(KRW)          2  060310      2,340     2,360     2,300      2,360     197,239,685    85,093                 3S    103,886,354,520   44,395,878          2,340    500          20   2382      0.85
-        1          5,010   원(KRW)          1  095570      5,010     5,080     4,900      5,080     225,355,175    45,256          AJ네트웍스   234,579,697,950   46,822,295          5,020  1,000          30             0.60
-        2         11,900   원(KRW)          1  068400     11,950    12,000    11,750     11,850   1,085,727,100    91,324           AJ렌터카    264,648,285,000   22,146,300         11,950    500          50             0.42
-        3         54,100   원(KRW)          2  006840     54,200    55,300    53,400     55,300     669,714,100    12,367           AK홀딩스    718,017,806,200   13,247,561         54,200  5,000       1,100             1.99
-        4          4,755   원(KRW)          2  054620      4,755     4,865     4,700      4,800     324,678,375    68,110          APS홀딩스     96,974,520,855   20,394,221          4,785    500         110             2.26
+                종목코드       종목명      현재가   대비  등락률(%)   매도호가   매수호가  거래량(주)     거래대금(원)   시가       고가     저가  액면가 통화구분 상장주식수(주)   상장시가총액(원)
+            0     060310           3S    2,365      -5    0.21        2,365      2,360    152,157     361,210,535    2,370    2,395    2,355    500  원(KRW)   44,772,143    105,886,118,195
+            1     095570    AJ네트웍스    5,400      70    1.31       5,400      5,380     90,129     485,098,680    5,330    5,470    5,260  1,000  원(KRW)   46,822,295    252,840,393,000
+            2     068400     AJ렌터카   12,000     400    3.45       12,050     12,000    219,282   2,611,434,750   11,600   12,000   11,550    500  원(KRW)   22,146,300    265,755,600,000
+            3     006840     AK홀딩스   55,000     800    1.48       55,200     55,000     16,541     901,619,600   54,700   55,300   53,600  5,000  원(KRW)   13,247,561    728,615,855,000
+            4     054620    APS홀딩스    4,475      10    0.22       4,475      4,460     31,950     142,780,675    4,440    4,520    4,440    500  원(KRW)   20,394,221     91,264,138,975
         """
-        result = self.post(schdate=date, stock_gubun="on", secugrp="ST",
-                           sect_tp_cd="ALL", marget_gubun="ALL")
-        return DataFrame(result['상장종목검색'])
+        result = self.post(indx_ind_cd=market, schdate=date, secugrp=market_detail, stock_gubun=stock_type)
+        return pd.read_excel(result, dtype=str)
 
 
 class MKD30040(KrxWebIo):
@@ -537,7 +554,8 @@ if __name__ == "__main__":
     # df = MKD30015().fetch("20190401", "ALL")
     # df = MKD81006().fetch("20200703", "ALL", 2)
     # df = MKD81004().fetch("20200831", "ALL")
-    df = MKD30017().fetch("20200907", "ALL", "1000", ["ST", "EF", "EW", "EN"])
+    df = MKD30030().fetch("20190405", "ALL", ["ST"], 0)
+    # df = MKD30017().fetch("20200907", "ALL", "1000", ["ST", "EF", "EW", "EN"])
     # index
     # df = MKD20011_PDF().fetch("20190412", "001", 2)
     # df = MKD20011().fetch("20190413", "03")
