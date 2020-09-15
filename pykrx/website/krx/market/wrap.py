@@ -287,7 +287,7 @@ def get_market_trading_value_and_volume_by_ticker(date, market, investor, market
     market = {"ALL": "ALL", "KOSPI": "STK", "KOSDAQ": "KSQ", "KONEX": "KNX"}.get(market, "ALL")
     investor = {"금융투자": 1000, "보험": 2000, "투신": 3000, "사모": 3100, "은행": 4000,
                 "은행": 4000, "기타금융": 5000, "기관": 7050, "기타법인": 7100,
-                "개인": 8000, "기타외국인": 9001, "전체": 9999}.get(investor, "ALL")
+                "개인": 8000, "외국인": 9000, "기타외국인": 9001, "전체": 9999}.get(investor, "ALL")
 
     market_convertor = lambda x:{"STC": "ST", "ETF": "EF", "ELW": "EW", "ETN": "EN"}.get(x, "ST")
     if isinstance(market_detail, list):
