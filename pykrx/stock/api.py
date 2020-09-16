@@ -432,6 +432,10 @@ def get_etf_tracking_error(fromdate, todate, ticker):
 
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
+    tickers = get_market_ticker_list()
+    for ticker in tickers:
+        name = get_market_ticker_name(ticker)
+        print(ticker, name)
     # tickers = get_market_ticker_list("20190225")
     # tickers = get_market_ticker_list()
     # tickers = get_market_ticker_list("20190225", "KOSDAQ")

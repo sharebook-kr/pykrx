@@ -43,13 +43,9 @@ class _DelistingFinder(KrxWebIo):
 class _StockTicker:
     def __init__(self):
         # 조회일 기준의 상장/상폐 종목 리스트
-        df_listed = self._get_stock_info_listed()
-        df_delisted = self._get_stock_info_delisted()
+        self.listed = self._get_stock_info_listed()
+        self.delisted = self._get_stock_info_delisted()
 
-        # Merge two DataFrame
-        self.df = pd.merge(df_listed, df_delisted, how='outer')
-        self.df = self.df.set_index('티커')
-        self.df = self.df.drop_duplicates(['ISIN'])
 
     @dataframe_empty_handler
     def _get_stock_info_listed(self, market="전체"):
@@ -67,6 +63,8 @@ class _StockTicker:
         df.rename(columns = {'full_code': 'ISIN', 'short_code': '티커', 'codeName': '종목', 'marketName': '시장'}, inplace=True)
         # - 티커 축약 (A037440 -> 037440)
         df['티커'] = df['티커'].apply(lambda x: x[1:7])
+        df = df.drop_duplicates(['ISIN'])
+        df = df.set_index('티커')
         df = df.drop_duplicates(['ISIN'])
         return df
 
@@ -89,49 +87,52 @@ class _StockTicker:
         # - 티커 축약 (A037440 -> 037440)
         df['티커'] = df['티커'].apply(lambda x: x[1:7])
         df = df.drop_duplicates(['ISIN'])
+        df = df.set_index('티커')
+        df = df.drop_duplicates(['ISIN'])
         return df
+
+    def get_series(self, ticker):
+        """입력된 종목(ticker)의 정보를 Series로 반환
+        :param ticker: 6자리 종목 구분 정보
+        :return      : 종목정보가 저장된 Series
+            종목         삼성전자
+            ISIN    KR7005930003
+            시장           KOSPI
+            상폐일           NaN
+        """
+        df = self.listed
+        if ticker not in df.index:
+            df = self.delisted
+            if ticker not in df.index:
+                return None
+            # 030270 에스마크	KR7030270003
+            # 030270 가희 11R	KRA030270151
+            elif isinstance(df.loc[ticker], DataFrame):
+                # ISIN을 기준으로 sorting 후 첫 번째 데이터를 선택
+                df = df.loc[ticker].sort_values('ISIN').iloc[:1]
+        return df.loc[ticker]
 
 
 @dataframe_empty_handler
 def get_stock_name(ticker):
-    df = _StockTicker().df
-    return df[df.index == ticker]['종목'].iloc[0]
+    s = _StockTicker().get_series(ticker)
+    return s['종목']
 
 
 @dataframe_empty_handler
 def get_stock_ticker_isin(ticker):
-    stock = _StockTicker()
-    return stock.df['ISIN'][ticker]
+    s = _StockTicker().get_series(ticker)
+    return s['ISIN']
 
 
 @dataframe_empty_handler
 def get_stock_market_from(ticker):
-    stock = _StockTicker()
-    return stock.df['시장'][ticker]
-
-
-@dataframe_empty_handler
-def get_stock_ticker_list(date=None):
-    stock = _StockTicker()
-    # 조회 시점에 상장된 종목을 반환
-    cond = stock.df['상폐일'].isnull()
-    if date is not None:
-        # 조회 일자가 지정됐다면, 조회 일자보다 앞선 상폐일을 갖은 데이터 추가
-        cond |= stock.df['상폐일'] > date
-    return list(stock.df[cond].index)
-
-
-@dataframe_empty_handler
-def get_stock_ticker_delist(todate, fromdate=None):
-    stock = _StockTicker()
-    cond = stock.df['상폐일'].notnull()
-    if fromdate is not None:
-        cond &= stock.df['상폐일'] >= fromdate
-    cond &= stock.df['상폐일'] <= todate
-    return list(stock.df[cond].index)
+    s = _StockTicker().get_series(ticker)
+    return s['시장']
 
 
 ################################################################################
+# Index
 
 def convert_date_string(method):
     def func_wrapper(self, dedicated, date=None):
@@ -145,9 +146,7 @@ def convert_date_string(method):
 
 def fetch_index_df(method):
     def func_wrapper(self, dedicated, date=None):
-        if 'date' not in self.df.columns or np.count_nonzero(
-                self.df.index.levels[0].day == date.day) == 0:
-
+        if self.df.empty or np.count_nonzero(self.df.index.levels[0].day == date.day) == 0:
             # 02 : KOSPI / 03 : KOSDAQ
             for index in ["02", "03"]:
                 df = MKD20011().fetch(date, index)
@@ -195,19 +194,14 @@ class IndexTicker:
 
 if __name__ == "__main__":
     pd.set_option('display.width', None)
-    # print(get_stock_ticker_delist(fromdate="20040422", todate="20040423"))
-    # print(get_stock_ticker_list())
+    # print(get_stock_name("060310"))
     # print(get_stock_ticker_isin("000660"))
-    # market = get_stock_market_from("000660")
-    # print(market)
-    # tickers = get_stock_ticker_list("20150720")
-    # print(tickers)
-#    print(len(tickers))
+    # print(get_stock_market_from("000660"))
     # print(get_stock_ticker_isin("035420"))
 
     # Index Ticker
     #    tickers = IndexTicker().get_ticker("20190412", "KOSPI")
     #    print(tickers)
-    index_id = IndexTicker().get_id("코스피")
-    print(index_id)
-    print(IndexTicker().get_id("코스피 200", "20000201"))
+    # index_id = IndexTicker().get_id("코스피")
+    # print(index_id)
+    # print(IndexTicker().get_id("코스피 200", "20000201"))

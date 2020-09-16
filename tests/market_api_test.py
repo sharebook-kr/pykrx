@@ -70,6 +70,7 @@ class StockTickerNameTest(unittest.TestCase):
             self.assertIsInstance(name, str)
             self.assertNotEqual(len(name), 0)
 
+
 class StockOhlcvByDateTest(unittest.TestCase):
     def test_io_for_1_day(self):
         df = stock.get_market_ohlcv_by_date("20200717", "20200717", "005930")
