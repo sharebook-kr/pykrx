@@ -359,11 +359,11 @@ def get_exhaustion_rates_of_foreign_investment_by_ticker(date, market, balance_l
 ################################################################################
 # index
 @dataframe_empty_handler
-def get_index_ohlcv_by_date(fromdate, todate, id, market):
+def get_index_ohlcv_by_date(fromdate, todate, ticker):
     """
     :param fromdate: 조회 시작 일자 (YYYYMMDD)
     :param todate  : 조회 종료 일자 (YYYYMMDD)
-    :param id      : 코스피/코스피 벤치마크/코스피 200/코스피 100/
+    :param ticker  : 코스피/코스피 벤치마크/코스피 200/코스피 100/
                      코스피 50/코스피 대형주/코스피 중형주/코스피 소형주
                       - 종합지수 - 코스피          (001)
                       - 종합지수 - 코스피 벤치마크 (100)
@@ -374,7 +374,6 @@ def get_index_ohlcv_by_date(fromdate, todate, id, market):
                       - 규모별   - 코스피 중형주   (003)
                       - 규모별   - 코스피 소형주   (004)
                       - 생 략
-    :param market  : KOSPI / KOSDAQ
     :return        : Kospi Index의 OHLCV DataFrame
                          시가         고가         저가         종가     거래량
         날짜
@@ -384,8 +383,7 @@ def get_index_ohlcv_by_date(fromdate, todate, id, market):
         20190130  2183.489990  2206.199951  2177.879883  2206.199951  480390000
         20190131  2222.879883  2222.879883  2201.219971  2204.850098  545248000
     """
-    market = {"KOSPI": 1, "KOSDAQ": 2}.get(market, 1)
-    df = MKD20011_SUB().fetch(fromdate, todate, id, market)
+    df = MKD20011_SUB().fetch(fromdate, todate, ticker[1:], ticker[0])
     df = df[['trd_dd', 'opnprc_idx', 'hgprc_idx', 'lwprc_idx',
              'clsprc_idx', 'acc_trdvol']]
     df.columns = ['날짜', '시가', '고가', '저가', '종가', '거래량']
@@ -491,9 +489,8 @@ def _get_index_volume_by_date(df):
 
 
 @dataframe_empty_handler
-def get_index_portfolio_deposit_file(date, id, market):
-    market = {"KOSPI": 1, "KOSDAQ": 2}.get(market, 1)
-    df = MKD20011_PDF().fetch(date, id, market)
+def get_index_portfolio_deposit_file(date, ticker):
+    df = MKD20011_PDF().fetch(date, ticker[1:], ticker[0])
     return df['isu_cd'].tolist()
 
 

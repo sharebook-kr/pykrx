@@ -4,10 +4,10 @@ from pykrx import stock
 
 class KrxIndexBasicTest(unittest.TestCase):
     def test_not_empty_result(self):
-        df = stock.get_index_ohlcv_by_date("20190101", "20190228", "코스피 200")
+        df = stock.get_index_ohlcv_by_date("20190101", "20190228", "1001")
         self.assertNotEqual(df.empty, True)
 
-        df = stock.get_index_ohlcv_by_date("20190101", "20190228", "코스닥 150")
+        df = stock.get_index_ohlcv_by_date("20190101", "20190228", "2001")
         self.assertNotEqual(df.empty, True)
 
         df = stock.get_index_status_by_group("20190228", "KOSPI")

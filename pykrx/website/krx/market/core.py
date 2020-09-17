@@ -554,7 +554,8 @@ if __name__ == "__main__":
     # df = MKD30015().fetch("20190401", "ALL")
     # df = MKD81006().fetch("20200703", "ALL", 2)
     # df = MKD81004().fetch("20200831", "ALL")
-    df = MKD30030().fetch("20190405", "ALL", ["ST"], 0)
+    df = MKD20011().fetch('19900103', '02')
+    # df = MKD30030().fetch("20190405", "ALL", ["ST"], 0)
     # df = MKD30017().fetch("20200907", "ALL", "1000", ["ST", "EF", "EW", "EN"])
     # index
     # df = MKD20011_PDF().fetch("20190412", "001", 2)

@@ -2,8 +2,6 @@ from pykrx.website.comm import dataframe_empty_handler, singleton
 from pykrx.website.krx.krxio import KrxWebIo
 from pykrx.website.krx.market.core import MKD20011
 from pandas import DataFrame
-from datetime import datetime
-import numpy as np
 import pandas as pd
 
 
@@ -134,35 +132,27 @@ def get_stock_market_from(ticker):
 ################################################################################
 # Index
 
-def convert_date_string(method):
-    def func_wrapper(self, dedicated, date=None):
-        if date is None:
-            date = datetime.now()
-        if not isinstance(date, datetime):
-            date = datetime.strptime(date, "%Y%m%d")
-        return method(self, dedicated, date)
-    return func_wrapper
-
-
 def fetch_index_df(method):
-    def func_wrapper(self, dedicated, date=None):
-        if self.df.empty or np.count_nonzero(self.df.index.levels[0].day == date.day) == 0:
+    def func_wrapper(self, *args, **kwargs):
+        if self.df.empty:
             # 02 : KOSPI / 03 : KOSDAQ
             for index in ["02", "03"]:
-                df = MKD20011().fetch(date, index)
+                # date is not supported
+                df = MKD20011().fetch("", index)
                 if len(df) == 0:
                     continue
 
-                # data formatting
-                # - 3 level index : (날짜, 시장, 지수명)
-                df['date'] = date
-                df['ind_tp_cd'] = df['ind_tp_cd'].apply(
-                    lambda x: "KOSPI" if x == "1" else "KOSDAQ")
-                df = df.set_index(['date', 'ind_tp_cd', 'idx_nm'])
+                df = df[['idx_nm', 'bas_idx', 'ind_tp_cd', 'bas_tm', 'idx_clss', 'idx_ind_cd']]
+                df.columns = ['지수명', '기준지수', '시장', '기준시점', '구분', '티커']
+                # 다른 지수에 같은 티커가 존재함. 중복 문제를 피하기 위해 코스피 1xxx 코스닥 2xxx로
+                # 내부에서 사용함
+                df['티커'] = df['시장'] + df['티커']
+                df['시장'] = df['시장'].apply(lambda x: "KOSPI" if x == "1" else "KOSDAQ")
+                df['기준시점'] = pd.to_datetime(df['기준시점'])
+                df = df.set_index('티커')
                 self.df = self.df.append(df)
 
-            self.df = self.df.sort_index()
-        return method(self, dedicated, date)
+        return method(self, *args, **kwargs)
     return func_wrapper
 
 
@@ -171,37 +161,24 @@ class IndexTicker:
     def __init__(self):
         self.df = DataFrame()
 
-    @convert_date_string
     @fetch_index_df
-    def get_ticker(self, market, date=None):
-        return self.df.loc[(date, market)].index.tolist()
+    def get_ticker(self, market, date):
+        cond = (self.df['시장'] == market) & (self.df['기준시점'] <= date)
+        return self.df[cond].index.tolist()
 
-    @convert_date_string
     @fetch_index_df
-    def get_id(self, ticker, date=None):
-        result = self.df.loc[(date, slice(None), ticker)]
-        if len(result) == 0:
-            print("NOT FOUND")
-            return None
-        return result['idx_ind_cd'].iloc[0]
+    def get_name(self, ticker):
+        return self.df.loc[ticker, '지수명']
 
-    @convert_date_string
     @fetch_index_df
-    def get_market(self, ticker, date=None):
-        result = self.df.loc[(date, slice(None), ticker)]
-        return result.index[0][1]
+    def get_market(self, ticker):
+        return self.df.loc[ticker].index['시장']
 
 
 if __name__ == "__main__":
     pd.set_option('display.width', None)
-    # print(get_stock_name("060310"))
-    # print(get_stock_ticker_isin("000660"))
-    # print(get_stock_market_from("000660"))
-    # print(get_stock_ticker_isin("035420"))
+    print(IndexTicker().get_ticker("KOSPI", "19800104"))
+    tickers = IndexTicker().get_ticker("KOSPI", "20200917")
+    for ticker in tickers:
+        print(ticker, IndexTicker().get_name(ticker))
 
-    # Index Ticker
-    #    tickers = IndexTicker().get_ticker("20190412", "KOSPI")
-    #    print(tickers)
-    # index_id = IndexTicker().get_id("코스피")
-    # print(index_id)
-    # print(IndexTicker().get_id("코스피 200", "20000201"))

@@ -428,25 +428,43 @@ print(df.head())
 코스피 인덱스를 조회합니다.
 
 #### 2.1.2.1 인덱스 종류 조회
-get_index_ticker_list() 함수는 지정한 날짜의 인덱스를 리스트로 반환합니다.
+get_index_ticker_list() 함수는 코스피 인덱스를 리스트로 반환합니다.
 ```python
 tickers = stock.get_index_ticker_list()
 print(tickers)
 ```
 ```text
-['코스피', '코스피 200', '코스피 100', '코스피 50', ... ]
+['1001', '1028', '1034', '1035', '1167', '1182', ...]
 ```
 
-현재의 인덱스와 과거의 인덱스가 다를 수 있기 때문에 일자를 입력하면 해당 일자의 인덱스 리스트를 반환 합니다.
+현재의 인덱스와 과거의 인덱스가 다를 수 있기 때문에 일자를 입력하면 입력한 일자에 존재하는 인덱스를 반환 합니다.
 ```python
-tickers = stock.get_index_ticker_list("20200717")
-print(tickers)
+tickers = stock.get_index_ticker_list("19800104")
+```
+
+코스닥 인덱스를 조회할 때는 `market` 옵션을 추가합니다.
+```python
+tickers = stock.get_index_ticker_list(market='KOSDAQ')
+```
+
+`get_index_name` 함수를 사용해서 티커의 이름을 얻을 수 있습니다. 
+```python
+for ticker in stock.get_index_ticker_list():
+    print(ticker, stock.get_index_name(ticker))
+```
+```text
+1001 코스피
+1028 코스피 200
+1034 코스피 100
+1035 코스피 50
+1167 코스피 200 중소형주
+...
 ```
 
 #### 2.1.2.2 인덱스 OHLCV 조회
 get_index_ohlcv_by_date() 함수는 입력된 기간 동안의 인덱스 OHLCV를 조회합니다. 다음은 20190101-20190228 동안의 "코스피 200" 인덱스의 OHLCV를 조회합니다.
 ```python
-df = stock.get_index_ohlcv_by_date("20190101", "20190228", "코스피 200")
+df = stock.get_index_ohlcv_by_date("20190101", "20190228", "1028")
 print(df.head(2))
 ```
 ```text
@@ -457,7 +475,7 @@ print(df.head(2))
 get_index_ohlcv_by_date() 함수에 frequency 파라미터(d/m/y)를 추가할 수 있습니다. 
 d는 일자, m은 월, y는 연도를 의미합니다. 다음은 20190101부터 20190228까지의 "코스피 200"의 월별 OHLCV를 출력합니다. 
 ```python
-df = stock.get_index_ohlcv_by_date("20190101", "20190228", "코스피 200", "m")
+df = stock.get_index_ohlcv_by_date("20190101", "20190228", "1028", "m")
 print(df.head(2))
 ```
 ```text
