@@ -134,7 +134,6 @@ def get_market_price_change_by_ticker(fromdate, todate, market="ALL"):
     market = {"ALL": "ALL", "KOSPI": "STK", "KOSDAQ": "KSQ", "KONEX": "KNX"}.\
         get(market, "ALL")    
     df = MKD80037().fetch(market, fromdate, todate)    
-    
 
     df = df[['kor_shrt_isu_nm', 'isu_cd', 'opn_dd_end_pr', 'end_dd_end_pr',
              'prv_dd_cmpr', 'updn_rate', 'isu_tr_vl', 'isu_tr_amt']]
