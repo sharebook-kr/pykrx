@@ -407,7 +407,14 @@ def get_index_ticker_name(ticker):
     return krx.IndexTicker().get_name(ticker)
 
 
-def get_index_portfolio_deposit_file(date, ticker):
+def get_index_portfolio_deposit_file(ticker, date=None):
+    """지수 구성 종목 조회
+        :param ticker  : 조회할 지표의 티커
+        :param date           : 조회 일자 (YYMMDD)
+        :return 구성 종목의 티커를 리스트로 반환
+    """
+    if date is None:
+        date = get_nearest_business_day_in_a_week()
     if isinstance(date, datetime.datetime):
         date = _datetime2string(date)
 
@@ -565,8 +572,9 @@ if __name__ == "__main__":
     # print(tickers)
     # for ticker in get_index_ticker_list():
     #     print(ticker, get_index_name(ticker))
-    df = get_index_ohlcv_by_date("20190101", "20190228", "1009")
-    print(df)
+    # df = get_index_ohlcv_by_date("20190101", "20190228", "1009")
+    pdf = get_index_portfolio_deposit_file("1005")
+    print(len(pdf), pdf)
     # df = get_index_ohlcv_by_date("20190101", "20190228", "1001", "m")
     # df = get_index_price_change_by_name("20200520", "20200527", "KOSDAQ")
     # print(get_index_portfolio_deposit_file("20190412", "2001"))
