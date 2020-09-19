@@ -88,7 +88,7 @@ def get_market_ohlcv_by_date(fromdate, todate, ticker, freq='d', adjusted=True):
     else:
         df = krx.get_market_ohlcv_by_date(fromdate, todate, ticker)
 
-    df.columns.name = get_market_ticker_name()
+    df.columns.name = get_market_ticker_name(ticker)
 
     how = {'시가': 'first', '고가': 'max', '저가': 'min', '종가': 'last',
            '거래량': 'sum'}
