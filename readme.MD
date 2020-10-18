@@ -354,7 +354,7 @@ print(df.head())
 #### 2.1.1.11 투자자별 거래정보
 조회 일자를 입력받아 미거래 종목을 포함한 투자자별 거래 정보를 반환합니다. 기본적으로 KOSPI 시장의 주식시장 정보를 조회합니다.  
 ```python
-df = get_market_trading_value_and_volume_by_ticker("20200907")
+df = stock.get_market_trading_value_and_volume_by_ticker("20200907")
 print(df.head())
 ```
 ```text
@@ -368,25 +368,25 @@ print(df.head())
 
 `market` 옵션을 추가해서 특정 시장(`KOSPI`/`KOSDAQ`/`KONEX`)을 조회하거나 전체 시장(`ALL`)을 한 번에 검색할 수 있습니다. 입력하지 않으면 `KOSPI` 시장을 조회합니다.   
 ```python
-df = get_market_trading_value_and_volume_by_ticker("20200907", market="KOSDAQ")
+df = stock.get_market_trading_value_and_volume_by_ticker("20200907", market="KOSDAQ")
 print(df.head())
 ```
 `investror` 옵션은 투자자 정보를 입력합니다. 입력하지 않으면 `전체` 데이터를 조회합니다.  
 + 금융투자 / 보험 / 투신 / 사모 / 은행 / 기타금융 / 연기금 / 기관 / 기타법인 / 개인 / 외국인 /기타외국인 / 전체
 ```python
-df = get_market_trading_value_and_volume_by_ticker("20200907", market="KOSDAQ", investor="전체")
+df = stock.get_market_trading_value_and_volume_by_ticker("20200907", market="KOSDAQ", investor="전체")
 print(df.head())
 ```
 `market_detail` 옵션은 세부 검색항목을 지정합니다. 입력하지 않으면 주식시장(`STC`)을 선택합니다.
 + STC / ETF / ETN / ELW
 ```python
-df = get_market_trading_value_and_volume_by_ticker("20200907", market="KOSDAQ", investor="전체", market_detail="ELW")
+df = stock.get_market_trading_value_and_volume_by_ticker("20200907", market="KOSDAQ", investor="전체", market_detail="ELW")
 print(df.head())
 ```
 여러 개의 `market_detail`을 리스트로 지정해서 한 번에 조회할 수 있습니다. 
 ```python
 interest_market = ["ETF", "ELW"] 
-df = get_market_trading_value_and_volume_by_ticker("20200907", market="KOSDAQ", investor="전체", market_detail=interest_market)
+df = stock.get_market_trading_value_and_volume_by_ticker("20200907", market="KOSDAQ", investor="전체", market_detail=interest_market)
 print(df.head())
 ```
 

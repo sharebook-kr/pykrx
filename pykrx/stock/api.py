@@ -249,7 +249,7 @@ def get_market_trading_value_by_date(fromdate, todate, market="KOSPI", on="세�
         return resample_ohlcv(df, freq, sum)
 
 
-def get_market_trading_value_and_volume_by_ticker(date, market="KOSPI", investor="전체", market_detail="ST"):
+def get_market_trading_value_and_volume_by_ticker(date, market="KOSPI", investor="전체", market_detail="STC"):
     """거래실적 추이 (거래대금)
     :param date           : 조회 일자 (YYMMDD)
     :param market         : 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
@@ -268,11 +268,8 @@ def get_market_trading_value_and_volume_by_ticker(date, market="KOSPI", investor
         9001 - 기타외국인
         9999 - 전체
     :param market_detail   : 세부검색항목
-        복수 선택 가능 : ["주식", "ETF", "ELW", "ETN"]
-        ST - STC
-        EF - ETF
-        EW - ELW
-        EN - ETN
+        복수 선택 가능 : ["STC", "ETF", "ELW", "ETN"]
+        - STC : 일반 주식
     :return              :
                                   종목명  매수거래량  매도거래량   순매수거래량   매수거래대금    매도거래대금  순매수거래대금
         034020                두산중공업    3540069     610138      2929931     55633172300     9686899000    45946273300
