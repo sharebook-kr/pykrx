@@ -68,13 +68,15 @@ def get_business_days(year, mon):
     return df.index.tolist()
 
 
-def get_market_ohlcv_by_date(fromdate, todate, ticker, freq='d', adjusted=True):
+def get_market_ohlcv_by_date(fromdate, todate, ticker, freq='d', adjusted=True,
+                             name_display=False):
     """지정된 일자의 OHLCV 조회
     :param fromdate: 조회 시작 일자 (YYYYMMDD)
     :param todate  : 조회 종료 일자 (YYYYMMDD)
     :param ticker  : 조회할 종목의 티커
     :param freq    : d - 일 / m - 월 / y - 년
     :param adjusted: 수정 종가 여부 (True/False)
+    :param name_display : columns의 이름 출력 여부 (True/False)
     :return:
     """
     if isinstance(fromdate, datetime.datetime):
@@ -88,7 +90,8 @@ def get_market_ohlcv_by_date(fromdate, todate, ticker, freq='d', adjusted=True):
     else:
         df = krx.get_market_ohlcv_by_date(fromdate, todate, ticker)
 
-    df.columns.name = get_market_ticker_name(ticker)
+    if name_display:
+        df.columns.name = get_market_ticker_name(ticker)
 
     how = {'시가': 'first', '고가': 'max', '저가': 'min', '종가': 'last',
            '거래량': 'sum'}
@@ -170,7 +173,7 @@ def get_market_price_change_by_ticker(fromdate, todate):
     return df_a
 
 
-def get_market_fundamental_by_date(fromdate, todate, ticker, freq='d'):
+def get_market_fundamental_by_date(fromdate, todate, ticker, freq='d', name_display=False):
     if isinstance(fromdate, datetime.datetime):
         fromdate = _datetime2string(fromdate)
 
@@ -182,7 +185,9 @@ def get_market_fundamental_by_date(fromdate, todate, ticker, freq='d'):
     if df.empty:
         return df
 
-    df.columns.name = get_market_ticker_name(ticker)
+    if name_display:
+        df.columns.name = get_market_ticker_name(ticker)
+
     df['PBR'] = df['PER'] * df['EPS'] / df['BPS']
     df.loc[df['BPS'] == 0, 'PBR'] = 0
     how = {'DIV': 'first', 'BPS': 'first', 'PER': 'first', 'EPS': 'first',
@@ -418,12 +423,13 @@ def get_index_portfolio_deposit_file(ticker, date=None):
     return krx.get_index_portfolio_deposit_file(date, ticker)
 
 
-def get_index_ohlcv_by_date(fromdate, todate, ticker, freq='d'):
-    """
+def get_index_ohlcv_by_date(fromdate, todate, ticker, freq='d', name_display=False):
+    """인덱스 OHLCV 조회
         :param fromdate: 조회 시작 일자 (YYYYMMDD)
         :param todate  : 조회 종료 일자 (YYYYMMDD)
         :param ticker  : 조회할 지표의 티커
         :param freq    : d - 일 / m - 월 / y - 년
+        :param name_display : columns의 이름 출력 여부 (True/False)
         :return:
     """
     if isinstance(fromdate, datetime.datetime):
@@ -433,7 +439,10 @@ def get_index_ohlcv_by_date(fromdate, todate, ticker, freq='d'):
         todate = _datetime2string(todate)
 
     df = krx.get_index_ohlcv_by_date(fromdate, todate, ticker)
-    df.columns.name = get_index_ticker_name(ticker)
+
+    if name_display:
+        df.columns.name = get_index_ticker_name(ticker)
+
     how = {'시가': 'first', '고가': 'max', '저가': 'min', '종가': 'last', '거래량': 'sum'}
     return resample_ohlcv(df, freq, how)
 
