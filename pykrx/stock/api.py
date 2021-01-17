@@ -2,7 +2,19 @@ from pykrx.website import krx
 from pykrx.website import naver
 import datetime
 import pandas as pd
+from deprecated import deprecated
+from pandas import DataFrame
 
+
+def market_valid_check(func):
+    def wrapper(*args, **kwargs):
+        valid_market_list = ["ALL", "KOSPI", "KOSDAQ", "KONEX"]
+        for v in args:
+            if v in  valid_market_list:
+                return func(*args, **kwargs)
+        print(f"market 옵션이 올바르지 않습니다." )
+        return None
+    return wrapper
 
 def _datetime2string(dt, freq='d'):
     if freq.upper() == 'Y':
@@ -42,11 +54,15 @@ def get_nearest_business_day_in_a_week():
 # -----------------------------------------------------------------------------
 # 주식 API
 # -----------------------------------------------------------------------------
-def get_market_ticker_list(date=None, market="KOSPI"):
+def get_market_ticker_list(date: str=None, market: str="KOSPI") -> list:
     """티커 목록 조회
-    :param date: 조회 일자 (YYYYMMDD)
-    :param market: 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
-    :return: ticker 리스트
+
+    Args:
+        date   (str, optional):조회 일자 (YYYYMMDD)
+        market (str, optional): 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
+
+    Returns:
+        list: 티커가 담긴 리스트
     """
     if date is None:
         date = get_nearest_business_day_in_a_week()
@@ -55,11 +71,30 @@ def get_market_ticker_list(date=None, market="KOSPI"):
     return s.index.to_list()
 
 
-def get_market_ticker_name(ticker):
+def get_market_ticker_name(ticker: str) -> str:
+    """티커에 대응되는 종목 이름 반환
+
+    Args:
+        ticker (str): 티커
+
+    Returns:
+        str: 종목명
+    """
     return krx.get_stock_name(ticker)
 
 
-def get_business_days(year, mon):
+def get_business_days(year: int, mon: int) -> list:
+    """영업일을 조회해서 리스트로 반환
+
+    Args:
+        year (int): 4자리 년도
+        mon  (int): 월
+
+    Returns:
+        list: 지정된 월의 영업일을 조회
+
+    Note: 과거의 영업일만을 반환
+    """
     strt = "{}{:02d}01".format(year, mon)
     last = "{}{:02d}01".format(year, mon+1)
     df = get_market_ohlcv_by_date(strt, last, "000020")
@@ -68,16 +103,26 @@ def get_business_days(year, mon):
     return df.index.tolist()
 
 
-def get_market_ohlcv_by_date(fromdate, todate, ticker, freq='d', adjusted=True,
-                             name_display=False):
-    """지정된 일자의 OHLCV 조회
-    :param fromdate: 조회 시작 일자 (YYYYMMDD)
-    :param todate  : 조회 종료 일자 (YYYYMMDD)
-    :param ticker  : 조회할 종목의 티커
-    :param freq    : d - 일 / m - 월 / y - 년
-    :param adjusted: 수정 종가 여부 (True/False)
-    :param name_display : columns의 이름 출력 여부 (True/False)
-    :return:
+def get_market_ohlcv_by_date(fromdate: str, todate: str, ticker: str, freq: str='d', adjusted: bool=True,
+                             name_display: bool=False) -> DataFrame:
+    """특정 종목의 일자별로 정렬된 OHLCV
+
+    Args:
+        fromdate     (str           ): 조회 시작 일자 (YYYYMMDD)
+        todate       (str           ): 조회 종료 일자 (YYYYMMDD)
+        ticker       (str           ): 조회할 종목의 티커
+        freq         (str,  optional):  d - 일 / m - 월 / y - 년
+        adjusted     (bool, optional): 수정 종가 여부 (True/False)
+        name_display (bool, optional): columns의 이름 출력 여부 (True/False)
+
+    Returns:
+        DataFrame:
+                         시가   고가   저가   종가   거래량
+            날짜
+            2019-02-25  77300  77600  74800  75400  2865712
+            2019-02-26  75000  75900  74100  75200  2483512
+            2019-02-27  75300  75700  73700  73700  2864044
+            2019-02-28  72500  72600  69900  70000  7869451
     """
     if isinstance(fromdate, datetime.datetime):
         fromdate = _datetime2string(fromdate)
@@ -97,12 +142,23 @@ def get_market_ohlcv_by_date(fromdate, todate, ticker, freq='d', adjusted=True,
            '거래량': 'sum'}
     return resample_ohlcv(df, freq, how)
 
+@market_valid_check
+def get_market_ohlcv_by_ticker(date, market="KOSPI"):
+    """티커별로 정리된 전종목 OHLCV
 
-def get_market_ohlcv_by_ticker(date, market="ALL"):
-    """"
-    :param date    : 조회  일자 (YYYYMMDD)
-    :param market  : KOSPI / KOSDAQ / KONEX
-    :return        : OHLCV DataFrame
+    Args:
+        date   (str): 조회 일자 (YYYYMMDD)
+        market (str): 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL). Defaults to KOSPI.
+
+    Returns:
+        DataFrame:
+                        종목명   시가   고가   저가   종가  거래량    거래대금
+            티커
+            060310          3S   2150   2390   2150   2190  981348  2209370985
+            095570  AJ네트웍스   3135   3200   3100   3130   89871   282007385
+            006840    AK홀딩스  17050  17200  16500  16500   30567   512403000
+            054620   APS홀딩스   8550   8740   8400   8650  647596  5525789290
+            265520    AP시스템  22150  23100  22050  22400  255846  5798313650
     """
     if isinstance(date, datetime.datetime):
         date = _datetime2string(date)
@@ -110,7 +166,25 @@ def get_market_ohlcv_by_ticker(date, market="ALL"):
     return krx.get_market_ohlcv_by_ticker(date, market)
 
 
-def get_market_cap_by_date(fromdate, todate, ticker, freq='d'):
+def get_market_cap_by_date(fromdate: str, todate: str, ticker: str, freq: str='d'):
+    """일자별로 정렬된 시가총액
+
+    Args:
+        fromdate (str           ): 조회 시작 일자 (YYYYMMDD)
+        todate   (str           ): 조회 종료 일자 (YYYYMMDD)
+        ticker   (str           ): 티커
+        freq     (str,  optional):  d - 일 / m - 월 / y - 년
+
+    Returns:
+        DataFrame:
+                               시가총액  거래량      거래대금 상장주식수
+            날짜
+            2015-07-20  187806654675000  128928  165366199000  147299337
+            2015-07-21  186039062631000  194055  244129106000  147299337
+            2015-07-22  184566069261000  268323  333813094000  147299337
+            2015-07-23  181767381858000  208965  259446564000  147299337
+            2015-07-24  181030885173000  196584  241383636000  147299337
+    """
     if isinstance(fromdate, datetime.datetime):
         fromdate = _datetime2string(fromdate)
 
@@ -122,18 +196,81 @@ def get_market_cap_by_date(fromdate, todate, ticker, freq='d'):
     how = {'시가총액': 'last', '거래량': 'sum', '거래대금': 'sum', '상장주식수': 'last'}
     return resample_ohlcv(df, freq, how)
 
+@market_valid_check
+def get_market_cap_by_ticker(date, market="ALL", acending=False):
+    """티커별로 정렬된 시가총액
 
-def get_market_cap_by_ticker(date, market="ALL"):
+    Args:
+        date                 (str): 조회 일자 (YYYYMMDD)
+        market     (str, optional): 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
+        ascending (bool, optional): 정렬 기준.
+
+    Returns:
+        DataFrame :
+                      종가         시가총액    거래량         거래대금   상장주식수
+            티커
+            005930   51900  309831714345000  18541624  309831714345000   5969782550
+            000660   84300   61370599369500   3397112   61370599369500    728002365
+            207940  815000   53924475000000    163339   53924475000000     66165000
+            035420  269500   44268984952500   1196267   44268984952500    164263395
+            068270  316000   42640845660000    918369   42640845660000    134939385
+    """
     if isinstance(date, datetime.datetime):
         date = _datetime2string(date)
 
-    return krx.get_market_cap_by_ticker(date, market)
+    return krx.get_market_cap_by_ticker(date, market, acending)
 
 
-def get_exhaustion_rates_of_foreign_investment_by_ticker(date, market="ALL", balance_limit=False):
+def get_exhaustion_rates_of_foreign_investment_by_date(fromdate: str, todate: str, ticker: str) -> DataFrame:
+    """지정된 종목의 일자별로 정렬된 외국인 보유 수량 및 한도 수량
+
+    Args:
+        fromdate (str): 조회 시작 일자 (YYYYMMDD)
+        todate   (str): 조회 종료 일자 (YYYYMMDD)
+        ticker   (str): 종목의 티커
+
+    Returns:
+        DataFrame:
+                        상장주식수    보유수량    지분율    한도수량 한도소진율
+            날짜
+            2021-01-08  5969782550  3314966371  55.53125  5969782550   55.53125
+            2021-01-11  5969782550  3324115988  55.68750  5969782550   55.68750
+            2021-01-12  5969782550  3318676206  55.59375  5969782550   55.59375
+            2021-01-13  5969782550  3316551070  55.56250  5969782550   55.56250
+            2021-01-14  5969782550  3314652740  55.53125  5969782550   55.53125
+    """
+    if isinstance(fromdate, datetime.datetime):
+        fromdate = _datetime2string(fromdate)
+
+    if isinstance(todate, datetime.datetime):
+        todate = _datetime2string(todate)
+
+    return krx.get_exhaustion_rates_of_foreign_investment_by_ticker(fromdate, todate, ticker)
+
+
+@market_valid_check
+def get_exhaustion_rates_of_foreign_investment_by_ticker(date: str, market: str="KOSPI", balance_limit: bool=False) -> DataFrame:
+    """특정 시장에서 티커로 정렬된 외국인 보유량 조회
+
+    Args:
+        date          (str ): 조회 시작 일자 (YYYYMMDD)
+        market        (str ): 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
+        balance_limit (bool): 외국인보유제한종목
+            - 0 : check X
+            - 1 : check O
+
+    Returns:
+        DataFrame:
+                   상장주식수   보유수량     지분율   한도수량 한도소진율
+            티커
+            003490   94844634   12350096  13.023438   47412833  26.046875
+            003495    1110794      29061   2.619141     555286   5.230469
+            015760  641964077  127919592  19.937500  256785631  49.812500
+            017670   80745711   28962369  35.875000   39565398  73.187500
+            020560  223235294   13871465   6.210938  111595323  12.429688
+    """
     if isinstance(date, datetime.datetime):
         date = _datetime2string(date)
-
     return krx.get_exhaustion_rates_of_foreign_investment_by_ticker(date, market, balance_limit)
 
 
@@ -160,15 +297,15 @@ def get_market_price_change_by_ticker(fromdate, todate):
     # - 시작일 하루간의 가격 정보를 얻어온다.
     df_1 = krx.get_market_price_change_by_ticker(fromdate, fromdate)
     # - 시작일에는 존재하지만 기간 동안 없는(상폐) 종목을 찾아낸다.
-    # - 종가/대비/등락률/거래량/거래대금을 0으로 업데이트한다.    
+    # - 종가/대비/등락률/거래량/거래대금을 0으로 업데이트한다.
     cond = ~df_1.index.isin(df_a.index)
     if len(df_1[cond]) >= 1:
         df_1.loc[cond, '종가'    ] = 0
-        df_1.loc[cond, '변동폭'  ] = -df_1.loc[cond, '시가']    
+        df_1.loc[cond, '변동폭'  ] = -df_1.loc[cond, '시가']
         df_1.loc[cond, '등락률'  ] = -100.0
-        df_1.loc[cond, '거래량'  ] = 0    
+        df_1.loc[cond, '거래량'  ] = 0
         df_1.loc[cond, '거래대금'] = 0
-        # 조회 정보에 상장 폐지 정보를 추가한다.    
+        # 조회 정보에 상장 폐지 정보를 추가한다.
         df_a = df_a.append(df_1[cond])
     return df_a
 
@@ -180,8 +317,7 @@ def get_market_fundamental_by_date(fromdate, todate, ticker, freq='d', name_disp
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
 
-    isin = krx.get_stock_ticker_isin(ticker)
-    df = krx.get_market_fundamental_by_date(fromdate, todate, isin)
+    df = krx.get_market_fundamental_by_date(fromdate, todate, ticker)
     if df.empty:
         return df
 
@@ -293,109 +429,19 @@ def get_market_trading_value_and_volume_by_ticker(date, market="KOSPI", investor
 # -----------------------------------------------------------------------------
 # 지수(INDEX) API
 # -----------------------------------------------------------------------------
-def get_index_ticker_list(date=None, market="KOSPI"):
-    """지수 목록 조회
-    :param date           : 조회 일자 (YYMMDD)
-    :param market         : 조회 시장 (KOSPI/KOSDAQ)
-    :return 티커를 리스트로 반환
-        코스피 지수
-        1001 코스피
-        1028 코스피 200
-        1034 코스피 100
-        1035 코스피 50
-        1167 코스피 200 중소형주
-        1182 코스피 200 초대형제외 지수
-        1244 코스피200제외 코스피지수
-        1150 코스피 200 커뮤니케이션서비스
-        1151 코스피 200 건설
-        1152 코스피 200 중공업
-        1153 코스피 200 철강/소재
-        1154 코스피 200 에너지/화학
-        1155 코스피 200 정보기술
-        1156 코스피 200 금융
-        1157 코스피 200 생활소비재
-        1158 코스피 200 경기소비재
-        1159 코스피 200 산업재
-        1160 코스피 200 헬스케어
-        1005 음식료품
-        1006 섬유의복
-        1007 종이목재
-        1008 화학
-        1009 의약품
-        1010 비금속광물
-        1011 철강금속
-        1012 기계
-        1013 전기전자
-        1014 의료정밀
-        1015 운수장비
-        1016 유통업
-        1017 전기가스업
-        1018 건설업
-        1019 운수창고업
-        1020 통신업
-        1021 금융업
-        1022 은행
-        1024 증권
-        1025 보험
-        1026 서비스업
-        1027 제조업
-        1002 코스피 대형주
-        1003 코스피 중형주
-        1004 코스피 소형주
-        1224 코스피 200 비중상한 30%
-        1227 코스피 200 비중상한 25%
-        1232 코스피 200 비중상한 20%
+def get_index_ticker_list(date: str=None, market: str="KOSPI") -> list:
+    """모든 지수 (index)의 티커 조회
 
-        2001 코스닥
-        2203 코스닥 150
-        2216 코스닥 150 정보기술
-        2217 코스닥 150 헬스케어
-        2218 코스닥 150 커뮤니케이션서비스
-        2212 코스닥 150 소재
-        2213 코스닥 150 산업재
-        2214 코스닥 150 필수소비재
-        2215 코스닥 150 자유소비재
-        2012 기타서비스
-        2015 코스닥 IT
-        2024 제조
-        2026 건설
-        2027 유통
-        2029 운송
-        2031 금융
-        2037 오락,문화
-        2041 통신방송서비스
-        2042 IT S/W & SVC
-        2043 IT H/W
-        2056 음식료·담배
-        2058 섬유·의류
-        2062 종이·목재
-        2063 출판·매체복제
-        2065 화학
-        2066 제약
-        2067 비금속
-        2068 금속
-        2070 기계·장비
-        2072 일반전기전자
-        2074 의료·정밀기기
-        2075 운송장비·부품
-        2077 기타 제조
-        2151 통신서비스
-        2152 방송서비스
-        2153 인터넷
-        2154 디지털컨텐츠
-        2155 소프트웨어
-        2156 컴퓨터서비스
-        2157 통신장비
-        2158 정보기기
-        2159 반도체
-        2160 IT부품
-        2002 코스닥 대형주
-        2003 코스닥 중형주
-        2004 코스닥 소형주
-        2181 코스닥 우량기업부
-        2182 코스닥 벤처기업부
-        2183 코스닥 중견기업부
-        2184 코스닥 기술성장기업부
+    Args:
+        date   (str, optional): 조회 일자 (YYMMDD)
+        market (str, optional): 조회 시장 (KOSPI/KOSDAQ/KRX/테마)
+
+    Returns:
+        list:
+            ['1001', '1002', '1003', '1004', '1005', '1006', '1007', '1008', '1009', '1010', '1011', '1012', '1013', '1014', '1015', '1016', '1017', '1018', '1019', '1020', '1021', '1022', '1024', '1025', '1026', '1027', '1028', '1034', '1035', '1150', '1151', '1152', '1153', '1154', '1155', '1156', '1157', '1158', '1159', '1160', '1167', '1182', '1224', '1227', '1232', '1244']
+
+        for ticker in stock.get_index_ticker_list():
+            print(ticker, stock.get_index_ticker_name(ticker))
     """
     if date is None:
         date = datetime.datetime.now()
@@ -447,18 +493,41 @@ def get_index_ohlcv_by_date(fromdate, todate, ticker, freq='d', name_display=Fal
     return resample_ohlcv(df, freq, how)
 
 
-def get_index_status_by_group(date, market="KOSPI"):
-    if isinstance(date, datetime.datetime):
-        date = _datetime2string(date)
-    return krx.get_index_status_by_group(date, market)
+def get_index_listing_date(계열구분: str="KOSPI") -> DataFrame:
+    """[11004] 전체지수 기본정보
 
+    Args:
+        계열구분 (str, optional): KRX/KOSPI/KOSDAQ/테마
 
+    Returns:
+        DataFrame:
+                                   기준시점    발표시점   기준지수  종목수
+            지수명
+            코스피               1980.01.04  1983.01.04      100.0       1
+            코스피 200           1990.01.03  1994.06.15      100.0      28
+            코스피 100           2000.01.04  2000.03.02     1000.0      34
+            코스피 50            2000.01.04  2000.03.02     1000.0      35
+            코스피 200 중소형주  2010.01.04  2015.07.13     1000.0     167
+    """
+    defined_list = ["KRX", "KOSPI", "KOSDAQ", "테마"]
+    if 계열구분 not in defined_list:
+        print(f"{계열구분}이 올바르지 않습니다." )
+        print(f" - 허용된 값: {' '.join(defined_list)}" )
+        print(f"KOSPI로 변경 조회합니다." )
+        계열구분 = "KOSPI"
+
+    return krx.get_index_listing_date(계열구분)
+
+@deprecated(version='1.0', reason="You should use get_index_price_change_by_ticker() instead")
 def get_index_price_change_by_name(fromdate, todate, market="KOSPI"):
+    return get_index_price_change_by_ticker(fromdate, todate, market)
+
+def get_index_price_change_by_ticker(fromdate, todate, market="KOSPI"):
     if isinstance(fromdate, datetime.datetime):
         fromdate = _datetime2string(fromdate)
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
-    return krx.get_index_price_change_by_name(fromdate, todate, market)
+    return krx.get_index_price_change_by_ticker(fromdate, todate, market)
 
 
 # -----------------------------------------------------------------------------
@@ -543,19 +612,22 @@ def get_etf_tracking_error(fromdate, todate, ticker):
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
     # tickers = get_market_ticker_list()
+    # print(tickers)
     # for ticker in tickers:
     #     name = get_market_ticker_name(ticker)
     #     print(ticker, name)
     # tickers = get_market_ticker_list("20190225")
+    # print(tickers)
     # tickers = get_market_ticker_list()
     # tickers = get_market_ticker_list("20190225", "KOSDAQ")
     # tickers = get_market_ticker_list("20190225", "ALL")
     # print(tickers)
     # df = get_market_ticker_name("000660")
-    # df = get_market_ohlcv_by_date("20190225", "20190228", "000660")
+    # print(get_market_ohlcv_by_date("20190225", "20190228", "000660"))
     # df = get_market_ohlcv_by_date("20190225", "20190228", "000660", adjusted=False)
     # df = get_market_ohlcv_by_date("20040418", "20140418", "000020")
-    # df = get_market_ohlcv_by_ticker("20200831", "KOSPI")
+    print(get_market_ohlcv_by_ticker("20200831", "KOSPI"))
+
     # df = get_market_ohlcv_by_ticker("20200831", "KOSDAQ")
     # df = get_market_price_change_by_ticker("20190624", "20190630")
     # df = get_market_ohlcv_by_date("20180101", "20181231", "000660", "y")
@@ -572,15 +644,19 @@ if __name__ == "__main__":
     # df = get_market_cap_by_date("20200101", "20200430", "005930", "m")
     # df = get_market_cap_by_ticker("20200625")
     # df = get_exhaustion_rates_of_foreign_investment_by_ticker("20200703")
-
+    # ticker_list = get_index_ticker_list()
+    # for ticker in ticker_list:
+    #     print(ticker, get_index_ticker_name(ticker))
+    # print (ticker_list)
+    # df = get_index_listing_date("KOSPI")
     # tickers = get_index_ticker_list()
     # tickers = get_index_ticker_list("20190225", "KOSDAQ")
     # print(tickers)
     # for ticker in get_index_ticker_list():
     #     print(ticker, get_index_name(ticker))
     # df = get_index_ohlcv_by_date("20190101", "20190228", "1009")
-    pdf = get_index_portfolio_deposit_file("1005")
-    print(len(pdf), pdf)
+    # pdf = get_index_portfolio_deposit_file("1005")
+    # print(len(pdf), pdf)
     # df = get_index_ohlcv_by_date("20190101", "20190228", "1001", "m")
     # df = get_index_price_change_by_name("20200520", "20200527", "KOSDAQ")
     # print(get_index_portfolio_deposit_file("20190412", "2001"))
@@ -603,6 +679,6 @@ if __name__ == "__main__":
     # df = get_etf_portfolio_deposit_file("252650", "20190329")
     # df = get_etf_price_deviation("20200101", "20200401", "295820")
     # df = get_etf_tracking_error("20200101", "20200401", "295820")
-    pass
+    # print(df)
 
 

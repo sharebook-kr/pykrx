@@ -1,7 +1,7 @@
 import io
 from abc import abstractmethod
 from pykrx.website.comm.webio import Get, Post
-
+import logging
 
 class MarketOtp(Get):
     @property
@@ -10,15 +10,14 @@ class MarketOtp(Get):
 
 
 class KrxWebIo(Post):
-    def post(self, **params):
-        otp = MarketOtp().read(name="form", bld=self.bld)
-        params.update({"code": otp.text})
+    def read(self, **params):
+        params.update(bld=self.bld)
         resp = super().read(**params)
         return resp.json()
 
     @property
     def url(self):
-        return "http://marketdata.krx.co.kr/contents/MKD/99/MKD99000001.jspx"
+        return "http://data.krx.co.kr/comm/bldAttendant/getJsonData.cmd"
 
     @property
     @abstractmethod
@@ -36,6 +35,13 @@ class KrxWebIo(Post):
 
 
 class KrxFileIo(Post):
+
+    def __init__(self):
+        super().__init__()
+        self.headers.update(
+            Referer="http://marketdata.krx.co.kr/mdi"
+        )
+
     def post(self, **params):
         otp = MarketOtp().read(name="fileDown", filetype="xls", url=self.bld, **params)
         resp = super().read(code=otp.text)
@@ -54,14 +60,6 @@ class KrxFileIo(Post):
     @abstractmethod
     def fetch(self, **params):
         return NotImplementedError
-
-    @property
-    def headers(self):
-        return {
-            "User-Agent": "Mozilla/5.0",
-            "Referer"   : "http://marketdata.krx.co.kr/mdi"
-        }
-
 
 class ShortOtp(Get):
     @property
