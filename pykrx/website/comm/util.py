@@ -1,11 +1,12 @@
 from pandas import DataFrame
-
+import logging
 
 def dataframe_empty_handler(func):
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except (AttributeError, KeyError, TypeError):
+        except (AttributeError, KeyError, TypeError) as e:
+            logging.exception(e)
             return DataFrame()
     return wrapper
 
