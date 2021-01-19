@@ -15,7 +15,7 @@ class 상장종목검색(KrxWebIo):
 
         Args:
             market (str, optional): 조회 시장 (STK/KSQ/ALL)
-            name (str, optional): 검색할 종목명 -  입력하지 않을 경우 전체
+            name   (str, optional): 검색할 종목명 -  입력하지 않을 경우 전체
 
         Returns:
             DataFrame : 상장 종목 정보를 반환
@@ -43,7 +43,7 @@ class 상폐종목검색(KrxWebIo):
 
         Args:
             market (str, optional): 조회 시장 (STK/KSQ/ALL) . Defaults to "ALL".
-            name (str, optional): 검색할 종목명으로 입력하지 않을 경우 전체 조회함
+            name   (str, optional): 검색할 종목명으로 입력하지 않을 경우 전체 조회함
 
         Returns:
             DataFrame: 상장폐지 종목 정보를 반환
@@ -70,8 +70,8 @@ class 개별종목시세(KrxWebIo):
 
         Args:
             fromdate (str): 조회 시작 일자 (YYMMDD)
-            todate (str): 조회 종료 일자 (YYMMDD)
-            isin (str): 조회할 종목의 ISIN 번호
+            todate   (str): 조회 종료 일자 (YYMMDD)
+            isin     (str): 조회할 종목의 ISIN 번호
 
         Returns:
             DataFrame: 일자별 시세 조회 결과

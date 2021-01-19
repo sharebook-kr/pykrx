@@ -598,7 +598,7 @@ def get_etf_ohlcv_by_date(fromdate, todate, ticker):
 def get_etf_portfolio_deposit_file(ticker, date=None):
     if date is None:
         date = get_nearest_business_day_in_a_week()
-    return krx.get_etf_portfolio_deposit_file(ticker, date)
+    return krx.get_etf_portfolio_deposit_file(date, ticker)
 
 
 def get_etf_price_deviation(fromdate, todate, ticker):
@@ -626,7 +626,7 @@ if __name__ == "__main__":
     # print(get_market_ohlcv_by_date("20190225", "20190228", "000660"))
     # df = get_market_ohlcv_by_date("20190225", "20190228", "000660", adjusted=False)
     # df = get_market_ohlcv_by_date("20040418", "20140418", "000020")
-    print(get_market_ohlcv_by_ticker("20200831", "KOSPI"))
+    # print(get_market_ohlcv_by_ticker("20200831", "KOSPI"))
 
     # df = get_market_ohlcv_by_ticker("20200831", "KOSDAQ")
     # df = get_market_price_change_by_ticker("20190624", "20190630")
@@ -673,12 +673,12 @@ if __name__ == "__main__":
     # df = get_shorting_balance_by_date("20190401", "20190405", "005930")
     # df = get_shorting_balance_top50("20190401", "KOSDAQ")
 
-    # df = get_etf_ticker_list()
-    # df = get_etf_isin("346000")
-    # df = get_etf_ohlcv_by_date("20200101", "20200401", "295820")
-    # df = get_etf_portfolio_deposit_file("252650", "20190329")
-    # df = get_etf_price_deviation("20200101", "20200401", "295820")
-    # df = get_etf_tracking_error("20200101", "20200401", "295820")
+    # print(get_etf_ticker_list())
+    # print(get_etf_isin("346000"))
+    # print(get_etf_ohlcv_by_date("20200101", "20200401", "295820"))
+    # print(get_etf_portfolio_deposit_file("252650", "20190329"))
+    # print(get_etf_price_deviation("20200101", "20200401", "295820"))
+    # print(get_etf_tracking_error("20200101", "20200401", "295820"))
     # print(df)
 
 
