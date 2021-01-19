@@ -382,7 +382,7 @@ def get_index_ohlcv_by_date(fromdate: str, todate: str, ticker: str) -> DataFram
                     '저가': np.float32, '종가': np.float32,
                     '거래량': np.int64, '거래대금': np.int64})
     df.index = pd.to_datetime(df.index, format='%Y%m%d')
-    return df
+    return df.sort_index()
 
 
 @dataframe_empty_handler
