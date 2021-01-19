@@ -134,7 +134,7 @@ def get_market_cap_by_ticker(date: str, market: str="KOSPI", ascending: bool=Fal
     """
     market = {"ALL": "ALL", "KOSPI": "STK", "KOSDAQ": "KSQ", "KONEX": "KNX"}[market]
     df = 전종목시세().fetch(date, market)
-    df = df[['ISU_SRT_CD', 'TDD_CLSPRC', 'MKTCAP', 'ACC_TRDVOL', 'MKTCAP', 'LIST_SHRS']]
+    df = df[['ISU_SRT_CD', 'TDD_CLSPRC', 'MKTCAP', 'ACC_TRDVOL', 'ACC_TRDVAL', 'LIST_SHRS']]
     df.columns = ['티커', '종가', '시가총액', '거래량', '거래대금', '상장주식수']
 
     df = df.set_index('티커')
