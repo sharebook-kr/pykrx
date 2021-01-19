@@ -1,19 +1,25 @@
 from pykrx.website import krx
 from pykrx.website import naver
 import datetime
+import inspect
+import functools
 import pandas as pd
 from deprecated import deprecated
 from pandas import DataFrame
 
 
 def market_valid_check(func):
+    sig = inspect.signature(func)
+    @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        valid_market_list = ["ALL", "KOSPI", "KOSDAQ", "KONEX"]
-        for v in args:
-            if v in  valid_market_list:
-                return func(*args, **kwargs)
-        print(f"market 옵션이 올바르지 않습니다." )
-        return None
+        if 'market' in sig.bind_partial(*args, **kwargs).arguments:
+            valid_market_list = ["ALL", "KOSPI", "KOSDAQ", "KONEX"]
+            for v in args:
+                if v in  valid_market_list:
+                    return func(*args, **kwargs)
+            print(f"market 옵션이 올바르지 않습니다." )
+            return None
+        return func(*args, **kwargs)
     return wrapper
 
 def _datetime2string(dt, freq='d'):
@@ -148,7 +154,7 @@ def get_market_ohlcv_by_ticker(date, market="KOSPI"):
 
     Args:
         date   (str): 조회 일자 (YYYYMMDD)
-        market (str): 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL). Defaults to KOSPI.
+        market (str): 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
 
     Returns:
         DataFrame:
@@ -626,6 +632,7 @@ if __name__ == "__main__":
     # print(get_market_ohlcv_by_date("20190225", "20190228", "000660"))
     # df = get_market_ohlcv_by_date("20190225", "20190228", "000660", adjusted=False)
     # df = get_market_ohlcv_by_date("20040418", "20140418", "000020")
+    print(get_market_ohlcv_by_ticker("20200831"))
     # print(get_market_ohlcv_by_ticker("20200831", "KOSPI"))
 
     # df = get_market_ohlcv_by_ticker("20200831", "KOSDAQ")
