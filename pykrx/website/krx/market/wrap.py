@@ -28,25 +28,29 @@ def get_market_ohlcv_by_date(fromdate: str, todate: str, ticker: str) -> DataFra
 
     Returns:
         DataFrame:
-                        시가    고가    저가    종가   거래량
-        2018-02-08     97200   99700   97100   99300   813467
-        2018-02-07     98000  100500   96000   96500  1082264
-        2018-02-06     94900   96700   93400   96100  1094871
-        2018-02-05     99400   99600   97200   97700   745562
+
+        >> get_market_ohlcv_by_date("20150720", "20150810", "005930")
+
+                           시가     고가     저가     종가  거래량      거래대금    등락률
+            날짜
+            2015-07-20  1291000  1304000  1273000  1275000  128928  165366199000 -2.300781
+            2015-07-21  1275000  1277000  1247000  1263000  194055  244129106000 -0.939941
+            2015-07-22  1244000  1260000  1235000  1253000  268323  333813094000 -0.790039
+            2015-07-23  1244000  1253000  1234000  1234000  208965  259446564000 -1.519531
     """
     isin = get_stock_ticker_isin(ticker)
     df = 개별종목시세().fetch(fromdate, todate, isin)
 
-    df = df[['TRD_DD', 'TDD_OPNPRC', 'TDD_HGPRC', 'TDD_LWPRC',
-             'FLUC_TP_CD', 'ACC_TRDVOL', 'ACC_TRDVAL']]
-    df.columns = ['날짜', '시가', '고가', '저가', '종가', '거래량', '거래대금']
-    df = df.replace('/', '', regex=True)
-    df = df.replace(',', '', regex=True)
+    df = df[['TRD_DD', 'TDD_OPNPRC', 'TDD_HGPRC', 'TDD_LWPRC', 'TDD_CLSPRC', 'ACC_TRDVOL', 'ACC_TRDVAL', 'FLUC_RT']]
+    df.columns = ['날짜', '시가', '고가', '저가', '종가', '거래량', '거래대금', '등락률']
     df = df.set_index('날짜')
+    df.index = pd.to_datetime(df.index, format='%Y/%m/%d')
+    df = df.replace('[^-\w\.]', '', regex=True)
+    df = df.replace('\-$', '0', regex=True)
+    df = df.replace('', '0')
     df = df.astype({
         "시가":np.int32, "고가":np.int32, "저가":np.int32, "종가":np.int32,
-        "거래량":np.int32, "거래대금":np.int64} )
-    df.index = pd.to_datetime(df.index, format='%Y%m%d')
+        "거래량":np.int32, "거래대금":np.int64, "등락률":np.float16} )
     return df.sort_index()
 
 
@@ -60,25 +64,26 @@ def get_market_ohlcv_by_ticker(date: str, market: str="KOSPI") -> DataFrame:
 
     Returns:
         DataFrame:
-                        종목명   시가   고가   저가   종가  거래량    거래대금
+                     시가   고가   저가   종가  거래량    거래대금
             티커
-            060310          3S   2150   2390   2150   2190  981348  2209370985
-            095570  AJ네트웍스   3135   3200   3100   3130   89871   282007385
-            006840    AK홀딩스  17050  17200  16500  16500   30567   512403000
-            054620   APS홀딩스   8550   8740   8400   8650  647596  5525789290
-            265520    AP시스템  22150  23100  22050  22400  255846  5798313650
+            060310   2150   2390   2150   2190  981348  2209370985
+            095570   3135   3200   3100   3130   89871   282007385
+            006840  17050  17200  16500  16500   30567   512403000
+            054620   8550   8740   8400   8650  647596  5525789290
+            265520  22150  23100  22050  22400  255846  5798313650
     """
 
     market = {"ALL": "ALL", "KOSPI": "STK", "KOSDAQ": "KSQ", "KONEX": "KNX"}[market]
     df = 전종목시세().fetch(date, market)
-    df = df[['ISU_SRT_CD', 'ISU_ABBRV', 'TDD_OPNPRC', 'TDD_HGPRC', 'TDD_LWPRC', 'TDD_CLSPRC', 'ACC_TRDVOL', 'ACC_TRDVAL', ]]
-    df.columns = ['티커', '종목명', '시가', '고가', '저가', '종가', '거래량', '거래대금']
-    df = df.replace('\W', '', regex=True)
+    df = df[['ISU_SRT_CD', 'TDD_OPNPRC', 'TDD_HGPRC', 'TDD_LWPRC', 'TDD_CLSPRC', 'ACC_TRDVOL', 'ACC_TRDVAL', 'FLUC_RT']]
+    df.columns = ['티커', '시가', '고가', '저가', '종가', '거래량', '거래대금', '등락률']
+    df = df.replace('[^-\w\.]', '', regex=True)
+    df = df.replace('\-$', '0', regex=True)
     df = df.replace('', '0')
     df = df.set_index('티커')
     df = df.astype({
-        "종목명":str, "시가":np.int32, "고가":np.int32, "저가":np.int32, "종가":np.int32,
-        "거래량":np.int32, "거래대금":np.int64} )
+        "시가":np.int32, "고가":np.int32, "저가":np.int32, "종가":np.int32,
+        "거래량":np.int32, "거래대금":np.int64, "등락률":np.float16 } )
     return df
 
 
@@ -949,5 +954,5 @@ def get_shorting_balance_top50(date, market="KOSPI"):
 
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
-    print(get_shorting_status_by_date("20201222", "20210122", "005930"))
-    # print(get_market_ohlcv_by_date("20150720", "20150810", "005930"))
+    # print(get_shorting_status_by_date("20201222", "20210122", "005930"))
+    print(get_market_ohlcv_by_date("20150720", "20150810", "005930"))
