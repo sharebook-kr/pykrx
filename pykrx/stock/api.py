@@ -291,8 +291,7 @@ def get_market_price_change_by_ticker(fromdate, todate):
     if df_a.empty:
         return df_a
 
-    # MKD80037는 상장 폐지 종목은 제외한 정보를 전달하기 때문에, 시작일의 가격
-    # 정보 중에서 시가를 가져온다.
+    # 상장 폐지 종목은 제외한 정보를 전달하기 때문에, 시작일의 가격 정보 중에서 시가를 가져온다.
     # - 시작일이 주말일 경우를 고려해서 가까운 미래의 평일의 날짜를 얻어온다.
     # - 동화약품(000020)은 가장 오래된 상장 회사
     dt = datetime.date(int(fromdate[:4]), int(fromdate[4:6]), int(fromdate[6:]))
@@ -348,89 +347,323 @@ def get_market_fundamental_by_ticker(date, market="ALL"):
     return df
 
 
-def get_market_trading_volume_by_date(fromdate, todate, market="KOSPI", on="세션", freq='d'):
-    """
-    :param fromdate: 조회 시작 일자 (YYYYMMDD)
-    :param todate  : 조회 종료 일자 (YYYYMMDD)
-    :param market  : KOSPI / KOSDAQ / KONEX
-    :param on      : 세션/종류/매수/매도/전체
-    :param freq    : d - 일 / m - 월 / y - 년
-    :return        : 거래실적(거래량) 추이 DataFrame
+def __get_market_trading_value_and_volume_by_investor(fromdate: str, todate: str, ticker: str, etf: bool, etn: bool,
+                                                      elw: bool, key: str) -> DataFrame:
+    """투자자별 거래실적 기간합계
+
+    Args:
+        fromdate (str ): 조회 시작 일자 (YYMMDD)
+        todate   (str ): 조회 종료 일자 (YYMMDD)
+        ticker   (str ): 조회 종목 티커
+          - KOSPI/KOSDAQ/KONEX/ALL을 입력할 경우 전체 시장을 조회
+        etf      (bool): 시장 포함 여부 - KOSPI/KOSDAQ/KONEX/ALL 시장일 경우에만 유효
+        etn      (bool): 시장 포함 여부 - KOSPI/KOSDAQ/KONEX/ALL 시장일 경우에만 유효
+        elw      (bool): 시장 포함 여부 - KOSPI/KOSDAQ/KONEX/ALL 시장일 경우에만 유효
+        key      (str ): column 인덱스 : 거래량 / 거래대금
+
+    Returns:
+        DataFrame:
+
+            >> __get_market_trading_value_and_volume_by_investor("20210115", "20210122", "005930")
+
+                         거래량                             거래대금
+                           매도       매수    순매수            매도            매수         순매수
+            투자자구분
+            금융투자    29455909   26450600  -3005309   2580964135000   2309054317700  -271909817300
+            보험         1757287     509535  -1247752    153322228800     44505136200  -108817092600
+            투신         2950680    1721970  -1228710    258073006600    150715203700  -107357802900
+            사모          745727     696135    -49592     65167773900     60862926800    -4304847100
+            은행           38675      46394      7719      3369626100      4004806100      635180000
+
+            >> __get_market_trading_value_and_volume_by_investor("20210115", "20210122", "KOSPI")
+
+                            거래량                                 거래대금
+                              매도         매수     순매수             매도             매수         순매수
+            투자자구분
+            금융투자    1857447354   1660620713 -196826641   15985568261831   15006116511544  -979451750287
+            보험          29594468     19872165   -9722303    1219035502445     757575677208  -461459825237
+            투신          69348190     60601427   -8746763    2235561259511    1799363743367  -436197516144
+            사모          31673292     26585281   -5088011     999084910863     846067212945  -153017697918
+            은행          44279242     51690814    7411572     886226324790     936210985810    49984661020
+
+            >> __get_market_trading_value_and_volume_by_investor("20210115", "20210122", "KOSPI", False, False)
+
+                            거래량                                 거래대금
+                              매도         매수     순매수             매도             매수         순매수
+            투자자구분
+            금융투자    1241225479   1156823717  -84401762    9897795863804    9355167899112  -542627964692
+            보험          15737709      8577242   -7160467     912820396542     560818697065  -352001699477
+            투신          46872846     34307243  -12565603    1790231574897    1421181450288  -369050124609
+            사모          20780475     16342937   -4437538     830445404788     665802837480  -164642567308
+            은행           2236667       632814   -1603853      58624439870      37109603010   -21514836860
     """
     if isinstance(fromdate, datetime.datetime):
         fromdate = _datetime2string(fromdate)
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
 
-    df = krx.get_market_trading_volume_by_date(fromdate, todate, market)
-
-    if on == "전체":
-        return resample_ohlcv(df, freq, sum)
+    if ticker in ["KOSPI", "KOSDAQ", "KONEX", "ALL"]:
+        df = krx.get_market_trading_value_and_volume_on_market_by_investor(fromdate, todate, ticker, etf, etn, elw)
     else:
-        if on not in df.columns.get_level_values(0):
-            return None
-        df = pd.concat([df['전체'], df[on]], axis=1)
-        return resample_ohlcv(df, freq, sum)
+        df  = krx.get_market_trading_value_and_volume_on_ticker_by_investor(fromdate, todate, ticker)
+    return df[key]
 
 
-def get_market_trading_value_by_date(fromdate, todate, market="KOSPI", on="세션", freq='d'):
+def get_market_trading_value_by_investor(fromdate: str, todate: str, ticker: str, etf: bool=False, etn: bool=False,
+                                         elw: bool=False) -> DataFrame:
+    """투자자별 거래실적 기간합계
+
+    Args:
+        fromdate (str           ): 조회 시작 일자 (YYMMDD)
+        todate   (str           ): 조회 종료 일자 (YYMMDD)
+        ticker   (str           ): 조회 종목 티커
+          - KOSPI/KOSDAQ/KONEX/ALL을 입력할 경우 전체 시장을 조회
+        etf      (bool          ): 시장 포함 여부 - KOSPI/KOSDAQ/KONEX/ALL 시장일 경우에만 유효
+        etn      (bool          ): 시장 포함 여부 - KOSPI/KOSDAQ/KONEX/ALL 시장일 경우에만 유효
+        elw      (bool          ): 시장 포함 여부 - KOSPI/KOSDAQ/KONEX/ALL 시장일 경우에만 유효
+        detail   (bool, optional): 상세조회 여부
+
+    Returns:
+        DataFrame:
+
+            >> get_market_trading_value_by_investor("20210115", "20210122", "005930")
+
+                                 매도            매수         순매수
+            투자자구분
+            금융투자    2580964135000   2309054317700  -271909817300
+            보험         153322228800     44505136200  -108817092600
+            투신         258073006600    150715203700  -107357802900
+            사모          65167773900     60862926800    -4304847100
+            은행           3369626100      4004806100      635180000
+
+            >> get_market_trading_value_by_investor("20210115", "20210122", "KOSPI")
+
+                                  매도             매수         순매수
+            투자자구분
+            금융투자     9827334289654    9294592831462  -532741458192
+            보험          912820396542     560818697065  -352001699477
+            투신         1790231574897    1421181450288  -369050124609
+            사모          830445404788     665802837480  -164642567308
+            은행           58624439870      37109603010   -21514836860
+
+            >> get_market_trading_value_by_investor("20210115", "20210122", "KOSPI", etf=True, etn=True, elw=True)
+
+                                  매도             매수         순매수
+            투자자구분
+            금융투자    15985568261831   15006116511544  -979451750287
+            보험         1219035502445     757575677208  -461459825237
+            투신         2235561259511    1799363743367  -436197516144
+            사모          999084910863     846067212945  -153017697918
+            은행          886226324790     936210985810    49984661020
     """
-    :param fromdate: 조회 시작 일자 (YYYYMMDD)
-    :param todate  : 조회 종료 일자 (YYYYMMDD)
-    :param market  : KOSPI / KOSDAQ / KONEX
-    :param freq    : d - 일 / m - 월 / y - 년
-    :return        : 거래실적(거래대금) 추이 DataFrame
+    return __get_market_trading_value_and_volume_by_investor(fromdate, todate, ticker, etf, etn, elw, '거래대금')
+
+
+def get_market_trading_volume_by_investor(fromdate: str, todate: str, ticker: str, etf: bool=False, etn: bool=False,
+                                          elw: bool=False) -> DataFrame:
+    """투자자별 거래실적 기간합계
+
+    Args:
+        fromdate (str           ): 조회 시작 일자 (YYMMDD)
+        todate   (str           ): 조회 종료 일자 (YYMMDD)
+        ticker   (str           ): 조회 종목 티커
+          - KOSPI/KOSDAQ/KONEX/ALL을 입력할 경우 전체 시장을 조회
+        etf      (bool          ): 시장 포함 여부 - KOSPI/KOSDAQ/KONEX/ALL 시장일 경우에만 유효
+        etn      (bool          ): 시장 포함 여부 - KOSPI/KOSDAQ/KONEX/ALL 시장일 경우에만 유효
+        elw      (bool          ): 시장 포함 여부 - KOSPI/KOSDAQ/KONEX/ALL 시장일 경우에만 유효
+
+    Returns:
+        DataFrame:
+
+            >> get_market_trading_volume_by_investor("20210115", "20210122", "005930")
+
+                            매도       매수    순매수
+            투자자구분
+            금융투자    29455909   26450600  -3005309
+            보험         1757287     509535  -1247752
+            투신         2950680    1721970  -1228710
+            사모          745727     696135    -49592
+            은행           38675      46394      7719
+
+            >> get_market_trading_volume_by_investor("20210115", "20210122", "KOSPI")
+
+                             매도        매수    순매수
+            투자자구분
+            금융투자    137969209   127697577 -10271632
+            보험         15737709     8577242  -7160467
+            투신         46872846    34307243 -12565603
+            사모         20780475    16342937  -4437538
+            은행          2236667      632814  -1603853
+
+            >> get_market_trading_volume_by_investor("20210115", "20210122", "KOSPI", etf=True, etn=True, elw=True)
+
+                              매도         매수     순매수
+            투자자구분
+            금융투자    1857447354   1660620713 -196826641
+            보험          29594468     19872165   -9722303
+            투신          69348190     60601427   -8746763
+            사모          31673292     26585281   -5088011
+            은행          44279242     51690814    7411572
+    """
+    return __get_market_trading_value_and_volume_by_investor(fromdate, todate, ticker, etf, etn, elw, '거래량')
+
+
+def get_market_trading_value_by_date(fromdate: str, todate: str, ticker: str, etf: bool=False, etn: bool=False,
+                                                elw: bool=False, on: str="순매수",
+                                                detail: bool=False, freq: str='d'):
+    """투자자별 거래실적 일별추이
+
+    Args:
+        fromdate (str           ): 조회 시작 일자 (YYMMDD)
+        todate   (str           ): 조회 종료 일자 (YYMMDD)
+        ticker   (str           ): 조회 종목 티커
+          - KOSPI/KOSDAQ/KONEX/ALL을 입력할 경우 전체 시장을 조회
+        on       (str           ): 일별 추이 옵션 (매수/매도/순매수)
+        etf      (bool          ): 시장 포함 여부 - KOSPI/KOSDAQ/KONEX/ALL 시장일 경우에만 유효
+        etn      (bool          ): 시장 포함 여부 - KOSPI/KOSDAQ/KONEX/ALL 시장일 경우에만 유효
+        elw      (bool          ): 시장 포함 여부 - KOSPI/KOSDAQ/KONEX/ALL 시장일 경우에만 유효
+        detail   (bool, optional): 상세조회 여부
+        freq     (str,  optional):  d - 일 / m - 월 / y - 년
+
+    Returns:
+           DataFrame:
+
+            >> get_market_trading_value_by_date("20210115", "20210122", "005930")
+
+                            기관합계     기타법인          개인    외국인합계  전체
+            날짜
+            2021-01-15 -440769209300  25442287800  661609085600 -246282164100     0
+            2021-01-18   42323535000  22682344800   14829121700  -79835001500     0
+            2021-01-19   95523053500  -3250422500 -173484213300   81211582300     0
+            2021-01-20 -364476214000  22980632900  430115581000  -88619999900     0
+            2021-01-21  -60637506300 -27880854000  250285510000 -161767149700     0
+
+           >> get_market_trading_value_by_date("20210115", "20210122", "KOSPI")
+
+                             기관합계     기타법인           개인    외국인합계  전체
+            날짜
+            2021-01-15 -1414745885546  54444293672  2113924037705 -753622445831     0
+            2021-01-18  -278880716957 -26004926379   514299140387 -209413497051     0
+            2021-01-19   593956459208  21472281148 -1025418915468  409990175112     0
+            2021-01-20 -1234485992694  34510184945  1436793223994 -236817416245     0
+            2021-01-21  -292666343147 -13168420832   -62476631241  368311395220     0
+            2021-01-22 -1364772011847  24513231108  1608263875827 -268005095088     0
+
+        >> get_market_trading_value_by_date("20210115", "20210122", "KOSPI", etf=True, etn=True, elw=True)
+
+                             기관합계     기타법인           개인    외국인합계  전체
+            날짜
+            2021-01-15 -1536570309441  63110174617  2251672617980 -778212483156     0
+            2021-01-18  -601428111357 -27000808439   494341183227  134087736569     0
+            2021-01-19   544654406338  21787409868  -968965427363  402523611157     0
+            2021-01-20 -1227642472619  32139813590  1444113501769 -248610842740     0
+            2021-01-21  -284899892322 -19072459127   -61503500921  365475852370     0
     """
     if isinstance(fromdate, datetime.datetime):
         fromdate = _datetime2string(fromdate)
-
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
 
-    df = krx.get_market_trading_value_by_date(fromdate, todate, market)
-
-    if on == "전체":
-        return resample_ohlcv(df, freq, sum)
+    if ticker in ["KOSPI", "KOSDAQ", "KONEX", "ALL"]:
+        df = krx.get_market_trading_value_and_volume_on_market_by_date(fromdate, todate, ticker, etf, etn, elw, "거래대금",
+                                                                       on, detail)
     else:
-        df = pd.concat([df['전체'], df[on]], axis=1)
-        return resample_ohlcv(df, freq, sum)
+        df  = krx.get_market_trading_value_and_volume_on_ticker_by_date(fromdate, todate, ticker, "거래대금", on, detail)
+    return resample_ohlcv(df, freq, sum)
 
 
-def get_market_trading_value_and_volume_by_ticker(date, market="KOSPI", investor="전체", market_detail="STC"):
-    """거래실적 추이 (거래대금)
-    :param date           : 조회 일자 (YYMMDD)
-    :param market         : 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
-    :param investor       : 투자주체
-        1000 - 금융투자
-        2000 - 보험
-        3000 - 투신
-        3100 - 사모
-        4000 - 은행
-        5000 - 기타금융
-        6000 - 연기금
-        7050 - 기관
-        7100 - 기타법인
-        8000 - 개인
-        9000 - 외국인
-        9001 - 기타외국인
-        9999 - 전체
-    :param market_detail   : 세부검색항목
-        복수 선택 가능 : ["STC", "ETF", "ELW", "ETN"]
-        - STC : 일반 주식
-    :return              :
-                                  종목명  매수거래량  매도거래량   순매수거래량   매수거래대금    매도거래대금  순매수거래대금
-        034020                두산중공업    3540069     610138      2929931     55633172300     9686899000    45946273300
-        069500                KODEX 200    5169740    4230962       938778     161877705700   132616689635    29261016065
-        233740  KODEX 코스닥150 레버리지    1934459    106592       1827867      26822115070    1474326130     25347788940
-        122630           KODEX 레버리지    3778502    2157651       1620851     56537672200    32152356945    24385315255
-        102110               TIGER 200     574050     166359        407691      17971019205    5200620380     12770398825
+def get_market_trading_volume_by_date(fromdate: str, todate: str, ticker: str, etf: bool=False, etn: bool=False,
+                                      elw: bool=False, on: str="순매수",
+                                      detail: bool=False, freq: str='d'):
+    """투자자별 거래실적 일별추이
+
+    Args:
+        fromdate (str           ): 조회 시작 일자 (YYMMDD)
+        todate   (str           ): 조회 종료 일자 (YYMMDD)
+        ticker   (str           ): 조회 종목 티커
+          - KOSPI/KOSDAQ/KONEX/ALL을 입력할 경우 전체 시장을 조회
+        on       (str           ): 일별 추이 옵션 2 (매수/매도/순매수)
+        etf      (bool          ): 시장 포함 여부 - KOSPI/KOSDAQ/KONEX/ALL 시장일 경우에만 유효
+        etn      (bool          ): 시장 포함 여부 - KOSPI/KOSDAQ/KONEX/ALL 시장일 경우에만 유효
+        elw      (bool          ): 시장 포함 여부 - KOSPI/KOSDAQ/KONEX/ALL 시장일 경우에만 유효
+        detail   (bool, optional): 상세조회 여부
+        freq     (str,  optional):  d - 일 / m - 월 / y - 년
+
+    Returns:
+           DataFrame:
+
+            >> get_market_trading_volume_by_date("20210115", "20210122", "005930")
+
+                       기관합계  기타법인     개인   외국인합계  전체
+            날짜
+            2021-01-15 -5006115    288832  7485785     -2768502     0
+            2021-01-18   505669    262604   151228      -919501     0
+            2021-01-19  1139258    -34023 -2044543       939308     0
+            2021-01-20 -4157919    262408  4917655     -1022144     0
+            2021-01-21  -712099   -321732  2890389     -1856558     0
+            2021-01-22 -6384793     56478  9884815     -3556500     0
+
+           >> get_market_trading_volume_by_date("20210115", "20210122", "KOSPI")
+
+                        기관합계   기타법인      개인  외국인합계  전체
+            날짜
+            2021-01-15 -20393142    8435634  29119751   -17162243     0
+            2021-01-18  -5700054   -1198498  15316328    -8417776     0
+            2021-01-19   7216278    -246496 -24395243    17425461     0
+            2021-01-20 -23038683    -793906  31606917    -7774328     0
+            2021-01-21 -18443990   -7082091   8365421    17160660     0
+            2021-01-22 -20475792    -775181  34931834   -13680861     0
     """
-    if isinstance(date, datetime.datetime):
-        date = _datetime2string(date)
+    if isinstance(fromdate, datetime.datetime):
+        fromdate = _datetime2string(fromdate)
+    if isinstance(todate, datetime.datetime):
+        todate = _datetime2string(todate)
 
-    df = krx.get_market_trading_value_and_volume_by_ticker(date, market, investor, market_detail)
-    return df
+    if ticker in ["KOSPI", "KOSDAQ", "KONEX", "ALL"]:
+        df = krx.get_market_trading_value_and_volume_on_market_by_date(fromdate, todate, ticker, etf, etn, elw, "거래량",
+                                                                       on, detail)
+    else:
+        df  = krx.get_market_trading_value_and_volume_on_ticker_by_date(fromdate, todate, ticker, "거래량", on, detail)
+    return resample_ohlcv(df, freq, sum)
 
+
+def get_market_net_purchases_of_equities_by_ticker(fromdate: str, todate: str, market: str="KOSPI", investor: str="개인"):
+    """입력된 투자자에 대한 티커별로 나열된 순매수 상위종목
+
+    Args:
+            fromdate (str): 조회 시작 일자 (YYMMDD)
+            todate   (str): 조회 종료 일자 (YYMMDD)
+            market   (str): 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
+            investor (str): 투자자
+             - 금융투자 / 보험 / 투신 / 사모 / 은행 / 기타금융 / 연기금 / 기관합계 / 기타법인 / 개인 / 외국인 / 기타외국인 / 전체
+
+            Note : inverstor를 전체로 설정하면 순매수 금액이 0으로 나옵니다.
+
+    Returns:
+           DataFrame:
+
+           >> get_market_net_purchases_of_equities_by_ticker("20210115", "20210122", "KOSPI", "개인")
+
+                         종목명   매도거래량 매수거래량  순매수거래량   매도거래대금   매수거래대금 순매수거래대금
+            티커
+            005930     삼성전자     79567418  102852747      23285329  6918846810800  8972911580500  2054064769700
+            000270       기아차     44440252   49880626       5440374  3861283906400  4377698855000   516414948600
+            005935   삼성전자우     15849762   20011325       4161563  1207133611400  1528694164400   321560553000
+            051910       LG화학       709872     921975        212103   700823533000   908593419000   207769886000
+            096770 SK이노베이션      4848359    5515777        667418  1298854139000  1478890602000   180036463000
+    """
+    if isinstance(fromdate, datetime.datetime):
+        date = _datetime2string(fromdate)
+
+    if isinstance(todate, datetime.datetime):
+        date = _datetime2string(todate)
+
+    return krx.get_market_net_purchases_of_equities_by_ticker(fromdate, todate, market, investor)
+
+
+@deprecated(version='1.0', reason="You should use get_market_net_purchases_of_equities_by_ticker() instead")
+def get_market_trading_value_and_volume_by_ticker(fromdate: str, todate: str, market: str="KOSPI", investor: str="개인"):
+    get_market_net_purchases_of_equities_by_ticker(fromdate, todate, market, investor)
 
 # -----------------------------------------------------------------------------
 # 지수(INDEX) API
@@ -632,7 +865,7 @@ if __name__ == "__main__":
     # print(get_market_ohlcv_by_date("20190225", "20190228", "000660"))
     # df = get_market_ohlcv_by_date("20190225", "20190228", "000660", adjusted=False)
     # df = get_market_ohlcv_by_date("20040418", "20140418", "000020")
-    print(get_market_ohlcv_by_ticker("20200831"))
+    # print(get_market_ohlcv_by_ticker("20200831"))
     # print(get_market_ohlcv_by_ticker("20200831", "KOSPI"))
 
     # df = get_market_ohlcv_by_ticker("20200831", "KOSDAQ")
@@ -642,11 +875,27 @@ if __name__ == "__main__":
     # df = get_market_fundamental_by_date("20000101", "20181231", "092970", "m")
     # df = get_market_fundamental_by_date("20180301", "20180320", '005930')
     # df = get_market_fundamental_by_date("20180301", "20180320", '005930')
-    # df = get_market_trading_volume_by_date("20200322", "20200430", 'KOSPI', '세션', 'm')
-    # df = get_market_trading_value_by_date("20190101", "20200430", 'KOSPI')
-    # df = get_market_trading_value_and_volume_by_ticker("20200907", "KOSPI", "전체")
-    # df = get_market_trading_value_and_volume_by_ticker("20200907", market="KOSPI", investor="전체",
-    #                                                    market_detail=['STC', 'ELW'])
+
+
+    # print(get_market_trading_value_by_date("20210115", "20210122", "005930", on='매도'))
+    # print(get_market_trading_volume_by_date("20210115", "20210122", "KOSPI"))
+    # print(get_market_trading_volume_by_date("20210115", "20210122", "005930"))
+    # print(get_market_trading_volume_by_date("20210115", "20210122", "KOSPI", etf=True, etn=True, elw=True, detail=True))
+
+    # print(get_market_trading_value_by_investor("20210115", "20210122", "005930"))
+    # print(get_market_trading_value_by_investor("20210115", "20210122", "KOSPI"))
+    # print(get_market_trading_value_by_investor("20210115", "20210122", "KOSPI", etf=True, etn=True, elw=True))
+    # print(get_market_trading_value_by_investor("20210115", "20210122", "KOSPI", etf=True, etn=True, elw=True, detail=True))
+
+    # print(get_market_trading_value_by_investor("20210115", "20210122", "005930"))
+    # print(get_market_trading_volume_by_investor("20210115", "20210122", "KOSPI"))
+    # print(get_market_trading_volume_by_investor("20210115", "20210122", "KOSPI", etf=True, etn=True, elw=True))
+
+
+
+    # print(get_market_trading_volume_by_investor("20210115", "20210122", "005930"))
+    # print(get_market_trading_volume_by_investor("20210115", "20210122", "KOSPI"))
+
     # df = get_market_cap_by_date("20190101", "20190131", "005930")
     # df = get_market_cap_by_date("20200101", "20200430", "005930", "m")
     # df = get_market_cap_by_ticker("20200625")

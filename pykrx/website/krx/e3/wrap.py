@@ -33,7 +33,7 @@ def get_etf_ohlcv_by_date(fromdate: str, todate: str, ticker: str) -> DataFrame:
              'TDD_CLSPRC', 'ACC_TRDVOL', 'ACC_TRDVAL', 'OBJ_STKPRC_IDX']]
     df.columns = ['날짜', 'NAV', '시가', '고가', '저가', '종가', '거래량',
                   '거래대금', '기초지수']
-    df = df.replace('\W', '', regex=True)
+    df = df.replace('[^-\w]', '', regex=True)
     df = df.set_index('날짜')
     df = df.astype({"NAV": np.float32, "시가": np.uint32, "고가": np.uint32,
                     "저가": np.uint32, "종가": np.uint32, "거래량": np.uint64,

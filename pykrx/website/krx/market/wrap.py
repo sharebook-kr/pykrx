@@ -2,7 +2,10 @@ from pykrx.website.comm import dataframe_empty_handler
 from pykrx.website.krx.market.ticker import get_stock_ticker_isin
 from pykrx.website.krx.market.core import (개별종목시세, 전종목등락률, PER_PBR_배당수익률_전종목,
                                            PER_PBR_배당수익률_개별, 전종목시세, 외국인보유량_개별추이,
-                                           외국인보유량_전종목,
+                                           외국인보유량_전종목, 투자자별_순매수상위종목,
+                                           투자자별_거래실적_개별종목_기간합계, 투자자별_거래실적_개별종목_일별추이_일반,
+                                           투자자별_거래실적_개별종목_일별추이_상세, 투자자별_거래실적_전체시장_기간합계,
+                                           투자자별_거래실적_전체시장_일별추이_일반, 투자자별_거래실적_전체시장_일별추이_상세,
                                            SRT02020100, SRT02020300, SRT02010100,
                                            SRT02020400, SRT02030100, SRT02030400
                                            )
@@ -319,7 +322,7 @@ def get_exhaustion_rates_of_foreign_investment_by_ticker(date: str, market: str,
     """[12023] 외국인보유량(개별종목) - 전종목
 
     Args:
-        date          (str ): 조회 시작 일자 (YYYYMMDD)
+        date          (str ): 조회 일자 (YYYYMMDD)
         market        (str ): 조회 시장 (KOSPI/KOSDAQ/ALL)
         balance_limit (bool): 외국인보유제한종목
             - 0 : check X
@@ -347,6 +350,243 @@ def get_exhaustion_rates_of_foreign_investment_by_ticker(date: str, market: str,
                     "한도수량": np.int64, "한도소진율": np.float16})
     df = df.set_index('티커')
     return df.sort_index()
+
+
+@dataframe_empty_handler
+def get_market_trading_value_and_volume_on_ticker_by_investor(fromdate: str, todate: str, ticker: str) -> DataFrame:
+    """[12009] 투자자별 거래실적 기간합계(개별 종목)
+
+    다음 메뉴의 내용을 스크래핑 함
+
+    거래실적
+         ㄴ 투자자별 거래실적(개별종목)
+            http://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201020302
+
+    Args:
+        fromdate (str ): 조회 시작 일자 (YYMMDD)
+        todate   (str ): 조회 종료 일자 (YYMMDD)
+        ticker   (str ): 조회 종목 티커
+
+    Returns:
+        DataFrame:
+
+            >> get_market_trading_value_and_volume_on_ticker_by_investor("20210113", "20210120", "005930")
+
+                         거래량                             거래대금
+                           매도       매수    순매수            매도            매수         순매수
+            투자자구분
+            금융투자   31324444   28513421   2811023   2765702311200   2510494630400   255207680800
+            보험        1790469     561307   1229162    158120209600     49570523900   108549685700
+            투신        3966211    1486178   2480033    351753222200    130513380300   221239841900
+            사모         756726     541912    214814     67202238800     47475872700    19726366100
+            은행         105323      70598     34725      9360874400      6170507400     3190367000
+    """
+    isin = get_stock_ticker_isin(ticker)
+    df = 투자자별_거래실적_개별종목_기간합계().fetch(fromdate, todate, isin)
+
+    df = df.set_index('INVST_TP_NM')
+    df.index.name = '투자자구분'
+    df.columns = pd.MultiIndex.from_product([['거래량', '거래대금'], ['매도','매수', '순매수']])
+    df = df.replace('[^-\w]', '', regex=True)
+    df = df.replace('', '0')
+    return df.astype(np.int64)
+
+
+@dataframe_empty_handler
+def get_market_trading_value_and_volume_on_market_by_investor(fromdate: str, todate: str, market: str, etf: bool=True,
+                                                              etn: bool=True, elw: bool=True) -> DataFrame:
+    """[12008] 투자자별 거래실적 기간합계
+
+    다음 메뉴의 내용을 스크래핑 함
+
+    거래실적
+         ㄴ 투자자별 거래실적
+            http://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201020301
+
+    Args:
+        fromdate    (str ): 조회 시작 일자 (YYMMDD)
+        todate      (str ): 조회 종료 일자 (YYMMDD)
+        market      (str ): 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
+        etf         (bool): 시장 포함 여부
+        etn         (bool): 시장 포함 여부
+        elw         (bool): 시장 포함 여부
+
+    Returns:
+        DataFrame:
+
+            >> get_market_trading_value_and_volume_on_market_by_investor("20210115", "20210122", "KOSPI", True, True)
+
+                            거래량                                 거래대금
+                              매도         매수     순매수             매도             매수         순매수
+            투자자구분
+            금융투자    1857447354   1660620713 -196826641   15985568261831   15006116511544  -979451750287
+            보험          29594468     19872165   -9722303    1219035502445     757575677208  -461459825237
+            투신          69348190     60601427   -8746763    2235561259511    1799363743367  -436197516144
+            사모          31673292     26585281   -5088011     999084910863     846067212945  -153017697918
+            은행          44279242     51690814    7411572     886226324790     936210985810    49984661020
+
+            >> get_market_trading_value_and_volume_on_market_by_investor("20210115", "20210122", "KOSPI", True, True, True)
+
+                            거래량                                 거래대금
+                              매도         매수     순매수             매도             매수         순매수
+            투자자구분
+            금융투자    1857447354   1660620713 -196826641   15985568261831   15006116511544  -979451750287
+            보험          29594468     19872165   -9722303    1219035502445     757575677208  -461459825237
+            투신          69348190     60601427   -8746763    2235561259511    1799363743367  -436197516144
+            사모          31673292     26585281   -5088011     999084910863     846067212945  -153017697918
+            은행          44279242     51690814    7411572     886226324790     936210985810    49984661020
+    """
+    etf = "EF" if etf else ""
+    etn = "EN" if etn else ""
+    elw = "EW" if elw else ""
+    market = {"ALL": "ALL", "KOSPI": "STK", "KOSDAQ": "KSQ", "KONEX": "KNX"}.get(market, "ALL")
+    df = 투자자별_거래실적_전체시장_기간합계().fetch(fromdate, todate, market, etf, etn, elw)
+
+    df = df.set_index('INVST_TP_NM')
+    df.index.name = '투자자구분'
+    df.columns = pd.MultiIndex.from_product([['거래량', '거래대금'], ['매도','매수', '순매수']])
+    df = df.replace('[^-\w]', '', regex=True)
+    df = df.replace('', '0')
+    return df.astype(np.int64)
+
+
+@dataframe_empty_handler
+def get_market_trading_value_and_volume_on_market_by_date(fromdate: str, todate: str, market: str, etf: bool, etn: bool,
+                                                          elw: bool, option_a: str, option_b: str, detail_view: bool) -> DataFrame:
+    """[12008] 투자자별 거래실적
+
+    Args:
+        fromdate    (str ): 조회 시작 일자 (YYMMDD)
+        todate      (str ): 조회 종료 일자 (YYMMDD)
+        market      (str ): 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
+        etf         (bool): 시장 포함 여부
+        etn         (bool): 시장 포함 여부
+        elw         (bool): 시장 포함 여부
+        option_a    (str ): 일별 추이 옵션 1 (거래량/거래대금)
+        option_b    (str ): 일별 추이 옵션 2 (매수/매도/순매수)
+        detail_view (bool): 상세조회 여부
+
+    Returns:
+        DataFrame:
+
+                       TRD_DD     TRDVAL1     TRDVAL2        TRDVAL3      TRDVAL4     TRDVAL_TOT
+                0  2021/01/22  67,656,491   6,020,990    927,119,399  110,426,104  1,111,222,984
+                1  2021/01/21  69,180,642  13,051,423  1,168,810,381  109,023,034  1,360,065,480
+    """
+    etf = "EF" if etf else ""
+    etn = "EN" if etn else ""
+    elw = "EW" if elw else ""
+    option_a = {"거래량": 1, "거래대금": 2}.get(option_a, 1)
+    option_b = {"매도": 1, "매수": 2, "순매수": 3}.get(option_b, 3)
+    market = {"ALL": "ALL", "KOSPI": "STK", "KOSDAQ": "KSQ", "KONEX": "KNX"}.get(market, "ALL")
+
+    if detail_view:
+        df = 투자자별_거래실적_전체시장_일별추이_상세().fetch(fromdate, todate, market, etf, etn, elw, option_a, option_b)
+        df.columns = ['날짜', '금융투자', '보험', '투신', '사모', '은행', '기타금융', '연기금', '기타법인', '개인', '외국인',
+            '기타외국인', '전체']
+    else:
+        df = 투자자별_거래실적_전체시장_일별추이_일반().fetch(fromdate, todate, market, etf, etn, elw, option_a, option_b)
+        df.columns = ['날짜', '기관합계', '기타법인', '개인', '외국인합계', '전체']
+
+    df = df.set_index('날짜')
+    df.index = pd.to_datetime(df.index, format='%Y/%m/%d')
+    df = df.replace('[^-\w]', '', regex=True)
+    df = df.replace('', '0')
+    df = df.astype(np.int64)
+    return df.sort_index()
+
+
+@dataframe_empty_handler
+def get_market_trading_value_and_volume_on_ticker_by_date(fromdate: str, todate: str, ticker: str, option_a: str, option_b: str,
+                                                          detail_view: bool) -> DataFrame:
+    """[12008] 투자자별 거래실적
+
+    Args:
+        fromdate    (str ): 조회 시작 일자 (YYMMDD)
+        todate      (str ): 조회 종료 일자 (YYMMDD)
+        ticker      (str ): 조회 종목 티커
+        option_a    (str ): 일별 추이 옵션 1 (거래량/거래대금)
+        option_b    (str ): 일별 추이 옵션 2 (매수/매도/순매수)
+        detail_view (bool): 상세조회 여부
+
+    Returns:
+        DataFrame:
+
+                       TRD_DD     TRDVAL1     TRDVAL2        TRDVAL3      TRDVAL4     TRDVAL_TOT
+                0  2021/01/22  67,656,491   6,020,990    927,119,399  110,426,104  1,111,222,984
+                1  2021/01/21  69,180,642  13,051,423  1,168,810,381  109,023,034  1,360,065,480
+    """
+    isin = get_stock_ticker_isin(ticker)
+
+    option_a = {"거래량": 1, "거래대금": 2}.get(option_a, 1)
+    option_b = {"매도": 1, "매수": 2, "순매수": 3}.get(option_b, 3)
+
+    if detail_view:
+        df = 투자자별_거래실적_개별종목_일별추이_상세().fetch(fromdate, todate, isin, option_a, option_b)
+        df.columns = ['날짜', '금융투자', '보험', '투신', '사모', '은행', '기타금융', '연기금', '기타법인', '개인', '외국인',
+            '기타외국인', '전체']
+    else:
+        df = 투자자별_거래실적_개별종목_일별추이_일반().fetch(fromdate, todate, isin, option_a, option_b)
+        df.columns = ['날짜', '기관합계', '기타법인', '개인', '외국인합계', '전체']
+
+    df = df.set_index('날짜')
+    df.index = pd.to_datetime(df.index, format='%Y/%m/%d')
+    df = df.replace('[^-\w]', '', regex=True)
+    df = df.replace('', '0')
+    df = df.astype(np.int64)
+    return df.sort_index()
+
+
+@dataframe_empty_handler
+def get_market_net_purchases_of_equities_by_ticker(fromdate: str, todate: str, market: str, investor: str) -> DataFrame:
+    """[12010] 투자자별 순매수상위종목
+
+    Args:
+        fromdate (str): 조회 시작 일자 (YYYYMMDD)
+        todate   (str): 조회 종료 일자 (YYYYMMDD)
+        market   (str): 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
+        investor (str): 투자자
+             - 1000 - 금융투자
+             - 2000 - 보험
+             - 3000 - 투신
+             - 3100 - 사모
+             - 4000 - 은행
+             - 5000 - 기타금융
+             - 6000 - 연기금
+             - 7050 - 기관합계
+             - 7100 - 기타법인
+             - 8000 - 개인
+             - 9000 - 외국인
+             - 9001 - 기타외국인
+             - 9999 - 전체
+
+    Returns:
+        DataFrame:
+                       종목명  매도거래량  매수거래량  순매수거래량  매도거래대금  매수거래대금  순매수거래대금
+            티커
+            034730         SK     1581633     1767494        185861  448072973000  511094137000     63021164000
+            010130   고려아연      188718      296707        107989   79480106000  126281029000     46800923000
+            039490   키움증권      374940      715079        340139   53685623500   99770954000     46085330500
+            011070   LG이노텍      743878      929876        185998  137990915000  173082664000     35091749000
+            352820     빅히트      247298      442325        195027   39722470000   73131351500     33408881500
+    """
+    market = {"ALL": "ALL", "KOSPI": "STK", "KOSDAQ": "KSQ", "KONEX": "KNX"}.get(market, "ALL")
+    investor = {"금융투자": 1000, "보험": 2000, "투신": 3000, "사모": 3100, "은행": 4000,
+                "기타금융": 5000, "연기금": 6000, "기관": 7050, "기타법인": 7100,
+                "개인": 8000, "외국인": 9000, "기타외국인": 9001, "전체": 9999}.get(investor, "9999")
+
+    df = 투자자별_순매수상위종목().fetch(fromdate, todate, market, investor)
+
+    df.columns = ['티커', '종목명', '매도거래량', '매수거래량', '순매수거래량', '매도거래대금', '매수거래대금', '순매수거래대금']
+    df = df.replace('/', '', regex=True)
+    df = df.replace(',', '', regex=True)
+    df = df.astype(
+        {'티커': str, '종목명': str, '매수거래량': np.int32, '매도거래량': np.int32,
+         '순매수거래량': np.int32, '매수거래대금': np.int64, '매도거래대금': np.int64,
+         '순매수거래대금': np.int64})
+    df['티커'] = df['티커'].apply(lambda x: x.zfill(6))
+    return df.set_index('티커')
+
 
 # ------------------------------------------------------------------------------------------
 # index
@@ -717,18 +957,21 @@ def get_shorting_balance_top50(date, market="KOSPI"):
 
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
-    # df = get_market_ohlcv_by_date("20150720", "20150810", "005930")
-    # df = get_market_ohlcv_by_ticker("20200831", "ALL")
-    # df = get_market_ticker_and_name("20190405", "KOSPI")
-    # df = get_market_fundamental_by_ticker("20190401", "ALL")
-    # df = get_market_fundamental_by_date("20150720", "20150810", "KR7005930003")
-    # df = get_market_cap_by_date("20150720", "20150810", "005930")
-    # df = get_market_cap_by_ticker("20200625", "ALL")
-    # df = get_market_price_change_by_ticker("20040418", "20040430")
-    # df = get_exhaustion_rates_of_foreign_investment_by_ticker("20200703", "ALL", 1)
-    df = get_exhaustion_rates_of_foreign_investment_by_date("20210108", "20210115", "005930")
+    # print(get_market_ohlcv_by_date("20150720", "20150810", "005930"))
+    # print(get_market_ohlcv_by_ticker("20200831", "ALL"))
+    # print(get_market_ticker_and_name("20190405", "KOSPI"))
+    # print(get_market_fundamental_by_ticker("20190401", "ALL"))
+    # print(get_market_fundamental_by_date("20150720", "20150810", "KR7005930003"))
+    # print(get_market_cap_by_date("20150720", "20150810", "005930"))
+    # print(get_market_cap_by_ticker("20200625", "ALL"))
+    # print(get_market_price_change_by_ticker("20040418", "20040430"))
+    # print(get_exhaustion_rates_of_foreign_investment_by_ticker("20200703", "ALL", 1))
+    # print(get_exhaustion_rates_of_foreign_investment_by_date("20210108", "20210115", "005930"))
+    # print(get_market_trading_value_and_volume_by_ticker("20201220", "20210120", "KOSPI", "연기금"))
 
-    # df = get_market_trading_value_and_volume_by_ticker("20200907", "KOSPI", "연기금", "STC")
+    print(get_market_trading_value_and_volume_on_market_by_date("20210115", "20210122", "KOSPI", True, True, True, "거래대금", "순매수", False))
+    # print(get_market_trading_value_and_volume_on_ticker_by_date("20210115", "20210122", "005930", "거래대금", "순매수", False))
+    # print(get_market_trading_value_and_volume_on_ticker_by_date("20210115", "20210122", "005930", "거래대금", "순매수", True))
 
     # index
     # df = get_index_listing_date("KOSPI")
@@ -748,4 +991,3 @@ if __name__ == "__main__":
     # df = get_shorting_volume_top50("20190211")
     # df = get_shorting_balance_by_date("20190211", "20190215", "KR7005930003")
     # df = get_shorting_balance_top50("20190401")
-    print(df.head())
