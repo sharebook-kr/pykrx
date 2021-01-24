@@ -559,13 +559,13 @@ class 전체지수등락률(KrxWebIo):
     def bld(self):
         return "dbms/MDC/STAT/standard/MDCSTAT00201"
 
-    def fetch(self, fromdate: str, todate: str, market: str) -> DataFrame:
+    def fetch(self, strtDd: str, endDd: str, idxIndMidclssCd: str) -> DataFrame:
         """[11002] 전체지수 등락률
 
         Args:
-            fromdate (str): 조회 시작 일자 (YYMMDD)
-            todate   (str): 조회 종료 일자 (YYMMDD)
-            market   (str): 검색 시장
+            strtDd          (str): 조회 시작 일자 (YYMMDD)
+            endDd           (str): 조회 종료 일자 (YYMMDD)
+            idxIndMidclssCd (str): 검색 시장
              - 01: KRX
              - 02: KOSPI
              - 03: KOSDAQ
@@ -580,7 +580,7 @@ class 전체지수등락률(KrxWebIo):
                     3  KRX Mid 200    1,751.19    1,722.32       2      -28.87   -1.65  2,807,696,801   27,059,313,040,039
                     4   KRX 자동차    2,046.67    2,298.05       1      251.38   12.28    288,959,592   29,886,192,965,797
         """
-        result = self.read(idxIndMidclssCd=market, strtDd=fromdate, endDd=todate)
+        result = self.read(idxIndMidclssCd=idxIndMidclssCd, strtDd=strtDd, endDd=endDd)
         return DataFrame(result['output'])
 
 
@@ -610,24 +610,35 @@ class 지수구성종목(KrxWebIo):
         return DataFrame(result['output'])
 
 
-################################################################################
-# Shorting
-class SRT02010100(KrxWebIo):
+# ------------------------------------------------------------------------------------------
+# shorting
+class 개별종목_공매도_종합정보(KrxWebIo):
     @property
     def bld(self):
-        return "SRT/02/02010100/srt02010100"
+        return "dbms/MDC/STAT/srt/MDCSTAT30001"
 
-    @staticmethod
-    def fetch(fromdate, todate, isin):
-        """02010100 공매도 종합 현황
-           http://short.krx.co.kr/contents/SRT/02/02010100/SRT02010100.jsp
-        :param fromdate: 조회 시작 일자 (YYMMDD)
-        :param todate: 조회 종료 일자 (YYMMDD)
-        :param isin:
-        :return: 공매도 종합 현황 DataFrame
+    def fetch(self, strtDd: str, endDd: str, isuCd: str) -> DataFrame:
+        """[31001] 개별종목 공매도 종합정보
+
+        Args:
+            strtDd (str): 조회 시작 일자 (YYMMDD)
+            endDd  (str): 조회 종료 일자 (YYMMDD)
+            isuCd  (str): 조회 종목 ISIN
+
+        Returns:
+            DataFrame:
+
+                >> 개별종목_공매도_종합정보().fetch("20210101", "20210115", "KR7005930003")
+
+                       TRD_DD CVSRTSELL_TRDVOL STR_CONST_VAL1 CVSRTSELL_TRDVAL   STR_CONST_VAL2
+                0  2021/01/15                0      3,365,984                0  296,206,592,000
+                1  2021/01/14            1,432      3,374,585      127,498,700  302,700,274,500
+                2  2021/01/13              228      3,268,098       20,571,200  293,148,390,600
+                3  2021/01/12            5,144      3,659,530      466,020,200  331,553,418,000
+                4  2021/01/11              204      3,152,160       18,686,400  286,846,560,000
         """
-        result = SRT02010100().post(isu_cd=isin, strt_dd=fromdate, end_dd=todate)
-        return DataFrame(result['block1'])
+        result = self.read(isuCd=isuCd, strtDd=strtDd, endDd=endDd)
+        return DataFrame(result['OutBlock_1'])
 
 
 class SRT02020100(KrxFileIo):
@@ -645,7 +656,7 @@ class SRT02020100(KrxFileIo):
         :return:  종목별 공매도 거래 현황 DataFrame
         """
 
-        result = self.post(mkt_tp_cd=market, isu_cd=isin, strt_dd=fromedata, end_dd=todate)
+        result = self.read(mkt_tp_cd=market, isu_cd=isin, strt_dd=fromedata, end_dd=todate)
         return pd.read_excel(result)
 
 
@@ -668,7 +679,7 @@ class SRT02020300(KrxWebIo):
         1         970,406         41,242      8,018,997         13,141      9,043,786  2018/01/18
         2       1,190,006         28,327      8,274,090          6,465      9,498,888  2018/01/17
         """
-        result = SRT02020300().post(mkt_tp_cd=market, inqCondTpCd=inquery, strt_dd=fromdate, end_dd=todate)
+        result = SRT02020300().read(mkt_tp_cd=market, inqCondTpCd=inquery, strt_dd=fromdate, end_dd=todate)
         return DataFrame(result['block1'])
 
 
@@ -690,7 +701,7 @@ class SRT02020400(KrxWebIo):
             2  27,690,715,500  2018/01/05    9,034,795,500             한샘  KR7009240003  -5.233    3       1.543      2,131,924,250        4.238         32.628         21.142
             3   2,444,863,350  2018/01/05      701,247,550             동서  KR7026960005  -0.530    4       2.820        255,763,771        2.742         28.682         10.172
         """
-        result = SRT02020400().post(mkt_tp_cd=market, schdate=date)
+        result = SRT02020400().read(mkt_tp_cd=market, schdate=date)
         return DataFrame(result['block1'])
 
 
@@ -714,7 +725,7 @@ class SRT02030100(KrxFileIo):
             3  14,594,580,000  200,200    0.03    SK하이닉스  KR7000660001  728,002,365  53,071,372,408,500  4      7  2018/01/10
         """
 
-        result = self.post(mkt_tp_cd=market, strt_dd=fromdate, end_dd=todate, isu_cd=isin)
+        result = self.read(mkt_tp_cd=market, strt_dd=fromdate, end_dd=todate, isu_cd=isin)
         return pd.read_excel(result)
 
 
@@ -736,7 +747,7 @@ class SRT02030400(KrxWebIo):
             2  147,469,396,800  9,131,232    8.58     두산중공업  KR7034020008  106,463,061  1,719,378,435,150    3       2018/01/05  20180105
             3  179,776,282,650  6,002,547    8.38         GS건설  KR7006360002   71,675,237  2,146,673,348,150    4       2018/01/05  20180105
         """
-        result = SRT02030400().post(mkt_tp_cd=market, schdate=date)
+        result = SRT02030400().read(mkt_tp_cd=market, schdate=date)
         return DataFrame(result['block1'])
 
 
@@ -752,8 +763,8 @@ if __name__ == "__main__":
 
     # print(투자자별_거래실적_전체시장_기간합계().fetch("20210115", "20210122", "ALL", "", "", ""))
     # print(투자자별_거래실적_전체시장_기간합계().fetch("20210115", "20210122", "STK", "EF", "", ""))
-    print(투자자별_거래실적_전체시장_일별추이_일반().fetch("20210115", "20210122", "STK", "", "", "", 1, 1))
-    print(투자자별_거래실적_전체시장_일별추이_상세().fetch("20210115", "20210122", "STK", "", "", "", 1, 1))
+    # print(투자자별_거래실적_전체시장_일별추이_일반().fetch("20210115", "20210122", "STK", "", "", "", 1, 1))
+    # print(투자자별_거래실적_전체시장_일별추이_상세().fetch("20210115", "20210122", "STK", "", "", "", 1, 1))
     # ---
     # print(투자자별_거래실적_개별종목_기간합계().fetch("20210113", "20210120", "KR7005930003"))
     # print(투자자별_거래실적_개별종목_일별추이_일반().fetch("20210113", "20210120", "KR7005930003", 1, 1))

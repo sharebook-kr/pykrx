@@ -5,10 +5,9 @@ from pykrx.website.krx.market.core import (개별종목시세, 전종목등락�
                                            외국인보유량_전종목, 투자자별_순매수상위종목,
                                            투자자별_거래실적_개별종목_기간합계, 투자자별_거래실적_개별종목_일별추이_일반,
                                            투자자별_거래실적_개별종목_일별추이_상세, 투자자별_거래실적_전체시장_기간합계,
-                                           투자자별_거래실적_전체시장_일별추이_일반, 투자자별_거래실적_전체시장_일별추이_상세,
-                                           SRT02020100, SRT02020300, SRT02010100,
-                                           SRT02020400, SRT02030100, SRT02030400
-                                           )
+                                           투자자별_거래실적_전체시장_일별추이_일반, 투자자별_거래실적_전체시장_일별추이_상세)
+from pykrx.website.krx.market.core import (개별종목_공매도_종합정보, SRT02020300,
+                                           SRT02020400, SRT02030100, SRT02030400)
 from pykrx.website.krx.market.core import (전체지수기본정보, 개별지수시세, 전체지수등락률, 지수구성종목)
 import numpy as np
 import pandas as pd
@@ -739,10 +738,10 @@ def get_index_portfolio_deposit_file(date: str, ticker: str) -> list:
     return df['ISU_SRT_CD'].tolist()
 
 
-################################################################################
-# Shorting
+# ------------------------------------------------------------------------------------------
+# shorting
 @dataframe_empty_handler
-def get_shorting_status_by_date(fromdate, todate, isin):
+def get_shorting_status_by_date(fromdate, todate, ticker):
     """일자별 공매도 종합 현황
     :param fromdate: 조회 시작 일자   (YYYYMMDD)
     :param todate  : 조회 종료 일자 (YYYYMMDD)
@@ -754,28 +753,22 @@ def get_shorting_status_by_date(fromdate, todate, isin):
         20180108   32411  167754   2528196100  13118362800
         20180109   50486  175261   3885385100  13477570900
     """
-    df = SRT02010100().fetch(fromdate, todate, isin)
+    isin = get_stock_ticker_isin(ticker)
+    df = 개별종목_공매도_종합정보().fetch(fromdate, todate, isin)
 
-    # (T+2)일 이전의 제공하기 때문에 (T), (T+1)의 비어있는 데이터를 제거
-    today = datetime.datetime.now()
-    # - today.isocalendar()[2] : 월(1)/화(2)/수(3)/목(4)/금(5)/토(6)/일(7) 반환
-    # - base에는 최근 영업일이 저장
-    base = today - datetime.timedelta(max(today.isocalendar()[2] - 5, 0))
-    elapsedTime = base - datetime.datetime.strptime(todate + "0900",
-                                                    '%Y%m%d%H%M')
-    day_offset = 2 - min(int(elapsedTime.total_seconds() / 3600 / 24), 2)
-    df = df.iloc[day_offset:]
-
-    df = df[['trd_dd', 'cvsrtsell_trdvol', 'str_const_val1',
-             'cvsrtsell_trdval', 'str_const_val2']]
-    df.columns = ['날짜', '공매도', '잔고', '공매도금액', '잔고금액']
-    df = df.replace('/', '', regex=True)
+    df.columns = ['날짜', '거래량', '잔고수량', '거래대금', '잔고금액']
     df = df.set_index('날짜')
-    df = df.replace('-', '0', regex=True)
-    df = df.replace(',', '', regex=True)
-    df = df.astype({"공매도": np.int32, "잔고": np.int32,
-                    "공매도금액": np.int64, "잔고금액": np.int64})
-    df.index = pd.to_datetime(df.index, format='%Y%m%d')
+    df.index = pd.to_datetime(df.index, format='%Y/%m/%d')
+
+    # '-'는 데이터가 집계되지 않은 것을 의미한다.
+    # 최근 2일 간의 데이터 ([:2])에서 '-'가 하나는 행의 갯수를 계산함
+    idx = (df.iloc[:2] == '-').any(axis=1).sum()
+    df = df.iloc[idx:]
+
+    df = df.replace('\D', '', regex=True)
+    df = df.replace('', 0)
+    df = df.astype({"거래량": np.int32, "잔고수량": np.int32,
+                    "거래대금": np.int64, "잔고금액": np.int64})
     return df.sort_index()
 
 
@@ -956,37 +949,5 @@ def get_shorting_balance_top50(date, market="KOSPI"):
 
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
+    print(get_shorting_status_by_date("20201222", "20210122", "005930"))
     # print(get_market_ohlcv_by_date("20150720", "20150810", "005930"))
-    # print(get_market_ohlcv_by_ticker("20200831", "ALL"))
-    # print(get_market_ticker_and_name("20190405", "KOSPI"))
-    # print(get_market_fundamental_by_ticker("20190401", "ALL"))
-    # print(get_market_fundamental_by_date("20150720", "20150810", "KR7005930003"))
-    # print(get_market_cap_by_date("20150720", "20150810", "005930"))
-    # print(get_market_cap_by_ticker("20200625", "ALL"))
-    # print(get_market_price_change_by_ticker("20040418", "20040430"))
-    # print(get_exhaustion_rates_of_foreign_investment_by_ticker("20200703", "ALL", 1))
-    # print(get_exhaustion_rates_of_foreign_investment_by_date("20210108", "20210115", "005930"))
-    # print(get_market_trading_value_and_volume_by_ticker("20201220", "20210120", "KOSPI", "연기금"))
-
-    print(get_market_trading_value_and_volume_on_market_by_date("20210115", "20210122", "KOSPI", True, True, True, "거래대금", "순매수", False))
-    # print(get_market_trading_value_and_volume_on_ticker_by_date("20210115", "20210122", "005930", "거래대금", "순매수", False))
-    # print(get_market_trading_value_and_volume_on_ticker_by_date("20210115", "20210122", "005930", "거래대금", "순매수", True))
-
-    # index
-    # df = get_index_listing_date("KOSPI")
-    # df = get_index_ohlcv_by_date("20190408", "20190412", "2001")
-    # df = get_index_price_change_by_ticker("20200520", "20200527", "KOSDAQ")
-    # df = get_index_portfolio_deposit_file("20210115", "1004")
-    # df = get_market_trading_volume_by_date("20200519", "20200526", 'KOSDAQ')
-    # df = get_market_trading_volume_by_date("20200519", "20200526", 'KOSDAQ')
-    # df = get_market_trading_value_by_date("20200519", "20200526", 'kospi')
-
-    # shoring
-    # df = get_shorting_status_by_date("20190401", "20190405", "KR7005930003")
-    # df = get_shorting_volume_by_ticker("20190211", "KOSPI")
-    # df = get_shorting_volume_by_date("20200101", "20200115", "KR7005930003", "KOSPI")
-    # df = get_shorting_investor_by_date("20190401", "20190405", "KOSDAQ", "거래량")
-    # df = get_shorting_investor_by_date("20190401", "20190405", "KR7005930003", "거래대금")
-    # df = get_shorting_volume_top50("20190211")
-    # df = get_shorting_balance_by_date("20190211", "20190215", "KR7005930003")
-    # df = get_shorting_balance_top50("20190401")

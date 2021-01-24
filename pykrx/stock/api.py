@@ -814,7 +814,6 @@ def get_index_price_change_by_ticker(fromdate, todate, market="KOSPI"):
 # -----------------------------------------------------------------------------
 
 def get_shorting_status_by_date(fromdate, todate, ticker):
-    isin = krx.get_stock_ticker_isin(ticker)
     return krx.get_shorting_status_by_date(fromdate, todate, isin)
 
 
