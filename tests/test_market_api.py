@@ -4,6 +4,22 @@ import pandas as pd
 import numpy as np
 
 
+class GetBusinessDaysTest(unittest.TestCase):
+    def test_every_month(self):
+        year = 2020
+        for month in range(1, 13):
+            days = stock.get_previous_business_days(year=year, month=month)
+            self.assertNotEqual(len(days), 0)
+            self.assertIsInstance(days, list)
+            self.assertIsInstance(days[0], pd._libs.tslibs.timestamps.Timestamp)
+
+    def test_days_for_a_specified_period_of_time(self):
+        days = stock.get_previous_business_days(fromdate="20200101", todate="20200115")
+        self.assertNotEqual(len(days), 0)
+        self.assertIsInstance(days, list)
+        self.assertIsInstance(days[0], pd._libs.tslibs.timestamps.Timestamp)
+
+
 class NetPurchasesOfEquitiesByTickerTest(unittest.TestCase):
     def test_net_purchases_of_equities_is_same_0(self):
         df = stock.get_market_net_purchases_of_equities_by_ticker("20210115", "20210122")
@@ -220,7 +236,6 @@ class TradingVolumeByDateTest(unittest.TestCase):
         # 2021-01-20 -4157919  262408  4917655   -1022144     0
         # 2021-01-21  -712099 -321732  2890389   -1856558     0
         df = stock.get_market_trading_volume_by_date("20210115", "20210122", "005930")
-
         temp = df.iloc[0:5, 0] == np.array([-5006115, 505669, 1139258, -4157919, -712099])
         self.assertEqual(temp.sum(), 5)
         self.assertIsInstance(df.index   , pd.core.indexes.datetimes.DatetimeIndex)

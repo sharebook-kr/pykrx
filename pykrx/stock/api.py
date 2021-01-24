@@ -89,24 +89,48 @@ def get_market_ticker_name(ticker: str) -> str:
     return krx.get_stock_name(ticker)
 
 
-def get_business_days(year: int, mon: int) -> list:
-    """영업일을 조회해서 리스트로 반환
+def __get_business_days_0(year: int, month: int):
+    strt = f"{year}{month:02}01"
+    if month == 12:
+        last = f"{year+1}0101"
+    else:
+        last = f"{year}{month+1:02}01"
+    df = krx.get_market_ohlcv_by_date(strt, last, "000020")
+    cond = df.index.month[0] == df.index.month
+    return df.index[cond].to_list()
 
-    Args:
-        year (int): 4자리 년도
-        mon  (int): 월
+
+def __get_business_days_1(strt: str, last: str):
+    df = krx.get_market_ohlcv_by_date(strt, last, "000020")
+    return df.index.to_list()
+
+
+def get_previous_business_days(**kwargs) -> list:
+    """과거의 영업일 조회
 
     Returns:
-        list: 지정된 월의 영업일을 조회
+        list: 영업일을 pandas의 Timestamp로 저장해서 리스트로 반환
 
-    Note: 과거의 영업일만을 반환
+        >> get_previous_business_days(year=2020, month=10)
+         -> 10월의 영업일을 조회
+
+        >> get_previous_business_days(fromdate="20200101", todate="20200115")
+         -> 주어진 기간 동안의 영업일을 조회
+
     """
-    strt = "{}{:02d}01".format(year, mon)
-    last = "{}{:02d}01".format(year, mon+1)
-    df = get_market_ohlcv_by_date(strt, last, "000020")
-    if df.index[-1].month != int(mon):
-        df = df.iloc[:-1]
-    return df.index.tolist()
+    if "year" in kwargs and "month" in kwargs:
+        return __get_business_days_0(kwargs['year'], kwargs['month'])
+
+    elif 'fromdate' in kwargs and "todate" in kwargs:
+        return __get_business_days_1(kwargs['fromdate'], kwargs['todate'])
+    else:
+        print("This option is not supported.")
+        return []
+
+
+@deprecated(version='1.1', reason="You should use get_previous_business_days() instead")
+def get_business_days(year, month) -> list:
+    return get_previous_business_days(year=year, month=month)
 
 
 def get_market_ohlcv_by_date(fromdate: str, todate: str, ticker: str, freq: str='d', adjusted: bool=True,
@@ -661,7 +685,7 @@ def get_market_net_purchases_of_equities_by_ticker(fromdate: str, todate: str, m
     return krx.get_market_net_purchases_of_equities_by_ticker(fromdate, todate, market, investor)
 
 
-@deprecated(version='1.0', reason="You should use get_market_net_purchases_of_equities_by_ticker() instead")
+@deprecated(version='1.1', reason="You should use get_market_net_purchases_of_equities_by_ticker() instead")
 def get_market_trading_value_and_volume_by_ticker(fromdate: str, todate: str, market: str="KOSPI", investor: str="개인"):
     get_market_net_purchases_of_equities_by_ticker(fromdate, todate, market, investor)
 
