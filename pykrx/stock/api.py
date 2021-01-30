@@ -302,8 +302,8 @@ def get_exhaustion_rates_of_foreign_investment_by_ticker(date: str, market: str=
         date          (str ): 조회 시작 일자 (YYYYMMDD)
         market        (str ): 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
         balance_limit (bool): 외국인보유제한종목
-            - 0 : check X
-            - 1 : check O
+            - False : check X
+            - True  : check O
 
     Returns:
         DataFrame:
@@ -889,89 +889,5 @@ def get_etf_tracking_error(fromdate, todate, ticker):
 
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
-    # tickers = get_market_ticker_list()
-    # print(tickers)
-    # for ticker in tickers:
-    #     name = get_market_ticker_name(ticker)
-    #     print(ticker, name)
-    # tickers = get_market_ticker_list("20190225")
-    # print(tickers)
-    # tickers = get_market_ticker_list()
-    # tickers = get_market_ticker_list("20190225", "KOSDAQ")
-    # tickers = get_market_ticker_list("20190225", "ALL")
-    # print(tickers)
-    # df = get_market_ticker_name("000660")
-    # print(get_market_ohlcv_by_date("20190225", "20190228", "000660"))
-    # df = get_market_ohlcv_by_date("20190225", "20190228", "000660", adjusted=False)
-    # df = get_market_ohlcv_by_date("20040418", "20140418", "000020")
-    # print(get_market_ohlcv_by_ticker("20200831"))
-    # print(get_market_ohlcv_by_ticker("20200831", "KOSPI"))
-
-    # df = get_market_ohlcv_by_ticker("20200831", "KOSDAQ")
-    # df = get_market_price_change_by_ticker("20190624", "20190630")
-    # df = get_market_ohlcv_by_date("20180101", "20181231", "000660", "y")
-    # df = get_market_fundamental_by_ticker("20180305")
-    # df = get_market_fundamental_by_date("20000101", "20181231", "092970", "m")
-    # df = get_market_fundamental_by_date("20180301", "20180320", '005930')
-    # df = get_market_fundamental_by_date("20180301", "20180320", '005930')
-
-
-    # print(get_market_trading_value_by_date("20210115", "20210122", "005930", on='매도'))
-    # print(get_market_trading_volume_by_date("20210115", "20210122", "KOSPI"))
-    # print(get_market_trading_volume_by_date("20210115", "20210122", "005930"))
-    # print(get_market_trading_volume_by_date("20210115", "20210122", "KOSPI", etf=True, etn=True, elw=True, detail=True))
-
-    # print(get_market_trading_value_by_investor("20210115", "20210122", "005930"))
-    # print(get_market_trading_value_by_investor("20210115", "20210122", "KOSPI"))
-    # print(get_market_trading_value_by_investor("20210115", "20210122", "KOSPI", etf=True, etn=True, elw=True))
-    # print(get_market_trading_value_by_investor("20210115", "20210122", "KOSPI", etf=True, etn=True, elw=True, detail=True))
-
-    # print(get_market_trading_value_by_investor("20210115", "20210122", "005930"))
-    # print(get_market_trading_volume_by_investor("20210115", "20210122", "KOSPI"))
-    # print(get_market_trading_volume_by_investor("20210115", "20210122", "KOSPI", etf=True, etn=True, elw=True))
-
-
-
-    # print(get_market_trading_volume_by_investor("20210115", "20210122", "005930"))
-    # print(get_market_trading_volume_by_investor("20210115", "20210122", "KOSPI"))
-
-    # df = get_market_cap_by_date("20190101", "20190131", "005930")
-    # df = get_market_cap_by_date("20200101", "20200430", "005930", "m")
-    # df = get_market_cap_by_ticker("20200625")
-    # df = get_exhaustion_rates_of_foreign_investment_by_ticker("20200703")
-    # ticker_list = get_index_ticker_list()
-    # for ticker in ticker_list:
-    #     print(ticker, get_index_ticker_name(ticker))
-    # print (ticker_list)
-    # df = get_index_listing_date("KOSPI")
-    # tickers = get_index_ticker_list()
-    # tickers = get_index_ticker_list("20190225", "KOSDAQ")
-    # print(tickers)
-    # for ticker in get_index_ticker_list():
-    #     print(ticker, get_index_name(ticker))
-    # df = get_index_ohlcv_by_date("20190101", "20190228", "1009")
-    # pdf = get_index_portfolio_deposit_file("1005")
-    # print(len(pdf), pdf)
-    # df = get_index_ohlcv_by_date("20190101", "20190228", "1001", "m")
-    # df = get_index_price_change_by_name("20200520", "20200527", "KOSDAQ")
-    # print(get_index_portfolio_deposit_file("20190412", "2001"))
-    # df = krx.IndexTicker().get_id("코스피 200", "20000201")
-    # df = get_index_portfolio_deposit_file("20200916", "1001")
-
-    # df = get_shorting_status_by_date("20181210", "20181212", "005930")
-    # df = get_shorting_investor_volume_by_date("20190401", "20190405", "KOSPI")
-    # df = get_shorting_investor_price_by_date("20190401", "20190405", "KOSPI")
-    # df = get_shorting_volume_by_ticker("20190211", "KOSPI")
-    # df = get_shorting_volume_by_date("20200101", "20200115", "005930")
-
-    # df = get_shorting_volume_top50("20190401", "KOSPI")
-    # df = get_shorting_balance_by_date("20190401", "20190405", "005930")
-    # df = get_shorting_balance_top50("20190401", "KOSDAQ")
-
-    # print(get_etf_ticker_list())
-    # print(get_etf_isin("346000"))
-    # print(get_etf_ohlcv_by_date("20200101", "20200401", "295820"))
-    # print(get_etf_portfolio_deposit_file("252650", "20190329"))
-    # print(get_etf_price_deviation("20200101", "20200401", "295820"))
-    # print(get_etf_tracking_error("20200101", "20200401", "295820"))
-    # print(df)
+    df = get_exhaustion_rates_of_foreign_investment_by_ticker('20210118', "KOSPI")
+    print(len(df))

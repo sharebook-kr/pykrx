@@ -342,7 +342,7 @@ def get_exhaustion_rates_of_foreign_investment_by_ticker(date: str, market: str,
             020560  223235294   13871465   6.210938  111595323  12.429688
     """
     market = {"ALL": "ALL", "KOSPI": "STK", "KOSDAQ": "KSQ", "KONEX": "KNX"}.get(market, "ALL")
-    balance_limit = 1 if True else 0
+    balance_limit = 1 if balance_limit else 0
     df = 외국인보유량_전종목().fetch(date, market, balance_limit)
 
     df = df[['ISU_SRT_CD', 'LIST_SHRS', 'FORN_HD_QTY', 'FORN_SHR_RT', 'FORN_ORD_LMT_QTY', 'FORN_LMT_EXHST_RT']]
