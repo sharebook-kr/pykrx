@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 
 
-class GetBusinessDaysTest(unittest.TestCase):
+class StockBusinessDaysTest(unittest.TestCase):
     def test_every_month(self):
         year = 2020
         for month in range(1, 13):
@@ -20,7 +20,29 @@ class GetBusinessDaysTest(unittest.TestCase):
         self.assertIsInstance(days[0], pd._libs.tslibs.timestamps.Timestamp)
 
 
-class OhlcvByTickerTest(unittest.TestCase):
+class StockOhlcvByDateTest(unittest.TestCase):
+    def test_ohlcv_simple_call(self):
+        df = stock.get_market_ohlcv_by_date("20210118", "20210126", "005930")
+        #              시가   고가   저가   종가    거래량
+        # 날짜
+        # 2021-01-18  86600  87300  84100  85000  43227951
+        # 2021-01-19  84500  88000  83600  87000  39895044
+        # 2021-01-20  89000  89000  86500  87200  25211127
+        # 2021-01-21  87500  88600  86500  88100  25318011
+        # 2021-01-22  89000  89700  86800  86800  30861661
+        temp = df.iloc[0:5, 0] == np.array([86600, 84500, 89000, 87500, 89000])
+        self.assertEqual(temp.sum(), 5)
+        self.assertIsInstance(df.index   , pd.core.indexes.datetimes.DatetimeIndex)
+        self.assertIsInstance(df.index[0], pd._libs.tslibs.timestamps.Timestamp)
+        self.assertTrue(df.index[0] < df.index[-1])
+
+    def test_ohlcv_for_a_day(self):
+        df = stock.get_market_ohlcv_by_date("20210118", "20210118", "005930")
+        self.assertIsInstance(df, pd.DataFrame)
+        self.assertEqual(len(df), 1)
+
+
+class StockOhlcvByTickerTest(unittest.TestCase):
     def test_ohlcv_for_a_day(self):
         df = stock.get_market_ohlcv_by_ticker("20210122")
         #           시가    고가    저가    종가   거래량     거래대금     등락률
@@ -55,7 +77,71 @@ class OhlcvByTickerTest(unittest.TestCase):
         self.assertTrue((temp == 0).all(axis=None))
 
 
-class NetPurchasesOfEquitiesByTickerTest(unittest.TestCase):
+class StockFundamentalByDate(unittest.TestCase):
+    def test_with_valid_business_days(self):
+        df = stock.get_market_fundamental_by_date("20210104", "20210108", "005930")
+        #               BPS        PER       PBR   EPS       DIV   DPS
+        # 날짜
+        # 2021-01-04  37528  26.218750  2.210938  3166  1.709961  1416
+        # 2021-01-05  37528  26.500000  2.240234  3166  1.690430  1416
+        # 2021-01-06  37528  25.953125  2.189453  3166  1.719727  1416
+        # 2021-01-07  37528  26.187500  2.210938  3166  1.709961  1416
+        # 2021-01-08  37528  28.046875  2.369141  3166  1.589844  1416
+        self.assertIsInstance(df, pd.DataFrame)
+        temp = np.isclose(df.iloc[0], [37528, 26.218750,  2.210938, 3166, 1.709961, 1416])
+        self.assertEqual(temp.sum(), 6)
+        self.assertEqual(len(df), 5)
+
+    def test_with_a_holiday_1(self):
+        # 20210104 monday / 20210109 saturday
+        df = stock.get_market_fundamental_by_date("20210104", "20210109", "005930")
+        self.assertIsInstance(df, pd.DataFrame)
+        temp = np.isclose(df.iloc[0], [37528, 26.218750,  2.210938, 3166, 1.709961, 1416])
+        self.assertEqual(temp.sum(), 6)
+        self.assertEqual(len(df), 5)
+
+    def test_with_holidays(self):
+        # 20210103 sunday / 20210110 sunday
+        df = stock.get_market_fundamental_by_date("20210103", "20210110", "005930")
+        self.assertIsInstance(df, pd.DataFrame)
+        temp = np.isclose(df.iloc[0], [37528, 26.218750,  2.210938, 3166, 1.709961, 1416])
+        self.assertEqual(temp.sum(), 6)
+        self.assertEqual(len(df), 5)
+
+    def test_with_freq(self):
+        df = stock.get_market_fundamental_by_date("20200101", "20200430", "005930", freq="m")
+        self.assertIsInstance(df, pd.DataFrame)
+        temp = np.isclose(df.iloc[0], [35342, 8.539062,  1.559570, 6461, 2.570312, 1416])
+        self.assertEqual(temp.sum(), 6)
+        self.assertEqual(len(df), 4)
+
+
+class StockFundamentalByTicker(unittest.TestCase):
+    def test_with_valid_a_business_day(self):
+        # 20210108 friday
+        df = stock.get_market_fundamental_by_ticker("20210108")
+        #           BPS        PER       PBR   EPS       DIV   DPS
+        # 티커
+        # 095570   6802   4.621094  0.669922   982  6.609375   300
+        # 006840  62448  11.687500  0.409912  2168  2.960938   750
+        # 027410  15699  17.453125  0.310059   281  2.240234   110
+        # 282330  36022  16.093750  3.910156  8763  1.910156  2700
+        # 138930  25415   3.509766  0.229980  1647  6.230469   360
+        self.assertIsInstance(df, pd.DataFrame)
+        temp = np.isclose(df.iloc[0], [6802, 4.621094, 0.669922, 982, 6.609375, 300])
+        self.assertEqual(temp.sum(), 6)
+        self.assertEqual(len(df), 895)
+
+    def test_with_valid_a_holiday(self):
+        # 20210109 saturday
+        df = stock.get_market_fundamental_by_ticker("20210104")
+        self.assertIsInstance(df, pd.DataFrame)
+        temp = np.isclose(df.iloc[0], [6802, 4.660156, 0.669922, 982, 6.550781, 300])
+        self.assertEqual(temp.sum(), 6)
+        self.assertEqual(len(df), 895)
+
+
+class StockNetPurchasesOfEquitiesByTickerTest(unittest.TestCase):
     def test_net_purchases_of_equities_is_same_0(self):
         df = stock.get_market_net_purchases_of_equities_by_ticker("20210115", "20210122")
         #               종목명  매도거래량  매수거래량   순매수거래량   매도거래대금   매수거래대금 순매수거래대금
@@ -127,7 +213,7 @@ class NetPurchasesOfEquitiesByTickerTest(unittest.TestCase):
         self.assertEqual(temp.sum(), 5)
 
 
-class TradingVolumeByInvestorTest(unittest.TestCase):
+class StockTradingVolumeByInvestorTest(unittest.TestCase):
     def test_trading_volume_is_same_0(self):
         #                 매도       매수    순매수
         # 투자자구분
@@ -167,7 +253,7 @@ class TradingVolumeByInvestorTest(unittest.TestCase):
         self.assertEqual(temp.sum(), 5)
 
 
-class TradingValueByInvestorTest(unittest.TestCase):
+class StockTradingValueByInvestorTest(unittest.TestCase):
     def test_trading_value_is_same_0(self):
         #                      매도            매수         순매수
         # 투자자구분
@@ -207,7 +293,7 @@ class TradingValueByInvestorTest(unittest.TestCase):
         self.assertEqual(temp.sum(), 5)
 
 
-class TradingValueByDateTest(unittest.TestCase):
+class StockTradingValueByDateTest(unittest.TestCase):
     def test_trading_value_is_same_0(self):
         #                 기관합계     기타법인          개인    외국인합계  전체
         # 날짜
@@ -221,6 +307,7 @@ class TradingValueByDateTest(unittest.TestCase):
         self.assertEqual(temp.sum(), 5)
         self.assertIsInstance(df.index   , pd.core.indexes.datetimes.DatetimeIndex)
         self.assertIsInstance(df.index[0], pd._libs.tslibs.timestamps.Timestamp)
+        self.assertTrue(df.index[0] < df.index[-1])
 
     def test_trading_value_is_same_1(self):
         #                  기관합계     기타법인           개인    외국인합계  전체
@@ -261,7 +348,7 @@ class TradingValueByDateTest(unittest.TestCase):
         self.assertIsInstance(df.index[0], pd._libs.tslibs.timestamps.Timestamp)
 
 
-class TradingVolumeByDateTest(unittest.TestCase):
+class StockTradingVolumeByDateTest(unittest.TestCase):
     def test_trading_value_is_same_0(self):
         #            기관합계 기타법인    개인 외국인합계  전체
         # 날짜
@@ -275,6 +362,7 @@ class TradingVolumeByDateTest(unittest.TestCase):
         self.assertEqual(temp.sum(), 5)
         self.assertIsInstance(df.index   , pd.core.indexes.datetimes.DatetimeIndex)
         self.assertIsInstance(df.index[0], pd._libs.tslibs.timestamps.Timestamp)
+        self.assertTrue(df.index[0] < df.index[-1])
 
     def test_trading_value_is_same_1(self):
         #             기관합계 기타법인      개인 외국인합계  전체
@@ -314,235 +402,12 @@ class TradingVolumeByDateTest(unittest.TestCase):
         self.assertIsInstance(df.index   , pd.core.indexes.datetimes.DatetimeIndex)
         self.assertIsInstance(df.index[0], pd._libs.tslibs.timestamps.Timestamp)
 
-class ExhaustionRatesOfForeignInvestmentByTicker(unittest.TestCase):
+class StockExhaustionRatesOfForeignInvestmentByTicker(unittest.TestCase):
     def test_kospi_for_specific_day(self):
         df = stock.get_exhaustion_rates_of_foreign_investment_by_ticker('20210118', "KOSPI")
         self.assertEqual(len(df), 917)
         df = stock.get_exhaustion_rates_of_foreign_investment_by_ticker('20210118', "KOSPI", True)
         self.assertEqual(len(df), 18)
-
-# class MarketTickerName(unittest.TestCase):
-#     def test_get_listed_stock(self):
-#         name = stock.get_market_ticker_name("000660")
-#         self.assertIsInstance(name, str)
-#         self.assertIsNotNone(name)
-
-#     def test_get_delisted_stock(self):
-#         # 코리아오토글라스 / 코스피 / 해산사유발생 / 2015.12.29
-#         name = stock.get_market_ticker_name("152330")
-#         self.assertIsNotNone(name)
-
-# class MarketTickerList(unittest.TestCase):
-#     def test_with_default_param(self):
-#         tickers = stock.get_market_ticker_list()
-#         self.assertIsInstance(tickers, list)
-#         self.assertNotEqual(len(tickers), 0)
-
-#     def test_with_specific_business_date(self):
-#         tickers = stock.get_market_ticker_list("20210115")
-#         self.assertIsInstance(tickers, list)
-#         self.assertNotEqual(len(tickers), 0)
-
-#     def test_with_holiday(self):
-#         tickers = stock.get_market_ticker_list("20170101")
-#         self.assertIsInstance(tickers, list)
-#         self.assertNotEqual(len(tickers), 0)
-
-#     def test_io_with_specific_market(self):
-#         tickers = stock.get_market_ticker_list("20190225", "KOSDAQ")
-#         self.assertIsInstance(tickers, list)
-#         self.assertNotEqual(len(tickers), 0)
-
-#     def test_with_specific_business_date_and_market(self):
-#         tickers = stock.get_market_ticker_list("20190225")
-#         self.assertEqual(len(tickers), 901)
-#         tickers = stock.get_market_ticker_list("20190225", "KOSDAQ")
-#         self.assertEqual(len(tickers), 1328)
-#         tickers = stock.get_market_ticker_list("20190225", "ALL")
-#         self.assertEqual(len(tickers), 2382)
-
-
-# class StockOhlcvByDateTest(unittest.TestCase):
-#     def test_io_for_1_day(self):
-#         df = stock.get_market_ohlcv_by_date("20200717", "20200717", "005930")
-#         self.assertIsNotNone(df)
-#         self.assertIsInstance(df.index[0], pandas.Timestamp)
-#         self.assertIsInstance(df['시가'].iloc[0], np.int32)
-#         self.assertIsInstance(df['고가'].iloc[0], np.int32)
-#         self.assertIsInstance(df['저가'].iloc[0], np.int32)
-#         self.assertIsInstance(df['종가'].iloc[0], np.int32)
-#         self.assertIsInstance(df['거래량'].iloc[0], np.int32)
-
-#     def test_io_for_n_day(self):
-#         df = stock.get_market_ohlcv_by_date("20200701", "20200717", "005930")
-#         self.assertIsNotNone(df)
-#         self.assertIsInstance(df.index[0], pandas.Timestamp)
-#         self.assertIsInstance(df['시가'].iloc[0], np.int32)
-#         self.assertIsInstance(df['고가'].iloc[0], np.int32)
-#         self.assertIsInstance(df['저가'].iloc[0], np.int32)
-#         self.assertIsInstance(df['종가'].iloc[0], np.int32)
-#         self.assertIsInstance(df['거래량'].iloc[0], np.int32)
-
-#     def test_io_for_month(self):
-#         df = stock.get_market_ohlcv_by_date("20200101", "20200630", "005930", "m")
-#         self.assertIsNotNone(df)
-#         self.assertEqual(len(df), 6)
-
-
-# class StockOhlcvByTickerTest(unittest.TestCase):
-#     def test_io(self):
-#         df = stock.get_market_ohlcv_by_ticker("20180212")
-#         self.assertIsInstance(df.index[0], str)
-#         self.assertIsInstance(df['종목명'].iloc[0], str)
-#         self.assertIsInstance(df['시가'].iloc[0], np.int32)
-#         self.assertIsInstance(df['고가'].iloc[0], np.int32)
-#         self.assertIsInstance(df['저가'].iloc[0], np.int32)
-#         self.assertIsInstance(df['종가'].iloc[0], np.int32)
-#         self.assertIsInstance(df['거래량'].iloc[0], np.int64)
-#         self.assertIsInstance(df['시가총액'].iloc[0], np.int64)
-#         self.assertIsInstance(df['거래대금'].iloc[0], np.int64)
-#         self.assertIsInstance(df['시총비중'].iloc[0], np.float16)
-#         self.assertIsInstance(df['상장주식수'].iloc[0], np.int32)
-
-
-
-
-
-# class KrxMarketBasicTest(unittest.TestCase):
-#     def test_not_empty_result(self):
-#         df = stock.get_market_ohlcv_by_date("20190225", "20190228", "000660")
-#         self.assertFalse(df.empty)
-
-#         df = stock.get_market_cap_by_date("20190101", "20190131", "005930")
-#         self.assertFalse(df.empty)
-
-#         df = stock.get_market_cap_by_ticker("20200625")
-#         self.assertFalse(df.empty)
-
-#         df = stock.get_market_price_change_by_ticker("20180301", "20180320")
-#         self.assertFalse(df.empty)
-
-#         df = stock.get_market_fundamental_by_ticker("20180305", "KOSPI")
-#         self.assertFalse(df.empty)
-
-#         df = stock.get_market_fundamental_by_date("20180301", "20180320", '005930')
-#         self.assertFalse(df.empty)
-
-
-# class StockPriceChangeByTickerTest(unittest.TestCase):
-#     def test_io_for_holiday(self):
-#         df = stock.get_market_price_change_by_ticker("20040418", "20040418")
-#         self.assertEqual(df.empty, True)
-
-#     def test_io_for_weekday(self):
-#         df = stock.get_market_price_change_by_ticker("20040420", "20040422")
-#         self.assertIsNotNone(df)
-#         self.assertNotEqual(df.empty, True)
-
-#     def test_io_for_delisting(self):
-#         #  - 상장 폐지 종목 079660 (20190625)
-#         df = stock.get_market_price_change_by_ticker("20190624", "20190630")
-#         self.assertEqual(df.loc['079660']['종가'], 0)
-#         self.assertEqual(df.loc['079660']['등락률'], -100)
-
-
-# class StockFundamentalByTickerTest(unittest.TestCase):
-#     def test_io(self):
-#         df = stock.get_market_fundamental_by_ticker("20180212")
-#         self.assertIsInstance(df.index[0], str)
-#         self.assertIsInstance(df['종목명'].iloc[0], str)
-#         self.assertIsInstance(df['DIV'].iloc[0], np.float64)
-#         self.assertIsInstance(df['BPS'].iloc[0], np.int32)
-#         self.assertIsInstance(df['PER'].iloc[0], np.float64)
-#         self.assertIsInstance(df['EPS'].iloc[0], np.int32)
-#         self.assertIsInstance(df['PBR'].iloc[0], np.float64)
-
-
-# class StockFundamentalByDateTest(unittest.TestCase):
-#     def test_io(self):
-#         df = stock.get_market_fundamental_by_date("20180212", "20180216", "006800")
-#         self.assertIsInstance(df.index[0], pandas._libs.tslibs.timestamps.Timestamp)
-#         self.assertIsInstance(df['DIV'].iloc[0], np.float64)
-#         self.assertIsInstance(df['BPS'].iloc[0], np.int32)
-#         self.assertIsInstance(df['PER'].iloc[0], np.float64)
-#         self.assertIsInstance(df['EPS'].iloc[0], np.int32)
-#         self.assertIsInstance(df['PBR'].iloc[0], np.float64)
-
-#     def test_io_with_frequency(self):
-#         df = stock.get_market_fundamental_by_date("20180101", "20180331", "006800", "m")
-#         self.assertIsNotNone(df)
-#         self.assertEqual(len(df), 3)
-
-
-# class StockTradingVolumeTest(unittest.TestCase):
-#     def test_io_for_kospi(self):
-#         df = stock.get_market_trading_volume_by_date("20200519", "20200526", "KOSPI")
-#         self.assertIsNotNone(df)
-#         self.assertIsInstance(df['전체'].iloc[0], np.int64)
-#         self.assertIsInstance(df['정규매매'].iloc[0], np.int64)
-
-#     def test_io_for_kosdaq(self):
-#         df = stock.get_market_trading_volume_by_date("20200519", "20200526", "KOSDAQ")
-#         print(df)
-#         self.assertIsNotNone(df)
-#         self.assertIsInstance(df['전체'].iloc[0], np.int64)
-#         self.assertIsInstance(df['정규매매'].iloc[0], np.int64)
-
-#     def test_io_for_kosdaq(self):
-#         df = stock.get_market_trading_volume_by_date("20200519", "20200526", "KONEX")
-#         self.assertIsNotNone(df)
-#         self.assertIsInstance(df['전체'].iloc[0], np.int64)
-#         self.assertIsInstance(df['정규매매'].iloc[0], np.int64)
-
-#     def test_io_for_month(self):
-#         df = stock.get_market_trading_volume_by_date("20200101", "20200331", "KOSPI", freq="m")
-#         self.assertIsNotNone(df)
-#         self.assertEqual(len(df), 3)
-
-#     def test_io_for_diverse_market(self):
-#         kospi = stock.get_market_trading_volume_by_date("20200519", "20200520", "KOSPI")
-#         kosdaq = stock.get_market_trading_volume_by_date("20200519", "20200520", "KOSDAQ")
-#         konex = stock.get_market_trading_volume_by_date("20200519", "20200520", "KONEX")
-
-#         self.assertNotEqual(kospi.iloc[0][1], kosdaq.iloc[0][1])
-#         self.assertNotEqual(kospi.iloc[0][1], konex.iloc[0][1])
-
-
-# class StockCapByTickerTest(unittest.TestCase):
-#     def test_io(self):
-#         df = stock.get_market_cap_by_ticker("20200101")
-#         self.assertTrue(df.empty)
-
-#         df = stock.get_market_cap_by_ticker("20200625")
-#         self.assertFalse(df.empty)
-#         for col in df.columns:
-#             self.assertEqual(type(df[col].iloc[0]), np.int64)
-
-
-# class StockCapByDateTest(unittest.TestCase):
-#     def test_io(self):
-#         df = stock.get_market_cap_by_date("20200101", "20200102", "005930")
-#         self.assertTrue(len(df) == 1)
-
-#         for col in df.columns:
-#             self.assertEqual(type(df[col].iloc[0]), np.int64)
-
-
-# class StockMarketTradingValueAndVolumeByTicker(unittest.TestCase):
-#     def test_io(self):
-#         df = stock.get_market_trading_value_and_volume_by_ticker("20200907")
-#         self.assertFalse(df.empty)
-
-
-# class StockExhaustionRatesOfForeignInvestmentByTicker(unittest.TestCase):
-#     def test_io(self):
-#         df = stock.get_exhaustion_rates_of_foreign_investment_by_ticker('20200703')
-#         self.assertIsNotNone(df)
-
-#     def test_io_for_diverse_market(self):
-#         kospi = stock.get_exhaustion_rates_of_foreign_investment_by_ticker('20200703', "KOSPI")
-#         kosdaq = stock.get_exhaustion_rates_of_foreign_investment_by_ticker('20200703', "KOSDAQ")
-#         self.assertNotEqual(kospi.iloc[0][1], kosdaq.iloc[0][1])
 
 
 if __name__ == '__main__':

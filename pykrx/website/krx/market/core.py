@@ -1,4 +1,4 @@
-from pykrx.website.krx.krxio import KrxWebIo, KrxFileIo, SrtWebIo
+from pykrx.website.krx.krxio import KrxWebIo
 import pandas as pd
 from pandas import DataFrame
 
@@ -148,7 +148,7 @@ class PER_PBR_배당수익률_개별(KrxWebIo):
         Args:
             strtDd (str): 조회 시작 일자 (YYMMDD)
             endDd  (str): 조회 종료 일자 (YYMMDD)
-             mktId (str): 조회 시장 (STK/KSQ/KNX/ALL)
+            mktId  (str): 조회 시장 (STK/KSQ/KNX/ALL)
             isuCd  (str): 조회 종목 ISIN
 
         Returns:
@@ -496,6 +496,7 @@ class 전체지수기본정보(KrxWebIo):
         result = self.read(idxIndMidclssCd=idxIndMidclssCd)
         return DataFrame(result['output'])
 
+
 class 주가지수검색(KrxWebIo):
     @property
     def bld(self):
@@ -598,13 +599,16 @@ class 지수구성종목(KrxWebIo):
             date     (str): 조회 일자 (YYMMDD)
 
         Returns:
+
+            >> 지수구성종목().fetch("20210125", "001", "1"))
+
             DataFrame:
-                  ISU_SRT_CD     ISU_ABBRV TDD_CLSPRC FLUC_TP_CD STR_CMP_PRC FLUC_RT               MKTCAP MKTCAP_WT
-                0     005930      삼성전자     46,850          1         600    1.30  279,684,312,467,500     19.54
-                1     000660    SK하이닉스     78,100          2        -300   -0.38   56,856,984,706,500      3.97
-                2     005380        현대차    126,500          2      -1,500   -1.17   27,029,025,655,500      1.89
-                3     051910        LG화학    380,000          2      -8,500   -2.19   26,825,090,340,000      1.87
-                4     068270      셀트리온    209,000          2      -1,500   -0.71   26,221,440,542,000      1.83
+
+                    ISU_SRT_CD     ISU_ABBRV TDD_CLSPRC FLUC_TP_CD STR_CMP_PRC FLUC_RT               MKTCAP
+                0       005930      삼성전자     89,400          1       2,600    3.00  533,698,559,970,000
+                1       000660    SK하이닉스    135,000          1       6,500    5.06   98,280,319,275,000
+                2       051910        LG화학    990,000          1      15,000    1.54   69,886,419,570,000
+                3       035420         NAVER    349,000          1       5,500    1.60   57,327,924,855,000
         """
         result = self.read(indIdx2=ticker, indIdx=group_id, trdDd=date)
         return DataFrame(result['output'])
@@ -612,6 +616,7 @@ class 지수구성종목(KrxWebIo):
 
 # ------------------------------------------------------------------------------------------
 # shorting
+
 class 개별종목_공매도_종합정보(KrxWebIo):
     @property
     def bld(self):
@@ -641,140 +646,228 @@ class 개별종목_공매도_종합정보(KrxWebIo):
         return DataFrame(result['OutBlock_1'])
 
 
-class SRT02020100(KrxFileIo):
+class 개별종목_공매도_거래_전종목(KrxWebIo):
     @property
     def bld(self):
-        return "SRT/02/02020100/srt02020100"
+        return "dbms/MDC/STAT/srt/MDCSTAT30101"
 
-    def fetch(self, fromedata, todate, market, isin):
-        """02020100 공매도 거래 현황
-           http://short.krx.co.kr/contents/SRT/02/02020100/SRT02020100.jsp
-        :param fromdate: 조회 시작 일자 (YYMMDD)
-        :param todate: 조회 종료 일자 (YYMMDD)
-        :param market: 1 (코스피) / 3 (코스닥) / 4 (코넥스)
-        :param isin: 종목의 ISIN
-        :return:  종목별 공매도 거래 현황 DataFrame
+    def fetch(self, trdDd: str, mktId: str, secugrpId: list) -> DataFrame:
+        """[32001] 개별종목 시세 추이
+
+        Args:
+            trdDd (str): 조회 일자 (YYMMDD)
+            mktId (str): 조회 시장 (STK/KSQ/KNX)
+            secugrpId (str): 증권구분 옵션을 리스트로 지정
+              - STMFRTSCIFDRFS : 주식
+              - EF             : ETF
+              - EN             : ETN
+              - EW             : ELW
+              - SRSW           : 신주인수권증서및증권
+              - BC             : 수익증권
+
+        Returns:
+            DataFrame:
+
+                >> 개별종목_공매도_거래_전종목().fetch("20210125", "STK", ["STMFRTSCIFDRFS"])
+
+                     ISU_CD    ISU_ABBRV SECUGRP_NM CVSRTSELL_TRDVOL ACC_TRDVOL TRDVOL_WT CVSRTSELL_TRDVAL      ACC_TRDVAL TRDVAL_WT
+                0    095570   AJ네트웍스       주권               32    180,458      0.02          134,240     757,272,515      0.02
+                1    006840     AK홀딩스       주권               79    386,257      0.02        2,377,900  11,554,067,000      0.02
+                2    027410          BGF       주권           18,502  8,453,962      0.22      108,713,300  49,276,275,460      0.22
+                3    282330    BGF리테일       주권               96     82,986      0.12       14,928,000  13,018,465,500      0.11
+                4    138930  BNK금융지주       주권            1,889  1,181,748      0.16       10,635,610   6,658,032,800      0.16
         """
+        result = self.read(trdDd=trdDd, mktId=mktId, inqCond="".join(secugrpId))
+        return DataFrame(result['OutBlock_1'])
 
-        result = self.read(mkt_tp_cd=market, isu_cd=isin, strt_dd=fromedata, end_dd=todate)
-        return pd.read_excel(result)
 
-
-class SRT02020300(KrxWebIo):
+class 개별종목_공매도_거래_개별추이(KrxWebIo):
     @property
     def bld(self):
-        return "SRT/02/02020300/srt02020300"
+        return "dbms/MDC/STAT/srt/MDCSTAT30102"
 
-    @staticmethod
-    def fetch(fromdate, todate, market=1, inquery=1):
-        """02020300 공매도 거래 현황
-           http://short.krx.co.kr/contents/SRT/02/02020300/SRT02020300.jsp
-        :param fromdate: 조회 시작 일자 (YYMMDD)
-        :param todate  : 조회 종료 일자 (YYMMDD)
-        :param market  : 1 (코스피) / 2 (코스닥) / 6 (코넥스)
-        :param inquery : 1 (거래대금) / 2 (거래량)
-        :return: 투자자별 공매도 거래 현황 DataFrame
-           str_const_val1 str_const_val2 str_const_val3 str_const_val4 str_const_val5      trd_dd
-        0       1,161,522         37,396      6,821,963              0      8,020,881  2018/01/19
-        1         970,406         41,242      8,018,997         13,141      9,043,786  2018/01/18
-        2       1,190,006         28,327      8,274,090          6,465      9,498,888  2018/01/17
+    def fetch(self, strtDd: str, endDd: str, isuCd: str) -> DataFrame:
+        """[32001] 개별종목 시세 추이
+
+        Args:
+            strtDd (str): 조회 시작 일자 (YYMMDD)
+            endDd  (str): 조회 종료 일자 (YYMMDD)
+            isuCd  (str): 조회 종목 ISIN
+
+        Returns:
+            DataFrame:
+
+                >> 개별종목_공매도_거래_개별추이().fetch("20201226", "20210126", "KR7060310000"))
+
+                        TRD_DD CVSRTSELL_TRDVOL ACC_TRDVOL TRDVOL_WT CVSRTSELL_TRDVAL     ACC_TRDVAL TRDVAL_WT
+                0   2021/01/26                0  1,665,933       0.0                0  3,927,562,180       0.0
+                1   2021/01/25                0    328,833       0.0                0    748,091,530       0.0
+                2   2021/01/22                0    275,425       0.0                0    619,653,305       0.0
+                3   2021/01/21                0    283,660       0.0                0    638,360,995       0.0
+                4   2021/01/20                0    210,629       0.0                0    467,705,100       0.0
         """
-        result = SRT02020300().read(mkt_tp_cd=market, inqCondTpCd=inquery, strt_dd=fromdate, end_dd=todate)
-        return DataFrame(result['block1'])
+
+        result = self.read(strtDd=strtDd, endDd=endDd, isuCd=isuCd)
+        return DataFrame(result['OutBlock_1'])
 
 
-class SRT02020400(KrxWebIo):
+class 투자자별_공매도_거래(KrxWebIo):
     @property
     def bld(self):
-        return "SRT/02/02020400/srt02020400"
+        return "dbms/MDC/STAT/srt/MDCSTAT30301"
 
-    @staticmethod
-    def fetch(date, market=1):
-        """02020400 공매도 거래 현황
-           http://short.krx.co.kr/contents/SRT/02/02010100/SRT02010100.jsp
-        :param date  : 조회 일자 (YYMMDD)
-        :param market: 1 (코스피) / 2 (코스닥) / 6 (코넥스)
-        :return: 공매도 거래비중 상위 50 종목 DataFrame
-               acc_trdval      bas_dd cvsrtsell_trdval isu_abbrv        isu_cd  prc_yd rank srtsell_rto srtsell_trdval_avg tdd_srtsell_trdval_incdec_rt tdd_srtsell_wt valu_pd_avg_srtsell_wt
-            0  35,660,149,500  2018/01/05   15,217,530,000     아모레퍼시픽  KR7090430000   0.334    1       2.877      7,945,445,875        1.915         42.674         14.834
-            1     176,886,900  2018/01/05       69,700,600   영원무역홀딩스  KR7009970005   2.698    2       4.259         20,449,658        3.408         39.404          9.251
-            2  27,690,715,500  2018/01/05    9,034,795,500             한샘  KR7009240003  -5.233    3       1.543      2,131,924,250        4.238         32.628         21.142
-            3   2,444,863,350  2018/01/05      701,247,550             동서  KR7026960005  -0.530    4       2.820        255,763,771        2.742         28.682         10.172
+    def fetch(self, strtDd: str, endDd: str, inqCondTpCd: int, mktTpCd: int) -> DataFrame:
+        """[32003] 투자자별 공매도 거래
+
+        Args:
+            strtDd      (str): 조회 시작 일자 (YYMMDD)
+            endDd       (str): 조회 종료 일자 (YYMMDD)
+            inqCondTpCd (int): 조회 구분 (1:거래량/2:거래대금)
+            mktTpCd     (int): 조회 시장 (1:KOSPI/2:KOSDAQ/3:KONEX)
+
+        Returns:
+            DataFrame:
+
+                >> 투자자별_공매도_거래().fetch("20201226", "20210126", 1, 1))
+
+                        TRD_DD STR_CONST_VAL1 STR_CONST_VAL2 STR_CONST_VAL3 STR_CONST_VAL4 STR_CONST_VAL5
+                0   2021/01/26        478,268              0              0              0        478,268
+                1   2021/01/25        303,055              0              0              0        303,055
+                2   2021/01/22        356,044              0              0              0        356,044
+                3   2021/01/21        422,529              0              0              0        422,529
+                4   2021/01/20        206,970              0              0              0        206,970
+
+                >> 투자자별_공매도_거래().fetch("20201226", "20210126", 2, 1))
+
+                        TRD_DD  STR_CONST_VAL1 STR_CONST_VAL2 STR_CONST_VAL3 STR_CONST_VAL4  STR_CONST_VAL5
+                0   2021/01/26  13,770,392,399              0              0              0  13,770,392,399
+                1   2021/01/25  12,165,731,063              0              0              0  12,165,731,063
+                2   2021/01/22  13,621,266,642              0              0              0  13,621,266,642
+                3   2021/01/21  13,072,231,798              0              0              0  13,072,231,798
+                4   2021/01/20   7,703,123,621              0              0              0   7,703,123,621
         """
-        result = SRT02020400().read(mkt_tp_cd=market, schdate=date)
-        return DataFrame(result['block1'])
+
+        result = self.read(strtDd=strtDd, endDd=endDd, inqCondTpCd=inqCondTpCd, mktTpCd=mktTpCd)
+        return DataFrame(result['OutBlock_1'])
 
 
-class SRT02030100(KrxFileIo):
+class 공매도_거래상위_50종목(KrxWebIo):
     @property
     def bld(self):
-        return "SRT/02/02030100/srt02030100"
+        return "dbms/MDC/STAT/srt/MDCSTAT30401"
 
-    def fetch(self, fromdate, todate, market, isin):
-        """02030100 공매도 잔고 현황
-           http://short.krx.co.kr/contents/SRT/02/02010100/SRT02010100.jsp
-        :param fromdate: 조회 시작 일자 (YYMMDD)
-        :param todate  : 조회 종료 일자 (YYMMDD)
-        :param market  : 1 (코스피) / 2 (코스닥) / 6 (코넥스)
-        :param isin    : 조회 종목의 ISIN
-        :return        : 종목별 공매도 잔고 현황 DataFrame
-                  bal_amt  bal_qty bal_rto isu_abbrv        isu_cd    list_shrs              mktcap rn totCnt      trd_dd
-            0  11,982,777,500  164,825    0.02    SK하이닉스  KR7000660001  728,002,365  52,925,771,935,500  1      7  2018/01/15
-            1  12,427,999,200  167,043    0.02    SK하이닉스  KR7000660001  728,002,365  54,163,375,956,000  2      7  2018/01/12
-            2  13,297,270,800  183,158    0.02    SK하이닉스  KR7000660001  728,002,365  52,852,971,699,000  3      7  2018/01/11
-            3  14,594,580,000  200,200    0.03    SK하이닉스  KR7000660001  728,002,365  53,071,372,408,500  4      7  2018/01/10
+    def fetch(self, trdDd: str, mktTpCd: int) -> DataFrame:
+        """[32004] 공매도 거래 상위 50종목
+
+        Args:
+            trdDd   (str): 조회 일자 (YYMMDD)
+            mktTpCd (int): 시장구분 (1:KOSPI/2:KOSDAQ/3:KONEX)
+
+        Returns:
+
+            >> 공매도_거래상위_50종목().fetch("20210129", 1))
+
+            DataFrame:
+
+                   RANK  ISU_CD            ISU_ABBRV CVSRTSELL_TRDVAL      ACC_TRDVAL TDD_SRTSELL_WT STR_CONST_VAL1 STR_CONST_VAL2 VALU_PD_AVG_SRTSELL_WT VALU_PD_CMP_TDD_SRTSELL_RTO PRC_YD
+                0     1  003545           대신증권우       38,510,030     915,824,030           4.21      5,814,411           6.62                   0.51                        8.33  -1.25
+                1     2  267290         경동도시가스       13,265,200     329,805,000           4.02      2,755,259           4.82                   0.66                        6.14  -2.46
+                2     3  015890             태경산업       15,865,860     428,852,660           3.70      8,316,412           1.91                   1.30                        2.85  -4.46
+                3     4  005945         NH투자증권우       25,401,240     908,915,950           2.79      4,610,634           5.51                   0.44                        6.40  -0.35
+                4     5  227840 현대코퍼레이션홀딩스       13,784,400     546,597,900           2.52      3,084,294           4.47                   0.51                        4.91  -2.37
         """
+        result = self.read(trdDd=trdDd, mktTpCd=mktTpCd)
+        return DataFrame(result['OutBlock_1'])
 
-        result = self.read(mkt_tp_cd=market, strt_dd=fromdate, end_dd=todate, isu_cd=isin)
-        return pd.read_excel(result)
 
-
-class SRT02030400(KrxWebIo):
+class 공매도_잔고상위_50종목(KrxWebIo):
     @property
     def bld(self):
-        return "SRT/02/02030400/srt02030400"
+        return "dbms/MDC/STAT/srt/MDCSTAT30801"
 
-    @staticmethod
-    def fetch(date, market=1):
-        """02030400 공매도 잔고 현황
-           http://short.krx.co.kr/contents/SRT/02/02020300/SRT02020300.jsp
-        :param date  : 조회 일자 (YYMMDD)
-        :param market: 1 (코스피) / 3 (코스닥) / 6 (코넥스)
-        :return: 잔고 비중 상위 50 DataFrame
-                       bal_amt    bal_qty bal_rto      isu_abbrv        isu_cd    list_shrs             mktcap rank rpt_duty_occr_dd    trd_dd
-            0  190,835,680,350  5,323,171   10.12     한화테크윈  KR7012450003   52,600,000  1,885,710,000,000    1       2018/01/05  20180105
-            1  161,456,413,600  2,570,962    9.45       현대위아  KR7011210002   27,195,083  1,707,851,212,400    2       2018/01/05  20180105
-            2  147,469,396,800  9,131,232    8.58     두산중공업  KR7034020008  106,463,061  1,719,378,435,150    3       2018/01/05  20180105
-            3  179,776,282,650  6,002,547    8.38         GS건설  KR7006360002   71,675,237  2,146,673,348,150    4       2018/01/05  20180105
+    def fetch(self, trdDd: str, mktTpCd: int) -> DataFrame:
+        """[33004] 공매도 잔고 상위 50종목
+
+        Args:
+            trdDd   (str): 조회 일자 (YYMMDD)
+            mktTpCd (int): 시장구분 (1:KOSPI/2:KOSDAQ/3:KONEX)
+
+        Returns:
+
+            DataFrame:
+
+                >> 공매도_잔고상위_50종목().fetch("20210129", 1))
+
+                       RANK  ISU_CD       ISU_CD2       ISU_ABBRV     BAL_QTY    LIST_SHRS            BAL_AMT              MKTCAP BAL_RTO
+                    0     1  032350  KR7032350001    롯데관광개발   4,693,027   69,275,662     74,853,780,650   1,104,946,808,900    6.77
+                    1     2  042670  KR7042670000  두산인프라코어  10,846,251  215,931,625     92,843,908,560   1,848,374,710,000    5.02
+                    2     3  068270  KR7068270008        셀트리온   6,523,965  134,997,805  2,146,384,485,000  44,414,277,845,000    4.83
+                    3     4  008770  KR7008770000        호텔신라   1,269,261   39,248,121    106,237,145,700   3,285,067,727,700    3.23
+                    4     5  011690  KR7011690005      유양디앤유   1,604,890   58,494,201      1,957,965,800      71,362,925,220    2.74
         """
-        result = SRT02030400().read(mkt_tp_cd=market, schdate=date)
-        return DataFrame(result['block1'])
+        result = self.read(trdDd=trdDd, mktTpCd=mktTpCd)
+        return DataFrame(result['OutBlock_1'])
+
+
+class 전종목_공매도_잔고(KrxWebIo):
+    @property
+    def bld(self):
+        return "dbms/MDC/STAT/srt/MDCSTAT30501"
+
+    def fetch(self, trdDd: str, mktTpCd: int) -> DataFrame:
+        """[33001] 개별종목 공매도 잔고 (전종목)
+
+        Args:
+            trdDd   (str): 조회 일자 (YYMMDD)
+            mktTpCd (int): 시장구분 (1:KOSPI/2:KOSDAQ/3:KONEX)
+
+        Returns:
+
+            DataFrame:
+
+                >> 전종목_공매도_잔고().fetch("20210127", 1)
+
+                     ISU_CD      ISU_ABBRV  BAL_QTY    LIST_SHRS        BAL_AMT             MKTCAP BAL_RTO
+                0    095570     AJ네트웍스   33,055   46,822,295    134,864,400    191,034,963,600    0.07
+                1    006840       AK홀딩스    4,575   13,247,561    131,760,000    381,529,756,800    0.03
+                2    027410            BGF   68,060   95,716,791    449,196,000    631,730,820,600    0.07
+                3    282330      BGF리테일    4,794   17,283,906    757,452,000  2,730,857,148,000    0.03
+                4    138930    BNK금융지주  596,477  325,935,246  3,340,271,200  1,825,237,377,600    0.18
+        """
+        result = self.read(trdDd=trdDd, mktTpCd=mktTpCd)
+        return DataFrame(result['OutBlock_1'])
+
+class 개별종목_공매도_잔고(KrxWebIo):
+    @property
+    def bld(self):
+        return "dbms/MDC/STAT/srt/MDCSTAT30502"
+
+    def fetch(self, strtDd: str, endDd: str, isuCd: str) -> DataFrame:
+        """[33001] 개별종목 공매도 잔고 (개별종목)
+
+        Args:
+            strtDd (str): 조회 시작 일자 (YYMMDD)
+            endDd  (str): 조회 종료 일자 (YYMMDD)
+            isuCd  (str): 조회 종목 ISIN
+
+        Returns:
+
+            DataFrame:
+
+                >> 개별종목_공매도_잔고().fetch("20200106", "20200110", "KR7005930003")
+
+                  RPT_DUTY_OCCR_DD    BAL_QTY      LIST_SHRS          BAL_AMT               MKTCAP BAL_RTO
+                0       2020/01/10  5,489,240  5,969,782,550  326,609,780,000  355,202,061,725,000    0.09
+                1       2020/01/09  5,387,073  5,969,782,550  315,682,477,800  349,829,257,430,000    0.09
+                2       2020/01/08  5,224,233  5,969,782,550  296,736,434,400  339,083,648,840,000    0.09
+                3       2020/01/07  5,169,745  5,969,782,550  288,471,771,000  333,113,866,290,000    0.09
+                4       2020/01/06  5,630,893  5,969,782,550  312,514,561,500  331,322,931,525,000    0.09
+        """
+        result = self.read(strtDd=strtDd, endDd=endDd, isuCd=isuCd)
+        return DataFrame(result['OutBlock_1'])
 
 
 if __name__ == "__main__":
     pd.set_option('display.width', None)
-    # stock
-    # print(개별종목시세().fetch("20210110", "20210115", "KR7005930003"))
-    # print(PER_PBR_배당수익률_전종목().fetch("20210115", "ALL"))
-    # print(PER_PBR_배당수익률_개별().fetch('20190322', '20190329', 'ALL', 'KR7005930003'))
-    # print(전종목등락률().fetch("20180501", "20180801", "ALL", 2))
-    # print(외국인보유량_전종목().fetch("ALL", "20210115", 0))
-    # print(외국인보유량_개별추이().fetch("20210108", "20210115", "KR7005930003"))
-
-    # print(투자자별_거래실적_전체시장_기간합계().fetch("20210115", "20210122", "ALL", "", "", ""))
-    # print(투자자별_거래실적_전체시장_기간합계().fetch("20210115", "20210122", "STK", "EF", "", ""))
-    # print(투자자별_거래실적_전체시장_일별추이_일반().fetch("20210115", "20210122", "STK", "", "", "", 1, 1))
-    # print(투자자별_거래실적_전체시장_일별추이_상세().fetch("20210115", "20210122", "STK", "", "", "", 1, 1))
-    # ---
-    # print(투자자별_거래실적_개별종목_기간합계().fetch("20210113", "20210120", "KR7005930003"))
-    # print(투자자별_거래실적_개별종목_일별추이_일반().fetch("20210113", "20210120", "KR7005930003", 1, 1))
-    # print(투자자별_거래실적_개별종목_일별추이_상세().fetch("20210113", "20210120", "KR7005930003", 1, 1))
-    # print(투자자별_순매수상위종목().fetch("20201220", "20210120", "ALL", 1000))
-
-    # index
-    # df = 전체지수기본정보().fetch("04")
-    # df = 전체지수등락률().fetch("20210107", "20210115", "01")
-    # df = 주가지수검색().fetch("1")
-    # df = 개별지수시세().fetch("043", "5", "20210107", "20210115")
-    # df = 지수구성종목().fetch("20190412", "001", "1")
+    print(개별종목_공매도_잔고().fetch("20200106", "20200110", "KR7005930003"))
 

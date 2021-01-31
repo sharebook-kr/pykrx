@@ -8,19 +8,22 @@ from deprecated import deprecated
 from pandas import DataFrame
 
 
-def market_valid_check(func):
-    sig = inspect.signature(func)
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        if 'market' in sig.bind_partial(*args, **kwargs).arguments:
-            valid_market_list = ["ALL", "KOSPI", "KOSDAQ", "KONEX"]
-            for v in args:
-                if v in  valid_market_list:
-                    return func(*args, **kwargs)
-            print(f"market 옵션이 올바르지 않습니다." )
-            return None
-        return func(*args, **kwargs)
-    return wrapper
+def market_valid_check(param=None):
+    def _market_valid_check(func):
+        sig = inspect.signature(func)
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            # default parameter
+            if 'market' in sig.bind_partial(*args, **kwargs).arguments:
+                valid_market_list = ["ALL", "KOSPI", "KOSDAQ", "KONEX"] if param == None else param
+                for v in [x for x in kwargs.values()] + list(args):
+                    if v in  valid_market_list:
+                        return func(*args, **kwargs)
+                print(f"market 옵션이 올바르지 않습니다." )
+                return DataFrame()
+            return func(*args, **kwargs)
+        return wrapper
+    return _market_valid_check
 
 def _datetime2string(dt, freq='d'):
     if freq.upper() == 'Y':
@@ -48,13 +51,33 @@ def resample_ohlcv(df, freq, how):
     return df
 
 
-def get_nearest_business_day_in_a_week():
-    curr = datetime.datetime.now()
-    prev = curr - datetime.timedelta(days=7)
-    curr = _datetime2string(curr)
-    prev = _datetime2string(prev)
-    df = krx.get_index_ohlcv_by_date(prev, curr, "1001")
-    return df.index[-1].strftime("%Y%m%d")
+def get_nearest_business_day_in_a_week(date: str=None, prev: bool=True) -> str:
+    """인접한 영업일을 조회한다.
+
+    Args:
+        date (str , optional): 조회할 날짜로 입력하지 않으면 현재 시간으로 대체 됩
+        prev (bool, optional): 이전 영업일을 조회할지 이후 영업일을 조회할지 조정하는 flag
+
+    Returns:
+        str: 날짜 (YYMMDD)
+    """
+    if date == None:
+        curr = datetime.datetime.now()
+    else:
+        curr = datetime.datetime.strptime(date, "%Y%m%d")
+
+    if prev:
+        prev = curr - datetime.timedelta(days=7)
+        curr = _datetime2string(curr)
+        prev = _datetime2string(prev)
+        df = krx.get_index_ohlcv_by_date(prev, curr, "1001")
+        return df.index[-1].strftime("%Y%m%d")
+    else:
+        next = curr + datetime.timedelta(days=7)
+        next = _datetime2string(next)
+        curr = _datetime2string(curr)
+        df = krx.get_index_ohlcv_by_date(curr, next, "1001")
+        return df.index[0].strftime("%Y%m%d")
 
 
 # -----------------------------------------------------------------------------
@@ -64,7 +87,7 @@ def get_market_ticker_list(date: str=None, market: str="KOSPI") -> list:
     """티커 목록 조회
 
     Args:
-        date   (str, optional):조회 일자 (YYYYMMDD)
+        date   (str, optional): 조회 일자 (YYYYMMDD)
         market (str, optional): 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
 
     Returns:
@@ -141,18 +164,22 @@ def get_market_ohlcv_by_date(fromdate: str, todate: str, ticker: str, freq: str=
         fromdate     (str           ): 조회 시작 일자 (YYYYMMDD)
         todate       (str           ): 조회 종료 일자 (YYYYMMDD)
         ticker       (str           ): 조회할 종목의 티커
-        freq         (str,  optional):  d - 일 / m - 월 / y - 년
+        freq         (str,  optional): d - 일 / m - 월 / y - 년
         adjusted     (bool, optional): 수정 종가 여부 (True/False)
         name_display (bool, optional): columns의 이름 출력 여부 (True/False)
 
     Returns:
         DataFrame:
-                         시가   고가   저가   종가   거래량
+
+            >> get_market_ohlcv_by_date("20210118", "20210126", "005930")
+
+                         시가   고가   저가   종가    거래량
             날짜
-            2019-02-25  77300  77600  74800  75400  2865712
-            2019-02-26  75000  75900  74100  75200  2483512
-            2019-02-27  75300  75700  73700  73700  2864044
-            2019-02-28  72500  72600  69900  70000  7869451
+            2021-01-18  86600  87300  84100  85000  43227951
+            2021-01-19  84500  88000  83600  87000  39895044
+            2021-01-20  89000  89000  86500  87200  25211127
+            2021-01-21  87500  88600  86500  88100  25318011
+            2021-01-22  89000  89700  86800  86800  30861661
     """
     if isinstance(fromdate, datetime.datetime):
         fromdate = _datetime2string(fromdate)
@@ -174,7 +201,7 @@ def get_market_ohlcv_by_date(fromdate: str, todate: str, ticker: str, freq: str=
     return resample_ohlcv(df, freq, how)
 
 
-@market_valid_check
+@market_valid_check()
 def get_market_ohlcv_by_ticker(date, market="KOSPI"):
     """티커별로 정리된 전종목 OHLCV
 
@@ -242,13 +269,14 @@ def get_market_cap_by_date(fromdate: str, todate: str, ticker: str, freq: str='d
     how = {'시가총액': 'last', '거래량': 'sum', '거래대금': 'sum', '상장주식수': 'last'}
     return resample_ohlcv(df, freq, how)
 
-@market_valid_check
+
+@market_valid_check()
 def get_market_cap_by_ticker(date, market="ALL", acending=False):
     """티커별로 정렬된 시가총액
 
     Args:
-        date                 (str): 조회 일자 (YYYYMMDD)
-        market     (str, optional): 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
+        date      (str           ): 조회 일자 (YYYYMMDD)
+        market    (str , optional): 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
         ascending (bool, optional): 정렬 기준.
 
     Returns:
@@ -294,7 +322,7 @@ def get_exhaustion_rates_of_foreign_investment_by_date(fromdate: str, todate: st
     return krx.get_exhaustion_rates_of_foreign_investment_by_ticker(fromdate, todate, ticker)
 
 
-@market_valid_check
+@market_valid_check()
 def get_exhaustion_rates_of_foreign_investment_by_ticker(date: str, market: str="KOSPI", balance_limit: bool=False) -> DataFrame:
     """특정 시장에서 티커로 정렬된 외국인 보유량 조회
 
@@ -355,7 +383,38 @@ def get_market_price_change_by_ticker(fromdate, todate):
     return df_a
 
 
-def get_market_fundamental_by_date(fromdate, todate, ticker, freq='d', name_display=False):
+def get_market_fundamental_by_date(fromdate: str, todate: str, ticker: str, freq: str='d', name_display: bool=False) -> DataFrame:
+    """기간별 특정 종목의 PER/PBR/배당수익률 조회
+
+    Args:
+        fromdate     (str           ): 조회 시작 일자 (YYYYMMDD)
+        todate       (str           ): 조회 종료 일자 (YYYYMMDD)
+        ticker       (str           ): 조회 종목 티커
+        freq         (str , optional): d - 일 / m - 월 / y - 년
+        name_display (bool, optional): 종목 이름 출력 여부 (True/False)
+
+    Returns:
+        DataFrame:
+
+            >> get_market_fundamental_by_date("20210104", "20210108", "005930")
+
+                              BPS        PER       PBR   EPS       DIV   DPS
+                날짜
+                2021-01-04  37528  26.218750  2.210938  3166  1.709961  1416
+                2021-01-05  37528  26.500000  2.240234  3166  1.690430  1416
+                2021-01-06  37528  25.953125  2.189453  3166  1.719727  1416
+                2021-01-07  37528  26.187500  2.210938  3166  1.709961  1416
+                2021-01-08  37528  28.046875  2.369141  3166  1.589844  1416
+
+            >> get_market_fundamental_by_date("20200101", "20200430", "005930", freq="m")
+
+                              BPS       PER       PBR   EPS       DIV   DPS
+                날짜
+                2020-01-31  35342  8.539062  1.559570  6461  2.570312  1416
+                2020-02-29  35342  8.851562  1.620117  6461  2.480469  1416
+                2020-03-31  35342  8.507812  1.559570  6461  2.570312  1416
+                2020-04-30  35342  7.089844  1.299805  6461  3.089844  1416
+    """
     if isinstance(fromdate, datetime.datetime):
         fromdate = _datetime2string(fromdate)
 
@@ -369,22 +428,36 @@ def get_market_fundamental_by_date(fromdate, todate, ticker, freq='d', name_disp
     if name_display:
         df.columns.name = get_market_ticker_name(ticker)
 
-    df['PBR'] = df['PER'] * df['EPS'] / df['BPS']
-    df.loc[df['BPS'] == 0, 'PBR'] = 0
-    how = {'DIV': 'first', 'BPS': 'first', 'PER': 'first', 'EPS': 'first',
-           'PBR': 'first'}
+    how = {'BPS': 'first', 'PER': 'first', 'PBR': 'first', 'EPS': 'first', 'DIV': 'first', 'DPS': 'first'}
     return resample_ohlcv(df, freq, how)
 
 
-def get_market_fundamental_by_ticker(date, market="ALL"):
+def get_market_fundamental_by_ticker(date: str, market: str="KOSPI") -> DataFrame:
+    """특정 일자의 전종목 PER/PBR/배당수익률 조회
+
+    Args:
+        date   (str          ): 조회 일자 (YYMMDD)
+        market (str, optional): 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
+
+    Returns:
+        DataFrame:
+
+            >> get_market_fundamental_by_ticker("20210104")
+
+                           BPS        PER       PBR   EPS       DIV   DPS
+                티커
+                095570    6802   4.660156  0.669922   982  6.550781   300
+                006840   62448  11.648438  0.399902  2168  2.970703   750
+                027410   15699  17.765625  0.320068   281  2.199219   110
+                282330   36022  15.062500  3.660156  8763  2.050781  2700
+                138930   25415   3.380859  0.219971  1647  6.468750   360
+    """
     if isinstance(date, datetime.datetime):
         date = _datetime2string(date)
 
-    df = krx.get_market_fundamental_by_ticker(date, market)
-    if not df.empty:
-        df['PBR'] = df['PER'] * df['EPS'] / df['BPS']
-        df.loc[df['BPS'] == 0, 'PBR'] = 0
-    return df
+
+
+    return krx.get_market_fundamental_by_ticker(date, market)
 
 
 def __get_market_trading_value_and_volume_by_investor(fromdate: str, todate: str, ticker: str, etf: bool, etn: bool,
@@ -705,9 +778,12 @@ def get_market_net_purchases_of_equities_by_ticker(fromdate: str, todate: str, m
 def get_market_trading_value_and_volume_by_ticker(fromdate: str, todate: str, market: str="KOSPI", investor: str="개인"):
     get_market_net_purchases_of_equities_by_ticker(fromdate, todate, market, investor)
 
+
 # -----------------------------------------------------------------------------
 # 지수(INDEX) API
 # -----------------------------------------------------------------------------
+
+@market_valid_check(["KOSPI", "KOSDAQ", "KRX", "테마"])
 def get_index_ticker_list(date: str=None, market: str="KOSPI") -> list:
     """모든 지수 (index)의 티커 조회
 
@@ -730,32 +806,87 @@ def get_index_ticker_list(date: str=None, market: str="KOSPI") -> list:
     return krx.IndexTicker().get_ticker(market, date)
 
 
-def get_index_ticker_name(ticker):
+def get_index_ticker_name(ticker: str) -> str:
+    """티커의 이름 조회
+
+    Args:
+        ticker (str): 조회 인덱스 티커
+
+    Returns:
+        str: 종목이름
+    """
     return krx.IndexTicker().get_name(ticker)
 
 
-def get_index_portfolio_deposit_file(ticker, date=None):
+def get_index_portfolio_deposit_file(ticker: str, date: str=None) -> list:
     """지수 구성 종목 조회
-        :param ticker  : 조회할 지표의 티커
-        :param date           : 조회 일자 (YYMMDD)
-        :return 구성 종목의 티커를 리스트로 반환
+
+    Args:
+        ticker (str          ): 조회 인덱스
+        date   (str, optional): 조회 일자 (YYMMDD)
+
+    NOTE: 2014년 5월 2일 까지만 조회 가능
+
+    Returns:
+        list: 구성 종목의 티커 리스트
     """
+
     if date is None:
-        date = get_nearest_business_day_in_a_week()
-    if isinstance(date, datetime.datetime):
-        date = _datetime2string(date)
+        target_date = get_nearest_business_day_in_a_week()
+    else :
+        target_date = date
 
-    return krx.get_index_portfolio_deposit_file(date, ticker)
+    if target_date <= "20140501":
+        print(f"KRX web server does NOT provide data prior to 2014/05/01.")
+        return []
+
+    if isinstance(target_date, datetime.datetime):
+        target_date = _datetime2string(target_date)
+
+    pdf = krx.get_index_portfolio_deposit_file(target_date, ticker)
+    # 주말 or 비영업일 여부를 확인하는 것 자체가 상대적으로 오랜 시간 걸려 lazy 판단
+    # - 결과가 없으면 과거의 가장 가까운 영업일로 조회
+    if len(pdf) == 0:
+        target_date = get_nearest_business_day_in_a_week(target_date)
+        pdf = krx.get_index_portfolio_deposit_file(target_date, ticker)
+        if len(pdf) != 0 and date != None:
+            print(f"The date you entered {date} seems to be a holiday. PYKRX changes the date parameter to {target_date} to" \
+                   "query the requested information.")
+    return pdf
 
 
-def get_index_ohlcv_by_date(fromdate, todate, ticker, freq='d', name_display=False):
-    """인덱스 OHLCV 조회
-        :param fromdate: 조회 시작 일자 (YYYYMMDD)
-        :param todate  : 조회 종료 일자 (YYYYMMDD)
-        :param ticker  : 조회할 지표의 티커
-        :param freq    : d - 일 / m - 월 / y - 년
-        :param name_display : columns의 이름 출력 여부 (True/False)
-        :return:
+def get_index_ohlcv_by_date(fromdate: str, todate: str, ticker: str, freq: str='d', name_display: bool=False) -> DataFrame:
+    """일자별로 정렬된 인덱스 OHLCV 조회
+
+    Args:
+        fromdate     (str           ): 조회 시작 일자 (YYMMDD)
+        todate       (str           ): 조회 종료 일자 (YYMMDD)
+        ticker       (str           ): 조회 인덱스 티커
+        freq         (str, optional ): d - 일 / m - 월 / y - 년
+        name_display (bool, optional): 인덱스 이름 출력 유무
+
+    Returns:
+        DataFrame:
+
+        >> df = get_index_ohlcv_by_date("20210101", "20210130", "1001")
+
+                           시가         고가         저가         종가      거래량        거래대금
+        날짜
+        2021-01-04  2874.500000  2946.540039  2869.110107  2944.449951  1026510465  25011393960858
+        2021-01-05  2943.669922  2990.570068  2921.840088  2990.570068  1519911750  26548380179493
+        2021-01-06  2993.340088  3027.159912  2961.370117  2968.209961  1793418534  29909396443430
+        2021-01-07  2980.750000  3055.280029  2980.750000  3031.679932  1524654500  27182807334912
+        2021-01-08  3040.110107  3161.110107  3040.110107  3152.179932  1297903388  40909490005818
+
+        >> get_index_ohlcv_by_date("20200101", "20200531", "1001", freq="m")
+
+                           시가         고가         저가         종가       거래량
+        날짜
+        2020-01-31  2201.209961  2277.229980  2119.010010  2119.010010  13096066333
+        2020-02-29  2086.610107  2255.489990  1980.819946  1987.010010  13959766513
+        2020-03-31  1997.030029  2089.080078  1439.430054  1754.640015  17091025314
+        2020-04-30  1737.280029  1957.510010  1664.130005  1947.560059  21045120912
+        2020-05-31  1906.420044  2054.520020  1894.290039  2029.599976  16206496902
     """
     if isinstance(fromdate, datetime.datetime):
         fromdate = _datetime2string(fromdate, freq)
@@ -779,14 +910,18 @@ def get_index_listing_date(계열구분: str="KOSPI") -> DataFrame:
         계열구분 (str, optional): KRX/KOSPI/KOSDAQ/테마
 
     Returns:
+
         DataFrame:
+
+            >> get_index_listing_date()
+
                                    기준시점    발표시점   기준지수  종목수
             지수명
-            코스피               1980.01.04  1983.01.04      100.0       1
-            코스피 200           1990.01.03  1994.06.15      100.0      28
-            코스피 100           2000.01.04  2000.03.02     1000.0      34
-            코스피 50            2000.01.04  2000.03.02     1000.0      35
-            코스피 200 중소형주  2010.01.04  2015.07.13     1000.0     167
+            코스피               1980.01.04  1983.01.04      100.0     796
+            코스피 200           1990.01.03  1994.06.15      100.0     201
+            코스피 100           2000.01.04  2000.03.02     1000.0     100
+            코스피 50            2000.01.04  2000.03.02     1000.0      50
+            코스피 200 중소형주  2010.01.04  2015.07.13     1000.0     101
     """
     defined_list = ["KRX", "KOSPI", "KOSDAQ", "테마"]
     if 계열구분 not in defined_list:
@@ -797,15 +932,42 @@ def get_index_listing_date(계열구분: str="KOSPI") -> DataFrame:
 
     return krx.get_index_listing_date(계열구분)
 
+
 @deprecated(version='1.0', reason="You should use get_index_price_change_by_ticker() instead")
 def get_index_price_change_by_name(fromdate, todate, market="KOSPI"):
     return get_index_price_change_by_ticker(fromdate, todate, market)
 
-def get_index_price_change_by_ticker(fromdate, todate, market="KOSPI"):
+
+def get_index_price_change_by_ticker(fromdate: str, todate: str, market: str="KOSPI") -> DataFrame:
+    """입력된 기간동안의 전체 지수 등락률
+
+    Args:
+        fromdate (str          ): 조회 시작 일자 (YYMMDD)
+        todate   (str          ): 조회 종료 일자 (YYMMDD)
+        market   (str, optional): 조회 시장 (KOSPI/KOSDAQ/RKX/테마)
+
+    Returns:
+        DataFrame:
+
+            >> get_index_price_change_by_ticker("20210101", "20210130")
+
+                                      시가      종가     등락률      거래량         거래대금
+            지수명
+            코스피                 2873.47   3152.18   9.703125  7162398637  149561467924511
+            코스피 200              389.29    430.22  10.507812  2221276866  119905899468167
+            코스피 100             2974.06   3293.96  10.757812  1142234783   95023508273187
+            코스피 50              2725.20   3031.59  11.242188   742099360   79663247553065
+            코스피 200 중소형주    1151.78   1240.92   7.738281  1079042083   24882391194980
+    """
     if isinstance(fromdate, datetime.datetime):
         fromdate = _datetime2string(fromdate)
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
+
+    # KRX 웹 서버의 제약으로 인한 영업일 검사
+    fromdate = get_nearest_business_day_in_a_week(fromdate, prev=False)
+    todate   = get_nearest_business_day_in_a_week(todate)
+
     return krx.get_index_price_change_by_ticker(fromdate, todate, market)
 
 
@@ -813,47 +975,350 @@ def get_index_price_change_by_ticker(fromdate, todate, market="KOSPI"):
 # 공매도(SHORTING) API
 # -----------------------------------------------------------------------------
 
-def get_shorting_status_by_date(fromdate, todate, ticker):
-    return krx.get_shorting_status_by_date(fromdate, todate, isin)
+def get_shorting_status_by_date(fromdate: str, todate: str, ticker: str) -> DataFrame:
+    """공매도 거래량/누적수량/거래대금/누적잔고
+
+    Args:
+        fromdate (str): 조회 시작 일자 (YYMMDD)
+        todate   (str): 조회 종료 일자 (YYMMDD)
+        market   (str): 조회 종목 티커
+    Returns:
+
+        DataFrame:
+
+            >> get_shorting_status_by_date("20210104", "20210108", "005930")
+
+                      거래량 잔고수량   거래대금      잔고금액
+            날짜
+            2021-01-04  9279  2722585  771889500  225974555000
+            2021-01-05   169  2676924   14011100  224593923600
+            2021-01-06   967  3002548   80855100  246809445600
+            2021-01-07   763  2447030   63634800  202858787000
+            2021-01-08     6  2319328     534000  205956326400
+    """
+    return krx.get_shorting_status_by_date(fromdate, todate, ticker)
 
 
-def get_shorting_volume_by_ticker(date, market="KOSPI"):
+@market_valid_check(["KOSPI", "KOSDAQ", "KONEX"])
+def get_shorting_value_by_ticker(date: str, market: str="KOSPI", include: list=None) -> DataFrame:
+    """티커별로 정리된 전종목 공매도 거래 대금
+
+    Args:
+        date    (str, optional): 조회 일자 (YYYYMMDD)
+        market  (str, optional): 조회 시장 (KOSPI/KOSDAQ/KONEX)
+        include (str, optional): 증권 구분 (주식/ETF/ETN/ELW/신주인수권및증권/수익증권)
+
+    Returns:
+        DataFrame:
+
+            >> get_shorting_value_by_ticker("20210125")
+
+                       공매도         매수      비중
+            티커
+            095570     134240    757272515  0.020004
+            006840    2377900  11554067000  0.020004
+            027410  108713300  49276275460  0.219971
+            282330   14928000  13018465500  0.109985
+            138930   10635610   6658032800  0.160034
+    """
     if isinstance(date, datetime.datetime):
         date = _datetime2string(date)
 
-    return krx.get_shorting_volume_by_ticker(date, market)
+    if include is None:
+        include = ["주식"]
+
+    df = krx.get_shorting_trading_value_and_volume_by_ticker(date, market, include)
+    if df.empty:
+        print(f"The date you entered {date} seems to be a holiday. Empty dataframe will be returned.")
+        return df
+
+    return df['거래대금']
 
 
-def get_shorting_volume_by_date(fromdate, todate, ticker, market="KOSPI"):
+@market_valid_check(["KOSPI", "KOSDAQ", "KONEX"])
+def get_shorting_volume_by_ticker(date: str, market: str="KOSPI", include: list=None) -> DataFrame:
+    """티커별로 정리된 전종목 공매도 거래량
+
+    Args:
+        date    (str, optional): 조회 일자 (YYYYMMDD)
+        market  (str, optional): 조회 시장 (KOSPI/KOSDAQ/KONEX)
+        include (str, optional): 증권 구분 (주식/ETF/ETN/ELW/신주인수권및증권/수익증권)
+
+    Returns:
+        DataFrame:
+
+            >> get_shorting_volume_by_ticker("20210125")
+
+                   공매도     매수      비중
+            티커
+            095570     32   180458  0.020004
+            006840     79   386257  0.020004
+            027410  18502  8453962  0.219971
+            282330     96    82986  0.119995
+            138930   1889  1181748  0.160034
+    """
+    if isinstance(date, datetime.datetime):
+        date = _datetime2string(date)
+
+    if include is None:
+        include = ["주식"]
+
+    df = krx.get_shorting_trading_value_and_volume_by_ticker(date, market, include)
+    if df.empty:
+        print(f"The date you entered {date} seems to be a holiday. Empty dataframe will be returned.")
+        return df
+
+    return df['거래량']
+
+
+def get_shorting_volume_by_date(fromdate: str, todate: str, ticker: str) -> DataFrame:
+    """일자별로 정렬된 공매도 거래량
+
+    Args:
+        fromdate (str): 조회 시작 일자 (YYMMDD)
+        todate   (str): 조회 종료 일자 (YYMMDD)
+        ticker   (str): 조회 종목 티커
+
+    Returns:
+        DataFrame:
+
+            >> get_shorting_volume_by_date("20210104", "20210108", "005930")
+
+                      공매도      매수      비중
+            날짜
+            2021-01-04  9279  38655276  0.020004
+            2021-01-05   169  35335669  0.000000
+            2021-01-06   967  42089013  0.000000
+            2021-01-07   763  32644642  0.000000
+            2021-01-08     6  59013307  0.000000
+    """
     if isinstance(fromdate, datetime.datetime):
         fromdate = _datetime2string(fromdate)
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
 
-    isin = krx.get_stock_ticker_isin(ticker)
-    return krx.get_shorting_volume_by_date(fromdate, todate, isin, market)
+    df = krx.get_shorting_trading_value_and_volume_by_date(fromdate, todate, ticker)
+    return df['거래량']
 
 
-def get_shorting_investor_volume_by_date(fromdate, todate, market):
+def get_shorting_value_by_date(fromdate: str, todate: str, ticker: str) -> DataFrame:
+    """일자별로 정렬된 공매도 거래량
+
+    Args:
+        fromdate (str): 조회 시작 일자 (YYMMDD)
+        todate   (str): 조회 종료 일자 (YYMMDD)
+        ticker   (str): 조회 종목 티커
+
+    Returns:
+        DataFrame:
+
+            >> get_shorting_value_by_date("20210104", "20210108", "005930")
+
+                           공매도           매수      비중
+            날짜
+            2021-01-04  771889500  3185356823460  0.020004
+            2021-01-05   14011100  2915618322800  0.000000
+            2021-01-06   80855100  3506903681680  0.000000
+            2021-01-07   63634800  2726112459660  0.000000
+            2021-01-08     534000  5083939899952  0.000000
+    """
+    if isinstance(fromdate, datetime.datetime):
+        fromdate = _datetime2string(fromdate)
+    if isinstance(todate, datetime.datetime):
+        todate = _datetime2string(todate)
+
+    df = krx.get_shorting_trading_value_and_volume_by_date(fromdate, todate, ticker)
+    return df['거래대금']
+
+
+@market_valid_check(["KOSPI", "KOSDAQ", "KONEX"])
+def get_shorting_investor_volume_by_date(fromdate: str, todate: str, market: str="KOSPI") -> DataFrame:
+    """투자자별 공매도 잔고 수량
+
+    Args:
+        fromdate (str          ): 조회 시작 일자 (YYMMDD)
+        todate   (str          ): 조회 종료 일자 (YYMMDD)
+        market   (str, optional): 조회 시장 (KOSPI/KOSDAQ/KONEX)
+
+    Returns:
+        DataFrame:
+
+            >> get_shorting_investor_volume_by_date("20200106", "20200110")
+
+                            기관    개인    외국인 기타      합계
+            날짜
+            2020-01-06  3783324  215700   9213745    0  13212769
+            2020-01-07  3627906  270121   7112215    0  11010242
+            2020-01-08  5161993  284087  13164830    0  18610910
+            2020-01-09  5265706  271622  11138406    0  16675734
+            2020-01-10  5129724  141885   7849543    0  13121152
+    """
+    if isinstance(fromdate, datetime.datetime):
+        fromdate = _datetime2string(fromdate)
+    if isinstance(todate, datetime.datetime):
+        todate = _datetime2string(todate)
+
     return krx.get_shorting_investor_by_date(fromdate, todate, market, "거래량")
 
 
-def get_shorting_investor_price_by_date(fromdate, todate, market):
+@market_valid_check(["KOSPI", "KOSDAQ", "KONEX"])
+def get_shorting_investor_value_by_date(fromdate: str, todate: str, market: str="KOSPI") -> DataFrame:
+    """투자자별 공매도 잔고 수량
+
+    Args:
+        fromdate (str          ): 조회 시작 일자 (YYMMDD)
+        todate   (str          ): 조회 종료 일자 (YYMMDD)
+        market   (str, optional): 조회 시장 (KOSPI/KOSDAQ/KONEX)
+
+    Returns:
+        DataFrame:
+
+            >> get_shorting_investor_value_by_date("20200106", "20200110")
+
+                                기관        개인        외국인  기타        합계
+            날짜
+            2020-01-06  135954452715  2502658310  119387130395   0  257844241420
+            2020-01-07  140062017520  2924582225  129899020748   0  272885620493
+            2020-01-08  175731372983  2579881000  266907627745   0  445218881728
+            2020-01-09  189541838466  3021427705  241819376326   0  434382642497
+            2020-01-10  185561759364  3182000295  165327866557   0  354071626216
+    """
+    if isinstance(fromdate, datetime.datetime):
+        fromdate = _datetime2string(fromdate)
+    if isinstance(todate, datetime.datetime):
+        todate = _datetime2string(todate)
+
     return krx.get_shorting_investor_by_date(fromdate, todate, market, "거래대금")
 
 
-def get_shorting_volume_top50(date, market):
+@market_valid_check(["KOSPI", "KOSDAQ", "KONEX"])
+def get_shorting_volume_top50(date: str, market: str="KOSPI") -> DataFrame:
+    """공매도 비중 상위 50개 종목 정보
+        - 비중 = 거래대금/거래대금
+
+    Args:
+        date   (str): 조회 일자 (YYMMDD)
+        market (str): 조회 시장 (KOSPI/KOSDAQ/KONEX)
+
+    Returns:
+        DataFrame:
+
+            >> get_shorting_volume_top50("20210127")
+
+                   순위  공매도거래대금   총거래대금  공매도비중  직전40일거래대금평균  공매도거래대금증가율  직전40일공매도평균비중  공매도비중증가율  주가수익률
+            티커
+            003545   1         38510030    915824030        4.21               5814411                  6.62                    0.51              8.33       -1.25
+            267290   2         13265200    329805000        4.02               2755259                  4.82                    0.66              6.14       -2.46
+            015890   3         15865860    428852660        3.70               8316412                  1.91                    1.30              2.85       -4.46
+            005945   4         25401240    908915950        2.79               4610634                  5.51                    0.44              6.40       -0.35
+            227840   5         13784400    546597900        2.52               3084294                  4.47                    0.51              4.91       -2.37
+
+            >> get_shorting_volume_top50("20210127", market="KOSDAQ")
+
+                  순위    공매도거래대금   총거래대금  공매도비중  직전40일거래대금평균  공매도거래대금증가율  직전40일공매도평균비중  공매도비중증가율  주가수익률
+            티커
+            003800   1           2460150    140242350        1.75               1881099                  1.31                    2.33              0.75        1.17
+            018120   2           3141500    230696500        1.36               2671128                  1.18                    1.99              0.68        0.00
+            092130   3           2217850    190657900        1.16               3134340                  0.71                    0.76              1.52       -1.10
+            260930   4           1197350    126576300        0.95                641443                  1.87                    0.27              3.56        0.97
+    """
+    if isinstance(date, datetime.datetime):
+        date = _datetime2string(date)
+
     return krx.get_shorting_volume_top50(date, market)
 
 
-def get_shorting_balance_by_date(fromdate, todate, ticker):
-    isin = krx.get_stock_ticker_isin(ticker)
-    mark = krx.get_stock_market_from(ticker)
-    return krx.get_shorting_balance_by_date(fromdate, todate, isin, mark)
+@market_valid_check(["KOSPI", "KOSDAQ", "KONEX"])
+def get_shorting_balance_top50(date: str, market: str="KOSPI") -> DataFrame:
+    """공매도 잔고 상위 50개 종목 정보
+       - 공매비중 = 공매도 잔고/상장주식수
 
+    Args:
+        date   (str): 조회 일자 (YYMMDD)
+        market (str): 조회 시장 (KOSPI/KOSDAQ/KONEX)
 
-def get_shorting_balance_top50(date, market):
+    Returns:
+        DataFrame:
+
+            >> get_shorting_balance_top50("20210127")
+
+                  순위  공매도잔고  상장주식수     공매도금액      시가총액      비중
+            티커
+            032350   1     4693027    69275662    74853780650  1.104947e+12  6.769531
+            042670   2    10846251   215931625    92843908560  1.848375e+12  5.019531
+            068270   3     6523965   134997805  2146384485000  4.441428e+13  4.828125
+            008770   4     1269261    39248121   106237145700  3.285068e+12  3.230469
+            011690   5     1604890    58494201     1957965800  7.136293e+10  2.740234
+
+            >> get_shorting_balance_top50("20210129", market="KOSDAQ")
+
+                  순위  공매도잔고  상장주식수    공매도금액      시가총액      비중
+            티커
+            215600   1     6497785    71617125   78623198500  8.665672e+11  9.070312
+            032500   2     2846196    39820883  217733994000  3.046298e+12  7.148438
+            028300   3     3483185    53013031  313834968500  4.776474e+12  6.570312
+            263750   4      443142    13189850  139944243600  4.165355e+12  3.359375
+            078130   5     4034831   126348384   18297958585  5.729899e+11  3.189453
+    """
+    if isinstance(date, datetime.datetime):
+        date = _datetime2string(date)
+
     return krx.get_shorting_balance_top50(date, market)
+
+
+@market_valid_check(["KOSPI", "KOSDAQ", "KONEX"])
+def get_shorting_balance_by_ticker(date: str, market: str="KOSPI") -> DataFrame:
+    """티커로 정렬된 공매도 잔고 현황
+
+    Args:
+        date   (str): 조회 일자 (YYMMDD)
+        market (str): 조회 시장 (KOSPI/KOSDAQ/KONEX)
+
+    Returns:
+        DataFrame:
+
+            >> get_shorting_balance_by_ticker("20210127")
+
+                    공매도잔고   상장주식수  공매도금액      시가총액      비중
+            티커
+            095570       33055     46822295   134864400  1.910350e+11  0.070007
+            006840        4575     13247561   131760000  3.815298e+11  0.029999
+            027410       68060     95716791   449196000  6.317308e+11  0.070007
+            282330        4794     17283906   757452000  2.730857e+12  0.029999
+            138930      596477    325935246  3340271200  1.825237e+12  0.180054
+    """
+    if isinstance(date, datetime.datetime):
+        date = _datetime2string(date)
+    return krx.get_shorting_balance_by_ticker(date, market)
+
+
+def get_shorting_balance_by_date(fromdate: str, todate: str, ticker: str) -> DataFrame:
+    """일자별로 정렬된 공매도 잔고 현황
+
+    Args:
+        fromdate (str): 조회 시작 일자 (YYMMDD)
+        todate   (str): 조회 종료 일자 (YYMMDD)
+        ticker   (str): 조회 종목 티커
+
+    Returns:
+        DataFrame:
+
+            >> get_shorting_balance_by_date("20200106", "20200110", "005930")
+
+                     공매도잔고  상장주식수    공매도금액      시가총액      비중
+            날짜
+            2020-01-06  5630893  5969782550  312514561500  3.313229e+14  0.090027
+            2020-01-07  5169745  5969782550  288471771000  3.331139e+14  0.090027
+            2020-01-08  5224233  5969782550  296736434400  3.390836e+14  0.090027
+            2020-01-09  5387073  5969782550  315682477800  3.498293e+14  0.090027
+            2020-01-10  5489240  5969782550  326609780000  3.552021e+14  0.090027
+    """
+    if isinstance(fromdate, datetime.datetime):
+        fromdate = _datetime2string(fromdate)
+    if isinstance(todate, datetime.datetime):
+        todate = _datetime2string(todate)
+
+    return krx.get_shorting_balance_by_date(fromdate, todate, ticker)
 
 
 # -----------------------------------------------------------------------------
@@ -889,5 +1354,6 @@ def get_etf_tracking_error(fromdate, todate, ticker):
 
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
-    df = get_exhaustion_rates_of_foreign_investment_by_ticker('20210118', "KOSPI")
-    print(len(df))
+    df = get_shorting_balance_by_date("20200106", "20200110", "005930")
+    print(df)
+
