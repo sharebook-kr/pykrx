@@ -61,7 +61,7 @@ def get_market_ohlcv_by_ticker(date: str, market: str="KOSPI") -> DataFrame:
 
     Args:
         date   (str): 조회 일자 (YYYYMMDD)
-        market (str): 조회 시장 (KOSPI/KOSDAQ/ALL). Defaults to KOSPI.
+        market (str): 조회 시장 (KOSPI/KOSDAQ/ALL).
 
     Returns:
         DataFrame:

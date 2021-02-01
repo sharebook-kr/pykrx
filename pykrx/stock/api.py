@@ -455,8 +455,6 @@ def get_market_fundamental_by_ticker(date: str, market: str="KOSPI") -> DataFram
     if isinstance(date, datetime.datetime):
         date = _datetime2string(date)
 
-
-
     return krx.get_market_fundamental_by_ticker(date, market)
 
 

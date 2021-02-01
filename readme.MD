@@ -25,7 +25,7 @@ from pykrx import stock
 코스피 종목의 주가 관련 정보를 얻는 API 입니다.
 
 #### 2.1.1.1 Ticker 조회
-get_market_ticker_list() 메서드는 지정한 일자(YYMMDD)의 코스피 시장에 상장된 ticker를 리스트로 반환합니다.
+`get_market_ticker_list` 메서드는 지정한 일자(YYMMDD)의 `코스피` 시장에 상장된 ticker를 리스트로 반환합니다.
 ```python
 tickers = stock.get_market_ticker_list("20190225")
 print(tickers)
@@ -34,7 +34,7 @@ print(tickers)
 ['095570', '068400', '006840', '027410', '282330', ...]
 ```
 
-날짜를 지정하지 않으면 내부적으로 최근 영업일을 계산해서 ticker 반환합니다. 최근 영업일을 조회하는 시간이 추가로 소모됩니다.
+날짜를 지정하지 않으면 내부적으로 최근 영업일을 계산해서 ticker 반환합니다. 최근 영업일을 조회하는 시간이 추가로 소모되지만 사용상의 차이점은 없습니다.
 
 ```python
 tickers = stock.get_market_ticker_list()
@@ -55,7 +55,7 @@ print(tickers)
 
 <br/>
 
-get_market_ticker_name() 함수로 티커를 입력하면 종목이름을 반환합니다.
+`get_market_ticker_name` 함수에 티커를 입력하면 종목이름을 반환합니다.
 ```python
 for ticker in stock.get_market_ticker_list():
         종목 = stock.get_market_ticker_name(ticker)
@@ -67,7 +67,7 @@ SK하이닉스
 ```
 
 #### 2.1.1.2 일자별 OHLCV 조회
-get_market_ohlcv_by_date() 함수는 시작일/종료일/티커 세 개의 파라미터를 입력받아 OHLCV를 일자별로 정렬하여 DataFrame으로 반환합니다.
+`get_market_ohlcv_by_date` 함수는 시작일/종료일/티커 세 개의 파라미터를 입력받아 OHLCV를 일자별로 정렬하여 DataFrame으로 반환합니다.
 
 ```python
 df = stock.get_market_ohlcv_by_date("20150720", "20150810", "005930")
@@ -104,7 +104,7 @@ for ticker in stock.get_stock_ticker_list():
 ```
 
 #### 2.1.1.3 전체 종목 시세 조회
-get_market_ohlcv_by_ticker() 함수는 입력된 일자의 전종목 시세를 DataFrame으로 반환합니다.
+`get_market_ohlcv_by_ticker` 함수는 입력된 일자의 `코스피` 전종목 시세를 DataFrame으로 반환합니다.
 
 ```python
 df = stock.stock.get_market_ohlcv_by_ticker("20210122")
@@ -119,17 +119,20 @@ print(df.head(3))
 027410    5020    5250    4955    5220  1547629   7990770515   4.191406
 ```
 
-두 번째 파라미터에 특정 시장을 지정해서 종목 시세를 조회할 수 있습니다. 코스피(KOSPI)/코스닥(KOSDAQ)/코넥스(KONEX) 시장을 지원합니다. 값을 입력하지 않는다면 전체 시장 정보를 조회합니다.
+두 번째 파라미터에 특정 시장을 지정해서 종목 시세를 조회할 수 있습니다.
+- 코스피(KOSPI)/코스닥(KOSDAQ)/코넥스(KONEX) 시장을 지원합니다.
+- `ALL`을 입력하면 전체 시장을 조회합니다.
+- 값을 입력하지 않는다면 코스피 시장을 조회합니다.
 
 ```python
-df = stock.get_market_ohlcv_by_ticker("20200831", "KOSPI")
-df = stock.get_market_ohlcv_by_ticker("20200831", "KOSDAQ")
-df = stock.get_market_ohlcv_by_ticker("20200831", "KONEX")
-
+df = stock.get_market_ohlcv_by_ticker("20200831", market="KOSPI")
+df = stock.get_market_ohlcv_by_ticker("20200831", market="KOSDAQ")
+df = stock.get_market_ohlcv_by_ticker("20200831", market="KONEX")
 ```
 
 #### 2.1.1.4 모든 종목의 가격 변동 조회
-get_market_price_change_by_ticker() 함수는 입력된 기간 동안의 가격 가격 변동 정보를 반환합니다. 다음 코드는 20180301-20180320 동안의 가격 변동폭을 조회합니다.
+`get_market_price_change_by_ticker` 함수는 입력된 기간 동안의 가격 가격 변동 정보를 반환합니다.
+다음 코드는 20180301-20180320 동안의 가격 변동폭을 조회합니다.
 .
 ```python
 df = stock.get_market_price_change_by_ticker("20180301", "20180320")
@@ -171,7 +174,7 @@ print(df.loc["051170"])
 ```
 
 #### 2.1.1.5 종목별 DIV/BPS/PER/EPS 조회
-get_market_fundamental_by_ticker() 함수는 입력된 일자의 DIV/BPS/PER/EPS/PBR를 조회합니다.
+`get_market_fundamental_by_ticker` 함수는 코스피 시장의 DIV/BPS/PER/EPS/PBR를 조회합니다.
 ```python
 df = stock.get_market_fundamental_by_ticker("20210108")
 print(df.head(2))
@@ -183,9 +186,22 @@ print(df.head(2))
 006840  62448  11.687500  0.409912  2168  2.960938   750
 ```
 
-#### 2.1.1.6 일자별 DIV/BPS/PER/EPS 조회
+두 번재 `market` 파라미터를 사용하면 특정 시장을 조회할 수 있습니다.
+- KOSPI / KOSDAQ / KONEX / ALL 을 사용할 수 있습니다.
 
-get_market_fundamental_by_date() 함수는 특정 종목에 대해 입력된 기간의 DIV/BPS/PER/EPS/PBR를 조회합니다.
+```python
+df = get_market_fundamental_by_ticker("20210104", market="KOSDAQ")
+print(df.head(2))
+```
+```text
+           BPS         PER       PBR   EPS       DIV   DPS
+티커
+060310     745    0.000000  3.029297     0  0.000000     0
+054620   10530    0.000000  0.759766     0  0.000000     0
+```
+
+#### 2.1.1.6 일자별 DIV/BPS/PER/EPS 조회
+`get_market_fundamental_by_date` 함수는 특정 종목에 대해 입력된 기간의 DIV/BPS/PER/EPS/PBR를 조회합니다.
 ```python
 df = stock.get_market_fundamental_by_date("20210104", "20210108", "005930")
 print(df.head(2))
