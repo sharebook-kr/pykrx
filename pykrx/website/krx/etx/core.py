@@ -30,6 +30,72 @@ class 상장종목검색(KrxWebIo):
         result = self.read(mktsel=market, searchText=name)
         return DataFrame(result['block1'])
 
+
+class ETF_전종목기본종목(KrxWebIo):
+    @property
+    def bld(self):
+        return "dbms/MDC/STAT/standard/MDCSTAT04601"
+
+    def fetch(self) -> DataFrame:
+        """[13104] 전종목 기본정보
+
+        Returns:
+            DataFrame : 상장 종목 정보를 반환
+
+                           ISU_CD ISU_SRT_CD                                                              ISU_NM                        ISU_ABBRV                                         ISU_ENG_NM     LIST_DD                ETF_OBJ_IDX_NM IDX_CALC_INST_NM1     IDX_CALC_INST_NM2 ETF_REPLICA_METHD_TP_CD IDX_MKT_CLSS_NM IDX_ASST_CLSS_NM  LIST_SHRS        COM_ABBRV   CU_QTY ETF_TOT_FEE                 TAX_TP_CD
+                0    KR7292340007     292340   DB 마이티 200커버드콜ATM레버리지증권상장지수투자신탁[주식-파생형]    마이티 200커버드콜ATM레버리지   DB Mighty KOSPI200 Covered Call ATM Leverage ETF  2018/03/20  코스피 200 커버드콜 ATM 지수               KRX       2X 레버리지 (2)                    실물            국내             주식    500,000     디비자산운용  100,000       0.510  배당소득세(보유기간과세)
+                1    KR7159800002     159800                              DB마이티K100증권상장지수투자신탁(주식)                 마이티 코스피100                                 DB Mighty K100 ETF  2012/07/05                    코스피 100               KRX              일반 (1)                    실물            국내             주식    400,000     디비자산운용   40,000       0.390                    비과세
+                2    KR7361580004     361580                KB KBSTAR 200 Total Return증권상장지수투자신탁(주식)                     KBSTAR 200TR                     KB KBSTAR 200 Total Return ETF  2020/08/21                 코스피 200 TR               KRX              일반 (1)                    실물            국내             주식  1,300,000   케이비자산운용   50,000       0.045  배당소득세(보유기간과세)
+                3    KR7285000006     285000                           KB KBSTAR 200IT증권상장지수투자신탁(주식)                     KBSTAR 200IT           KB KBSTAR 200 Information Technology ETF  2017/12/08           코스피 200 정보기술               KRX              일반 (1)                    실물            국내             주식    700,000   케이비자산운용   20,000       0.190                    비과세
+                4    KR7287300008     287300                         KB KBSTAR 200건설증권상장지수투자신탁(주식)                   KBSTAR 200건설                    KB KBSTAR 200 Constructions ETF  2017/12/22               코스피 200 건설               KRX              일반 (1)                    실물            국내             주식    560,000   케이비자산운용   20,000       0.190                    비과세
+        """
+        result = self.read()
+        return DataFrame(result['output'])
+
+
+class ETN_전종목기본종목(KrxWebIo):
+    @property
+    def bld(self):
+        return "dbms/MDC/STAT/standard/MDCSTAT06701"
+
+    def fetch(self) -> DataFrame:
+        """[13202] 전종목 등락률
+
+        Returns:
+            DataFrame : 상장 종목 정보를 반환
+
+                           ISU_CD ISU_SRT_CD                                                          ISU_NM               ISU_ABBRV                                     ISU_ENG_NM     LIST_DD   LSTTRD_DD            TRACE_IDX_NM IDX_CALC_INST_NM IDX_LVRG_INVRS_TP_CD ETP_PROD_TP_CD IDX_MKT_CLSS_NM IDX_ASST_CLSS_NM   LIST_SHRS   ISUR_NM   EXPS_RTO   TAX_TP_CD
+                0    KRG580000112     580011                    KB증권 KB FnGuide 언택트 상장지수증권 제11호   KB FnGuide 언택트 ETN            KB Securities KB FnGuide Untact ETN  2020/09/01  2030/08/29     FnGuide 언택트 지수          FnGuide                 일반            ETN            국내             주식   1,000,000    KB증권       0.80      비과세
+                1    KRG581100077     580007      KB증권 KB KQ 우량주30 ETN 파생결합증권(상장지수증권) 제7호      KB KQ 우량주30 ETN                      KB KB KQ Bluechip30 ETN 7  2016/12/28  2026/12/23   WISE KQ 우량주30 지수           WiseFn                 일반            ETN            국내             주식   5,000,000    KB증권       0.65      비과세
+                2    KRG580000138     580013           KB증권 KB KRX ESG Eco Leaders 100 상장지수증권 제13호      KB KRX ESG Eco ETN   KB Securities KB KRX ESG Eco Leaders 100 ETN  2020/11/12  2030/11/08     KRX Eco Leaders 100              KRX                 일반            ETN            국내             주식   1,000,000    KB증권       0.80      비과세
+                3    KRG580000120     580012                            KB증권 KB KRX300 상장지수증권 제12호           KB KRX300 ETN                    KB Securities KB KRX300 ETN  2020/09/10  2030/09/06                 KRX 300              KRX                 일반            ETN            국내             주식   1,000,000    KB증권       0.50      비과세
+                4    KRG581100069     580006               KB증권 KB KTOP30 파생결합증권(상장지수증권) 제6호           KB KTOP30 ETN                             KB KB KTOP30 ETN 6  2016/10/27  2026/10/23                 KTOP 30              KRX                 일반            ETN            국내             주식   5,000,000    KB증권       0.39      비과세
+        """
+        result = self.read()
+        return DataFrame(result['output'])
+
+
+class ELW_전종목기본종목(KrxWebIo):
+    @property
+    def bld(self):
+        return "dbms/MDC/STAT/standard/MDCSTAT08501"
+
+    def fetch(self) -> DataFrame:
+        """[13303] 전종목 기본정보
+
+        Returns:
+            DataFrame : 상장 종목 정보를 반환
+
+                            ISU_CD ISU_SRT_CD                                ISU_NM           ISU_ABBRV                ISU_ENG_NM     LIST_DD   LSTTRD_DD      EXP_DD ELW_ULY_TP_NM       ULY_NM   LIST_SHRS   ISUR_NM ELW_CONV_RTO RGHT_TP_NM ELW_EXER_TP EXER_PRC   LP_NM ORD_SPD_RTO ELW_LST_SETL_METHD
+                0     KRA5811AJA22     58F194    KB증권(주) 주식워런트증권 제F194호    KBF194SK하이닉콜    KB SECURITIES ELW F194  2020/02/26  2021/02/10  2021/02/16          주식   SK하이닉스  10,400,000    KB증권         0.01         콜      유럽형  110,000  KB증권          15           현금결제
+                1     KRA5811AKA29     58F195    KB증권(주) 주식워런트증권 제F195호    KBF195삼성전자콜    KB SECURITIES ELW F195  2020/02/26  2021/02/10  2021/02/16          주식     삼성전자  15,000,000    KB증권         0.01         콜      유럽형   65,600  KB증권          15           현금결제
+                2     KRA581194A30     58F298    KB증권(주) 주식워런트증권 제F298호    KBF298삼성전자콜    KB SECURITIES ELW F298  2020/03/31  2021/02/10  2021/02/16          주식     삼성전자  10,300,000    KB증권         0.01         콜      유럽형   52,300  KB증권          15           현금결제
+                3     KRA581295A38     58F299    KB증권(주) 주식워런트증권 제F299호    KBF299삼성전자풋    KB SECURITIES ELW F299  2020/03/31  2021/02/10  2021/02/16          주식     삼성전자  23,900,000    KB증권         0.01         풋      유럽형   50,900  KB증권          15           현금결제
+                4     KRA5811A0A44     58F407    KB증권(주) 주식워런트증권 제F407호      KBF407LG화학콜    KB SECURITIES ELW F407  2020/04/28  2021/02/10  2021/02/16          주식       LG화학  16,000,000    KB증권        0.002         콜      유럽형  322,500  KB증권          15           현금결제
+        """
+        result = self.read()
+        return DataFrame(result['output'])
+
 # ------------------------------------------------------------------------------------------
 # ETF
 
@@ -164,9 +230,10 @@ class 괴리율추이(KrxWebIo):
 if __name__ == "__main__":
     import pandas as pd
     pd.set_option('display.width', None)
-    # print(상장종목검색().fetch())
+    # print(상장종목검색().fetch("ETF"))
+    print(ELW_전종목기본종목().fetch())
     # print(개별종목시세_ETF().fetch("20210111", "20210119", "KR7152100004"))
     # print(전종목시세_ETF().fetch("20210119"))
     # print(PDF().fetch("20210119", "KR7152100004"))
     # print(추적오차율추이().fetch("20201219", "20210119", "KR7152100004"))
-    print(괴리율추이().fetch("20201219", "20210119", "KR7152100004"))
+    # print(괴리율추이().fetch("20201219", "20210119", "KR7152100004"))

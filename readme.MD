@@ -993,11 +993,10 @@ print(df.head())
 078130   5     4034831   126348384   18297958585  5.729899e+11  3.189453
 ```
 
-## 2.2 E3 API
-
+## 2.2 ETX API
 ### 2.2.1 ETF
 #### 2.2.1.1 ETF 티커
-get_etf_ticker_list() 함수는 입력된 날짜에 해당하는 ETF 티커를 리스트로 반환합니다. 날짜는 유효한 영업일이여야 올바른 값이 출력됩니다.
+`get_etf_ticker_list` 함수는 입력된 날짜에 존재하는 ETF 티커를 리스트로 반환합니다.
 ```python
 tickers = stock.get_etf_ticker_list("20200717")
 print(tickers[:10])
@@ -1005,68 +1004,86 @@ print(tickers[:10])
 ```text
 ['346000', '342140', '342500', '342600', '342610', .... ]
 ```
-#### 2.2.1.1 ETF OHLCV
-get_etf_ohlcv_by_date() 함수는 ETF의 OHLCV를 일자별로 출력합니다. 다음은 "ARIRANG 200동일가중(295820)"의 OHLCV를 출력합니다.
+
+20021014에는 `KODEX 200(069500)`과 `KOSEF 200(069660)` 두 개의 종목이 상장돼 있었습니다.
 ```python
-df = stock.get_etf_ohlcv_by_date("20190401", "20190405", "295820")
+get_etf_ticker_list("20021014")
+print(tickers)
+```
+```text
+ ['069500', '069660']
+```
+
+#### 2.2.1.1 ETF 이름
+`get_etf_ticker_name` 함수는 입력된 티커의 종목 이름을 출력합니다.
+```python
+tickers = stock.get_etf_ticker_list("20021014")
+    for ticker in tickers:
+        print(stock.get_etf_ticker_name(ticker))
+```
+
+```text
+KODEX 200
+KOSEF 200
+```
+
+#### 2.2.1.1 ETF OHLCV
+`get_etf_ohlcv_by_date` 함수는 ETF의 OHLCV를 일자별로 출력합니다. 다음은 "마이티 200커버드콜ATM레버리지(292340)"의 OHLCV를 출력합니다.
+```python
+df = stock.get_etf_ohlcv_by_date("20210104", "20210108", "292340")
 print(df.head())
 ```
 
 ```text
-              NAV  시가  고가  저가   종가 거래량 거래대금 기초지수
-20190401  9171.40  9080  9175  9080  9170   27        0  2029.91
-20190402  9147.04  9150  9150  9095  9140  331  3000000  2024.53
-20190403  9239.89  9115  9235  9110  9235  401  3000000  2045.12
-20190404  9254.05  9250  9275  9220  9250  325  3000000  2048.28
-20190405  9270.59  9235  9260  9225  9235   60        0  2051.92
+                NAV  시가  고가  저가  종가 거래량  거래대금  기초지수
+날짜
+2021-01-04  9737.23  9730  9730  9730  9730     81    788130   1303.29
+2021-01-05  9756.27  9705  9990  9700  9770      6     58845   1306.59
+2021-01-06  9796.98     0     0     0  9770      0         0   1306.76
+2021-01-07  9723.65  9845  9855  9845  9855      2     19700   1301.65
+2021-01-08  9771.73  9895  9900  9855  9885      6     59320   1306.73
 ```
 get_etf_ohlcv_by_date() 함수에 frequency 파라미터(d/m/y)를 추가할 수 있습니다.
-d는 일자, m은 월, y는 연도를 의미합니다. 다음은 20190301부터 20190405까지의 "ARIRANG 200동일가중"의 월별 OHLCV를 출력합니다.
+d는 일자, m은 월, y는 연도를 의미합니다. 다음은 20200101부터 20200531까지의 월별 OHLCV를 출력합니다.
 ```python
-df = stock.get_etf_ohlcv_by_date("20190301", "20190405", "295820", 'm')
+df = stock.get_etf_ohlcv_by_date("20200101", "20200531", "292340", 'm')
 print(df.head())
 ```
 ```text
-        시가  고가  저가  종가   거래량
-201903  9325  9400  8950  9055  125412
-201904  9080  9275  9080  9235    1144
+                NAV  시가  고가  저가  종가 거래량   거래대금 기초지수
+날짜
+2020-01-31  8910.61  8900  9270   0  8795   36559   330991070  1231.00
+2020-02-29  8633.13     0  9395   0  7555      72      658080  1213.88
+2020-03-31  7720.09  7520  9965   0  6030  206070  1373727350  1149.86
+2020-04-30  5590.35  6055  6975   0  6975    8743    57352845   997.80
+2020-05-31  6845.59  6835  7450   0  7415    1788    13057270  1107.92
 ```
-get_etf_ticker_list()로 얻어온 티커를 사용해서 반복적으로 OHLCV를 조회할 수 있습니다.
-```python
-import time
-tickers = stock.get_etf_ticker_list()
-for ticker in tickers[:10]:
-    df = stock.get_etf_ohlcv_by_date("20190301", "20190405", ticker)
-    print(df.head(2))
-    time.sleep(1)
-```
-
 
 #### 2.2.1.2 PDF 정보
-get_etf_portfolio_deposit_file() 함수는 ETF를 구성하는 종목/비중 정보를 얻어옵니다.
-다음은 KODEX 200동일가중(252650)의 PDF를 조회합니다.
+`get_etf_portfolio_deposit_file` 함수는 ETF를 구성하는 종목/비중 정보를 얻어옵니다.
+다음은 ARIRANG 200(152100)의 PDF를 조회합니다.
 ```python
-df = stock.get_etf_portfolio_deposit_file("252650", "20190329")
+df = stock.get_etf_portfolio_deposit_file("152100")
 print(df.head())
 ```
-평가 금액이 종목당 약 1200만정도로 비중이 조절된 것을 확인할 수 있습니다.
 ```text
-          계약수    금액    비중
-동원시스템즈 337  11963500  0.59
-호텔신라     121  11543400  0.57
-신세계        34  11475000  0.57
-엔씨소프트    23  11408000  0.56
-LG생활건강     8  11336000  0.56
+         계약수       금액   비중
+티커
+005930   8140.0  667480000  31.77
+000660    968.0  118580000   5.69
+035420    218.0   74774000   3.57
+051910     79.0   72443000   3.53
+068270    184.0   59616000   3.21
 ```
 
-날짜를 입력하지 않으면 조회 시점을 기준으로 조회합니다.
+날짜를 입력해서 특정일의 상태를 확인할 수 있습니다.
 ```python
-df = stock.get_etf_portfolio_deposit_file("252650")
+df = stock.get_etf_portfolio_deposit_file("152100", "20161206")
 print(df.head())
 ```
 
 #### 2.2.1.3 괴리율 추이
-get_etf_price_deviation() 함수는 ETF의 종가/순자산가치/괴리율 정보를 얻어옵니다.
+`get_etf_price_deviation` 함수는 ETF의 종가/순자산가치/괴리율 정보를 얻어옵니다.
 다음은 ARIRANG 200동일가중(295820) 종목의 괴리율을 출력합니다.
 ```python
 df = stock.get_etf_price_deviation("20200101", "20200401", "295820")
@@ -1083,28 +1100,72 @@ print(df.head())
 ```
 
 #### 2.2.1.4 추적오차율 추이
-get_etf_tracking_error() 함수는 ETF의 순자산가치/기초지수/추적오차 정보를 얻어옵니다.
+`get_etf_tracking_error` 함수는 ETF의 순자산가치/기초지수/추적오차 정보를 얻어옵니다.
 ```python
-df = get_etf_tracking_error("20200101", "20200401", "295820")
+df = get_etf_tracking_error("20210104", "20210108", "295820")
 print(df.head())
 ```
 
 ```text
-                    NAV         지수   추적오차
+                 NAV     지수   추적오차율
 날짜
-2020-01-02  8302.580078  1819.109985    0.32
-2020-01-03  8297.889648  1818.130005    0.32
-2020-01-06  8145.950195  1784.719971    0.32
-2020-01-07  8226.049805  1802.339966    0.32
-2020-01-08  7998.839844  1752.359985    0.32
+2021-01-04  10267.39  2218.76   0.82
+2021-01-05  10459.99  2261.10   0.81
+2021-01-06  10431.90  2254.82   0.81
+2021-01-07  10648.76  2302.73   0.82
+2021-01-08  10797.72  2335.10   0.82
 ```
 
 
 ### 2.2.2 ETN
-#### 2.2.2.1
+#### 2.2.2.1 ETN 티커
+`get_etn_ticker_list` 함수는 입력된 날짜에 존재하는 ETN 티커를 리스트로 반환합니다.
+```python
+tickers = stock.get_etn_ticker_list("20141215")
+print(tickers)
+```
+```text
+['550001', '550002', '500001', '500002']
+```
+
+#### 2.2.2.1 ETF 이름
+`get_etn_ticker_name` 함수는 입력된 티커의 종목 이름을 출력합니다.
+```python
+tickers = stock.get_etn_ticker_list("20141215")
+    for ticker in tickers:
+        print(stock.get_etn_ticker_name(ticker))
+```
+
+```text
+QV Big Vol ETN
+QV WISE 배당 ETN
+신한 K200 USD 선물 바이셀 ETN
+신한 USD K200 선물 바이셀 ETN
+```
 
 ### 2.2.3 ELW
-#### 2.2.3.1
+#### 2.2.3.1 ELW 티커
+`get_elw_ticker_list` 함수는 입력된 날짜에 존재하는 ELW 티커를 리스트로 반환합니다.
+```python
+tickers = stock.get_elw_ticker_list("20200306")
+print(tickers)
+```
+```text
+['58F194', '58F195']
+```
+
+#### 2.2.3.1 ELW 이름
+`get_etn_ticker_name` 함수는 입력된 티커의 종목 이름을 출력합니다.
+```python
+tickers = stock.get_elw_ticker_list("20200306")
+    for ticker in tickers:
+        print(stock.get_elw_ticker_name(ticker))
+```
+
+```text
+KBF194SK하이닉콜
+KBF195삼성전자콜
+```
 
 ## 2.3 채권 API
 

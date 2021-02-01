@@ -1,7 +1,7 @@
 from pykrx.website.comm import dataframe_empty_handler
-from pykrx.website.krx.e3.core import (개별종목시세_ETF, 전종목시세_ETF,
+from pykrx.website.krx.etx.core import (개별종목시세_ETF, 전종목시세_ETF,
                                        PDF, 추적오차율추이, 괴리율추이)
-from pykrx.website.krx.e3.ticker import EtfTicker
+from pykrx.website.krx.etx.ticker import get_etx_isin
 import numpy as np
 import decimal
 import pandas as pd
@@ -26,7 +26,7 @@ def get_etf_ohlcv_by_date(fromdate: str, todate: str, ticker: str) -> DataFrame:
             2020-01-06  814595.0  8230  8230  8140  8150      32      261570  178472.0
             2020-01-07  822605.0  8225  8225  8200  8220  238722  1960114040  180234.0
     """
-    isin = EtfTicker().get_isin(ticker)
+    isin = get_etx_isin(ticker)
     df = 개별종목시세_ETF().fetch(fromdate, todate, isin)
 
     df = df[['TRD_DD', 'LST_NAV', 'TDD_OPNPRC', 'TDD_HGPRC', 'TDD_LWPRC',
@@ -35,9 +35,9 @@ def get_etf_ohlcv_by_date(fromdate: str, todate: str, ticker: str) -> DataFrame:
                   '거래대금', '기초지수']
     df = df.replace('[^-\w\.]', '', regex=True)
     df = df.set_index('날짜')
-    df = df.astype({"NAV": np.float32, "시가": np.uint32, "고가": np.uint32,
+    df = df.astype({"NAV": np.float64, "시가": np.uint32, "고가": np.uint32,
                     "저가": np.uint32, "종가": np.uint32, "거래량": np.uint64,
-                    "거래대금": np.uint64, "기초지수": np.float32})
+                    "거래대금": np.uint64, "기초지수": np.float64})
     df.index = pd.to_datetime(df.index, format='%Y%m%d')
     return df.sort_index()
 
@@ -52,17 +52,17 @@ def get_etf_portfolio_deposit_file(date: str, ticker: str) -> DataFrame:
 
     Returns:
         DataFrame:
-                        종목명  계약수       금액       비중
+                     계약수       금액       비중
             티커
-            005930    삼성전자  8175.0  694875000  16.531250
-            000660  SK하이닉스   972.0  126360000   2.949219
-            051910      LG화학    80.0   77120000   1.849609
-            035420       NAVER   219.0   65809500   1.570312
+            005930   8175.0  694875000  16.531250
+            000660    972.0  126360000   2.949219
+            051910     80.0   77120000   1.849609
+            035420    219.0   65809500   1.570312
     """
-    isin = EtfTicker().get_isin(ticker)
+    isin = get_etx_isin(ticker)
     df = PDF().fetch(date, isin)
-    df = df[['COMPST_ISU_CD', 'COMPST_ISU_NM', 'COMPST_ISU_CU1_SHRS', 'VALU_AMT', 'COMPST_RTO']]
-    df.columns = ['티커', '종목명', '계약수', '금액', '비중']
+    df = df[['COMPST_ISU_CD', 'COMPST_ISU_CU1_SHRS', 'VALU_AMT', 'COMPST_RTO']]
+    df.columns = ['티커', '계약수', '금액', '비중']
 
     # NOTE: 웹 서버가 COMPST_ISU_CD에 ISIN과 축향형을 혼합해서 반환한다. Why?
     df['티커'] = df['티커'].apply(lambda x : x[3:9] if len(x) > 6 else x)
@@ -72,7 +72,7 @@ def get_etf_portfolio_deposit_file(date: str, ticker: str) -> DataFrame:
     # - empty string은 int, float로 형변환 불가
     #  -> 이 문제를 해결하기 위해 '-' 문자는 0으로 치환
     df = df.replace('-', '0', regex=True)
-    df = df.astype({"계약수": np.float32, "금액": np.uint64, "비중": np.float16 })
+    df = df.astype({"계약수": np.float64, "금액": np.uint64, "비중": np.float32 })
     return df
 
 
@@ -96,14 +96,14 @@ def get_etf_price_deviation(fromdate: str, todate: str, ticker: str) -> DataFram
             2020-01-08  7980  7998.839844 -0.239990
 
     """
-    isin = EtfTicker().get_isin(ticker)
+    isin = get_etx_isin(ticker)
     df = 괴리율추이().fetch(fromdate, todate, isin)
     df = df[['TRD_DD', 'CLSPRC', 'LST_NAV', 'DIVRG_RT']]
     df.columns = ['날짜', '종가', 'NAV', '괴리율']
     df = df.set_index('날짜')
     df = df.replace(',', '', regex=True)
 
-    df = df.astype({"종가": np.uint32, "NAV": np.float32, "괴리율": np.float16})
+    df = df.astype({"종가": np.uint32, "NAV": np.float64, "괴리율": np.float32})
     df.index = pd.to_datetime(df.index, format='%Y/%m/%d')
     return df.sort_index()
 
@@ -127,13 +127,13 @@ def get_etf_tracking_error(fromdate: str, todate: str, ticker: str) -> DataFrame
             2020-01-07  8226.049805  1802.339966  0.320068
             2020-01-08  7998.839844  1752.359985  0.320068
     """
-    isin = EtfTicker().get_isin(ticker)
+    isin = get_etx_isin(ticker)
     df = 추적오차율추이().fetch(fromdate, todate, isin)
     df = df[['TRD_DD', 'LST_NAV', 'OBJ_STKPRC_IDX', 'TRACE_ERR_RT']]
     df.columns = ['날짜', 'NAV', '지수', '추적오차율']
     df = df.set_index('날짜')
     df = df.replace(',', '', regex=True)
-    df = df.astype({"NAV": np.float32, "지수": np.float32, "추적오차율": np.float16})
+    df = df.astype({"NAV": np.float64, "지수": np.float64, "추적오차율": np.float32})
     df.index = pd.to_datetime(df.index, format='%Y/%m/%d')
     return df.sort_index()
 

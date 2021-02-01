@@ -1320,38 +1320,294 @@ def get_shorting_balance_by_date(fromdate: str, todate: str, ticker: str) -> Dat
 
 
 # -----------------------------------------------------------------------------
-# ETF API
+# ETX API
 # -----------------------------------------------------------------------------
-def get_etf_ticker_list(date=None):
+@market_valid_check(["ETF", "ETN", "ELW", "ALL"])
+def get_etx_ticker_list(market: str, date: str=None) -> list:
+    """ETX 티커 목록 조회
+
+    Args:
+        market (str          ): 조회 시장 (ETF/ETN/ELW/ALL)
+        date   (str, optional): 조회 일자 (YYMMDD)
+         - 입력하지 않을 경우 당일 기준 티커 조회
+
+    Returns:
+        list:
+
+            >> get_etx_ticker_list("ETF")
+
+            ['292340', '159800', '361580', '285000', '287300', '287310', ....]
+    """
     if date is None:
         date = get_nearest_business_day_in_a_week()
-    return krx.get_etf_ticker_list(date)
+    if isinstance(date, datetime.datetime):
+        date = _datetime2string(date)
+
+    return krx.get_etx_ticker_list(date, market)
 
 
-def get_etf_isin(ticker):
-    return krx.get_etf_isin(ticker)
+def get_etf_ticker_list(date: str=None) -> list:
+    """ETF 티커 목록 조회
+
+    Args:
+        date (str, optional): 조회 일자 (YYMMDD)
+         - 입력하지 않을 경우 당일 기준 티커 조회
+
+    Returns:
+        list:
+
+            >> get_etf_ticker_list("20021014")
+
+            ['069500', '069660']
+    """
+    if date is None:
+        date = get_nearest_business_day_in_a_week()
+    if isinstance(date, datetime.datetime):
+        date = _datetime2string(date)
+
+    return krx.get_etx_ticker_list(date, "ETF")
 
 
-def get_etf_ohlcv_by_date(fromdate, todate, ticker):
-    return krx.get_etf_ohlcv_by_date(fromdate, todate, ticker)
+def get_etn_ticker_list(date: str=None) -> list:
+    """ETN 티커 목록 조회
+
+    Args:
+        date (str, optional): 조회 일자 (YYMMDD)
+         - 입력하지 않을 경우 당일 기준 티커 조회
+
+    Returns:
+        list:
+
+            >> get_etn_ticker_list("20141215")
+
+            ['550001', '550002', '500001', '500002']
+    """
+    if date is None:
+        date = get_nearest_business_day_in_a_week()
+    if isinstance(date, datetime.datetime):
+        date = _datetime2string(date)
+
+    return krx.get_etx_ticker_list(date, "ETN")
 
 
-def get_etf_portfolio_deposit_file(ticker, date=None):
+def get_elw_ticker_list(date: str=None) -> list:
+    """ETW 티커 목록 조회
+
+    Args:
+        date (str, optional): 조회 일자 (YYMMDD)
+         - 입력하지 않을 경우 당일 기준 티커 조회
+
+    Returns:
+        list:
+
+            >> get_elw_ticker_list("20200306")
+
+            ['58F194', '58F195']
+    """
+    if date is None:
+        date = get_nearest_business_day_in_a_week()
+    if isinstance(date, datetime.datetime):
+        date = _datetime2string(date)
+
+    return krx.get_etx_ticker_list(date, "ELW")
+
+
+def get_etf_ticker_name(ticker: str) -> str:
+    """종목 이름 조회
+
+    Args:
+        ticker (str): 티커
+
+    Returns:
+        str: 종목명
+
+            >> get_etf_ticker_name("069500")
+
+            KODEX 200
+    """
+    return krx.get_etx_name(ticker)
+
+
+def get_etn_ticker_name(ticker: str) -> str:
+    """종목 이름 조회
+
+    Args:
+        ticker (str): 티커
+
+    Returns:
+        str: 종목명
+
+            >> get_etn_ticker_name("550001")
+
+            QV Big Vol ETN
+    """
+    return krx.get_etx_name(ticker)
+
+
+def get_elw_ticker_name(ticker: str) -> str:
+    """종목 이름 조회
+
+    Args:
+        ticker (str): 티커
+
+    Returns:
+        str: 종목명
+
+            >> get_elw_ticker_name("58F194")
+
+            KODEX 200
+    """
+    return krx.get_etx_name(ticker)
+
+
+def get_etf_isin(ticker: str) -> str:
+    """ISIN 조회
+
+    Args:
+        ticker (str): [description]
+
+    Returns:
+        str: ISIN
+
+            >> get_etf_isin("069500")
+
+            KR7069500007
+    """
+    return krx.get_etx_isin(ticker)
+
+
+def get_etf_ohlcv_by_date(fromdate: str, todate: str, ticker: str, freq: str="d") -> DataFrame:
+    """일자별로 정렬된 특정 종목의 OHLCV 조회
+
+    Args:
+        fromdate     (str           ): 조회 시작 일자 (YYYYMMDD)
+        todate       (str           ): 조회 종료 일자 (YYYYMMDD)
+        ticker       (str           ): 조회할 종목의 티커
+        freq         (str,  optional): d - 일 / m - 월 / y - 년
+
+    Returns:
+        DataFrame:
+
+            >> get_etf_ohlcv_by_date("20210104", "20210108", "292340")
+
+                            NAV  시가  고가  저가  종가 거래량  거래대금  기초지수
+            날짜
+            2021-01-04  9737.23  9730  9730  9730  9730     81    788130   1303.29
+            2021-01-05  9756.27  9705  9990  9700  9770      6     58845   1306.59
+            2021-01-06  9796.98     0     0     0  9770      0         0   1306.76
+            2021-01-07  9723.65  9845  9855  9845  9855      2     19700   1301.65
+            2021-01-08  9771.73  9895  9900  9855  9885      6     59320   1306.73
+
+            >> get_etf_ohlcv_by_date("20200101", "20200630", "292340", freq="m")
+
+                            NAV  시가  고가  저가  종가 거래량   거래대금 기초지수
+            날짜
+            2020-01-31  8910.61  8900  9270   0  8795   36559   330991070  1231.00
+            2020-02-29  8633.13     0  9395   0  7555      72      658080  1213.88
+            2020-03-31  7720.09  7520  9965   0  6030  206070  1373727350  1149.86
+            2020-04-30  5590.35  6055  6975   0  6975    8743    57352845   997.80
+            2020-05-31  6845.59  6835  7450   0  7415    1788    13057270  1107.92
+            2020-06-30  7469.16  7425  7570   0  7305    1265     9391255  1155.68
+    """
+    if isinstance(fromdate, datetime.datetime):
+        fromdate = _datetime2string(fromdate)
+
+    if isinstance(todate, datetime.datetime):
+        todate = _datetime2string(todate)
+
+    df = krx.get_etf_ohlcv_by_date(fromdate, todate, ticker)
+
+    how = {'NAV': 'first', '시가': 'first', '고가': 'max', '저가': 'min', '종가': 'last', '거래량': 'sum', '거래대금': 'sum',
+           '기초지수': 'first'}
+
+    return resample_ohlcv(df, freq, how)
+
+
+def get_etf_portfolio_deposit_file(ticker: str, date: str=None) -> DataFrame:
+    """PDF 상세 내역 조회
+
+    Args:
+        ticker (str          ): 조회 종목 티커
+        date   (str, optional): 조회 일자 (YYMMDD)
+
+    Returns:
+        DataFrame:
+
+            >> get_etf_portfolio_deposit_file("152100")
+
+                     계약수       금액    비중
+            티커
+            005930   8140.0  667480000  31.77
+            000660    968.0  118580000   5.69
+            035420    218.0   74774000   3.57
+            051910     79.0   72443000   3.53
+            068270    184.0   59616000   3.21
+    """
     if date is None:
         date = get_nearest_business_day_in_a_week()
     return krx.get_etf_portfolio_deposit_file(date, ticker)
 
 
-def get_etf_price_deviation(fromdate, todate, ticker):
+def get_etf_price_deviation(fromdate: str, todate: str, ticker: str) -> DataFrame:
+    """괴리율 조회
+
+    Args:
+        fromdate (str): 조회 시작 일자 (YYYYMMDD)
+        todate   (str): 조회 종료 일자 (YYYYMMDD)
+        ticker   (str): 조회할 종목의 티커
+
+    Returns:
+        DataFrame:
+
+            >> get_etf_price_deviation("20210104", "20210108", "152100")
+
+                         종가       NAV   괴리율
+            날짜
+            2021-01-04  40815  40885.24    -0.17
+            2021-01-05  41450  41510.71    -0.15
+            2021-01-06  40985  41112.12    -0.31
+            2021-01-07  41935  42002.85    -0.16
+            2021-01-08  43845  43983.05    -0.31
+    """
+    if isinstance(fromdate, datetime.datetime):
+        fromdate = _datetime2string(fromdate)
+    if isinstance(todate, datetime.datetime):
+        todate = _datetime2string(todate)
+
     return krx.get_etf_price_deviation(fromdate, todate, ticker)
 
 
-def get_etf_tracking_error(fromdate, todate, ticker):
+def get_etf_tracking_error(fromdate, todate, ticker) -> DataFrame:
+    """추적 오차율 조회
+
+    Args:
+        fromdate (str): 조회 시작 일자 (YYYYMMDD)
+        todate   (str): 조회 종료 일자 (YYYYMMDD)
+        ticker   (str): 조회할 종목의 티커
+
+    Returns:
+        DataFrame:
+
+            >> get_etf_tracking_error("20210104", "20210108", "152100")
+
+                             NAV    지수  추적오차율
+            날짜
+            2021-01-04  40885.24  399.88        0.44
+            2021-01-05  41510.71  406.03        0.44
+            2021-01-06  41112.12  402.08        0.44
+            2021-01-07  42002.85  410.81        0.44
+            2021-01-08  43983.05  430.22        0.44
+    """
+    if isinstance(fromdate, datetime.datetime):
+        fromdate = _datetime2string(fromdate)
+    if isinstance(todate, datetime.datetime):
+        todate = _datetime2string(todate)
+
     return krx.get_etf_tracking_error(fromdate, todate, ticker)
 
 
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
-    df = get_index_ohlcv_by_date("20200101", "20200531", "1001", freq="m")
-    print(df)
+    for ticker in get_elw_ticker_list("20200306"):
+        print(get_elw_ticker_name(ticker))
 

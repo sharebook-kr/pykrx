@@ -61,7 +61,7 @@ def get_market_ohlcv_by_ticker(date: str, market: str="KOSPI") -> DataFrame:
 
     Args:
         date   (str): 조회 일자 (YYYYMMDD)
-        market (str): 조회 시장 (KOSPI/KOSDAQ/ALL).
+        market (str): 조회 시장 (KOSPI/KOSDAQ/ALL)
 
     Returns:
         DataFrame:
@@ -697,7 +697,7 @@ def get_index_portfolio_deposit_file(date: str, ticker: str) -> list:
         ticker (str): 인덱스 ticker
 
     Returns:
-        list:
+        list: ['005930', '000660', '051910', ...]
 
     """
     df = 지수구성종목().fetch(date, ticker[1:], ticker[0])

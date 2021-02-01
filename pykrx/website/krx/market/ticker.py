@@ -4,6 +4,10 @@ from pykrx.website.krx.market.core import 상장종목검색, 상폐종목검색
 from pandas import DataFrame
 import pandas as pd
 
+# ----------------------------------------------------------------------------------------------------
+# Stock
+# ----------------------------------------------------------------------------------------------------
+
 @singleton
 class StockTicker:
     def __init__(self):
@@ -59,14 +63,10 @@ def get_stock_ticker_isin(ticker):
     return s['ISIN']
 
 
-@dataframe_empty_handler
-def get_stock_market_from(ticker):
-    s = StockTicker().get(ticker)
-    return s['시장']
-
-
-################################################################################
+# ----------------------------------------------------------------------------------------------------
 # Index
+# ----------------------------------------------------------------------------------------------------
+
 @singleton
 class IndexTicker:
     def __init__(self):
