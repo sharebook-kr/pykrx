@@ -127,7 +127,7 @@ def get_market_cap_by_ticker(date: str, market: str="KOSPI", ascending: bool=Fal
     Args:
         date                 (str): 조회 일자 (YYYYMMDD)
         market     (str, optional): 조회 시장 (KOSPI/KOSDAQ/ALL). Defaults to KOSPI.
-        ascending (bool, optional): 정렬 기준. Defaults to False.
+        ascending (bool, optional): 정렬 기준
 
     Returns:
         DataFrame :
@@ -145,9 +145,8 @@ def get_market_cap_by_ticker(date: str, market: str="KOSPI", ascending: bool=Fal
     df.columns = ['티커', '종가', '시가총액', '거래량', '거래대금', '상장주식수']
 
     df = df.set_index('티커')
-    df = df.replace(np.NaN, 0)
-    df = df.replace('/', '', regex=True)
-    df = df.replace(',', '', regex=True)
+    df = df.replace('\W', '', regex=True)
+    df = df.replace('', 0)
     df = df.astype(np.int64)
     return df.sort_values('시가총액', ascending=ascending)
 
@@ -826,10 +825,10 @@ def get_shorting_trading_value_and_volume_by_ticker(date: str, market: str, incl
     df = df.astype({
         ("거래량"  , "공매도"): np.int64,
         ("거래량"  , "매수"  ): np.int64,
-        ("거래량"  , "비중"  ): np.float16,
+        ("거래량"  , "비중"  ): np.float32,
         ("거래대금", "공매도"): np.int64,
         ("거래대금", "매수"  ): np.int64,
-        ("거래대금", "비중"  ): np.float16
+        ("거래대금", "비중"  ): np.float32
     })
     return df
 
@@ -1023,7 +1022,7 @@ def get_shorting_balance_by_date(fromdate: str, todate: str, ticker: str) -> Dat
     df = df.replace('', 0)
     df.index = pd.to_datetime(df.index, format='%Y/%m/%d')
     df = df.astype({"공매도잔고": np.int64, "상장주식수": np.int64, "공매도금액": np.int64,
-                    "시가총액": np.float64, "비중": np.float16})
+                    "시가총액": np.float64, "비중": np.float32})
     return df.sort_index()
 
 

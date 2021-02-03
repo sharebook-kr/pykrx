@@ -141,6 +141,28 @@ class StockFundamentalByTicker(unittest.TestCase):
         self.assertEqual(len(df), 895)
 
 
+class StockMarketCapByTicker(unittest.TestCase):
+    def test_with_a_businessday(self):
+        df = stock.get_market_cap_by_ticker("20210104")
+        #           종가         시가총액    거래량       거래대금  상장주식수
+        # 티커
+        # 005930   83000  495491951650000  38655276  3185356823460  5969782550
+        # 000660  126000   91728297990000   7995016   994276505704   728002365
+        # 051910  889000   62756592927000    858451   747929748128    70592343
+        # 005935   74400   61222770480000   5455139   405685236800   822886700
+        # 207940  829000   54850785000000    182864   149889473000    66165000
+        self.assertIsInstance(df, pd.DataFrame)
+        self.assertEqual(len(df), 2531)
+        temp = np.isclose(df.iloc[0:5, 0], [83000, 126000, 889000, 74400, 829000])
+        self.assertEqual(temp.sum(), 5)
+
+    def test_with_a_holiday(self):
+        df_0 = stock.get_market_cap_by_ticker("20210103")
+        df_1 = stock.get_market_cap_by_ticker("20201230")
+        same = (df_0 == df_1).all(axis=None)
+        self.assertTrue(same)
+
+
 class StockNetPurchasesOfEquitiesByTickerTest(unittest.TestCase):
     def test_net_purchases_of_equities_is_same_0(self):
         df = stock.get_market_net_purchases_of_equities_by_ticker("20210115", "20210122")

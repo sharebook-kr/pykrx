@@ -281,18 +281,29 @@ def get_market_cap_by_ticker(date, market="ALL", acending=False):
 
     Returns:
         DataFrame :
-                      종가         시가총액    거래량         거래대금   상장주식수
+
+            >> get_market_cap_by_ticker("20210104")
+
+                      종가         시가총액    거래량       거래대금   상장주식수
             티커
-            005930   51900  309831714345000  18541624  309831714345000   5969782550
-            000660   84300   61370599369500   3397112   61370599369500    728002365
-            207940  815000   53924475000000    163339   53924475000000     66165000
-            035420  269500   44268984952500   1196267   44268984952500    164263395
-            068270  316000   42640845660000    918369   42640845660000    134939385
+            005930   83000  495491951650000  38655276  3185356823460  5969782550
+            000660  126000   91728297990000   7995016   994276505704   728002365
+            051910  889000   62756592927000    858451   747929748128    70592343
+            005935   74400   61222770480000   5455139   405685236800   822886700
+            207940  829000   54850785000000    182864   149889473000    66165000
     """
     if isinstance(date, datetime.datetime):
         date = _datetime2string(date)
 
-    return krx.get_market_cap_by_ticker(date, market, acending)
+    df = krx.get_market_cap_by_ticker(date, market, acending)
+    holiday = (df[['종가', '시가총액', '거래량', '거래대금']] == 0).all(axis=None)
+    if holiday:
+        target_date = get_nearest_business_day_in_a_week(date=date)
+        df = krx.get_market_cap_by_ticker(target_date, market, acending)
+        print(f"The date you entered {date} seems to be a holiday. PYKRX changes the date parameter to {target_date} to" \
+                "query the requested information.")
+
+    return df
 
 
 def get_exhaustion_rates_of_foreign_investment_by_date(fromdate: str, todate: str, ticker: str) -> DataFrame:
@@ -1027,8 +1038,11 @@ def get_shorting_value_by_ticker(date: str, market: str="KOSPI", include: list=N
 
     df = krx.get_shorting_trading_value_and_volume_by_ticker(date, market, include)
     if df.empty:
-        print(f"The date you entered {date} seems to be a holiday. Empty dataframe will be returned.")
-        return df
+        target_date = get_nearest_business_day_in_a_week(date=date)
+        df = krx.get_shorting_trading_value_and_volume_by_ticker(target_date, market, include)
+        print(f"The date you entered {date} seems to be a holiday. PYKRX changes the date parameter to {target_date} to" \
+               "query the requested information.")
+        return df['거래대금']
 
     return df['거래대금']
 
@@ -1041,6 +1055,8 @@ def get_shorting_volume_by_ticker(date: str, market: str="KOSPI", include: list=
         date    (str, optional): 조회 일자 (YYYYMMDD)
         market  (str, optional): 조회 시장 (KOSPI/KOSDAQ/KONEX)
         include (str, optional): 증권 구분 (주식/ETF/ETN/ELW/신주인수권및증권/수익증권)
+
+    NOTE: include 항목을 입력하지 않으면 "주식"만 조회
 
     Returns:
         DataFrame:
@@ -1063,8 +1079,11 @@ def get_shorting_volume_by_ticker(date: str, market: str="KOSPI", include: list=
 
     df = krx.get_shorting_trading_value_and_volume_by_ticker(date, market, include)
     if df.empty:
-        print(f"The date you entered {date} seems to be a holiday. Empty dataframe will be returned.")
-        return df
+        target_date = get_nearest_business_day_in_a_week(date=date)
+        df = krx.get_shorting_trading_value_and_volume_by_ticker(target_date, market, include)
+        print(f"The date you entered {date} seems to be a holiday. PYKRX changes the date parameter to {target_date} to" \
+                   "query the requested information.")
+        return df['거래량']
 
     return df['거래량']
 
@@ -1608,6 +1627,5 @@ def get_etf_tracking_error(fromdate, todate, ticker) -> DataFrame:
 
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
-    for ticker in get_elw_ticker_list("20200306"):
-        print(get_elw_ticker_name(ticker))
+    print(get_shorting_volume_by_ticker("20210103"))
 
