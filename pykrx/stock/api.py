@@ -300,7 +300,7 @@ def get_market_cap_by_ticker(date, market="ALL", acending=False):
     if holiday:
         target_date = get_nearest_business_day_in_a_week(date=date)
         df = krx.get_market_cap_by_ticker(target_date, market, acending)
-        print(f"The date you entered {date} seems to be a holiday. PYKRX changes the date parameter to {target_date} to" \
+        print(f"The date you entered {date} seems to be a holiday. PYKRX changes the date parameter to {target_date} to " \
                 "query the requested information.")
 
     return df
@@ -859,7 +859,7 @@ def get_index_portfolio_deposit_file(ticker: str, date: str=None) -> list:
         target_date = get_nearest_business_day_in_a_week(target_date)
         pdf = krx.get_index_portfolio_deposit_file(target_date, ticker)
         if len(pdf) != 0 and date != None:
-            print(f"The date you entered {date} seems to be a holiday. PYKRX changes the date parameter to {target_date} to" \
+            print(f"The date you entered {date} seems to be a holiday. PYKRX changes the date parameter to {target_date} to " \
                    "query the requested information.")
     return pdf
 
@@ -1040,7 +1040,7 @@ def get_shorting_value_by_ticker(date: str, market: str="KOSPI", include: list=N
     if df.empty:
         target_date = get_nearest_business_day_in_a_week(date=date)
         df = krx.get_shorting_trading_value_and_volume_by_ticker(target_date, market, include)
-        print(f"The date you entered {date} seems to be a holiday. PYKRX changes the date parameter to {target_date} to" \
+        print(f"The date you entered {date} seems to be a holiday. PYKRX changes the date parameter to {target_date} to " \
                "query the requested information.")
         return df['거래대금']
 
@@ -1081,7 +1081,7 @@ def get_shorting_volume_by_ticker(date: str, market: str="KOSPI", include: list=
     if df.empty:
         target_date = get_nearest_business_day_in_a_week(date=date)
         df = krx.get_shorting_trading_value_and_volume_by_ticker(target_date, market, include)
-        print(f"The date you entered {date} seems to be a holiday. PYKRX changes the date parameter to {target_date} to" \
+        print(f"The date you entered {date} seems to be a holiday. PYKRX changes the date parameter to {target_date} to " \
                    "query the requested information.")
         return df['거래량']
 
