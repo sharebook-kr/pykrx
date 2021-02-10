@@ -103,6 +103,17 @@ class IndexOhlcvByDate(unittest.TestCase):
         self.assertIsInstance(df.index[0], pd._libs.tslibs.timestamps.Timestamp)
         self.assertTrue(df.index[0] < df.index[-1])
 
+    def test_ohlcv_with_nan(self):
+        df = stock.get_index_ohlcv_by_date("19800101", "20200831", "1001")
+        #               시가      고가     저가     종가      거래량        거래대금
+        # 날짜
+        # 1980-01-04     0.00     0.00     0.00   100.00       95900       602800000
+        # 1980-01-05     0.00     0.00     0.00   100.15      131100       776400000
+        # 1980-01-07     0.00     0.00     0.00   102.53      358300      2029700000
+        # 1980-01-08     0.00     0.00     0.00   105.28      795800      5567200000
+        temp = df.iloc[0:5, 0] == np.array([0, 0, 0, 0, 0])
+        self.assertEqual(temp.sum(), 5)
+
 
 class IndexListingDate(unittest.TestCase):
     def test_listing_info(self):

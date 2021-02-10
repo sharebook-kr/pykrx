@@ -616,9 +616,9 @@ def get_index_ohlcv_by_date(fromdate: str, todate: str, ticker: str) -> DataFram
     df = df[['TRD_DD', 'OPNPRC_IDX', 'HGPRC_IDX', 'LWPRC_IDX',
              'CLSPRC_IDX', 'ACC_TRDVOL', 'ACC_TRDVAL']]
     df.columns = ['날짜', '시가', '고가', '저가', '종가', '거래량', '거래대금']
-    df = df.replace(',', '', regex=True)
-    df = df.replace('', '0', regex=True)
-    df = df.replace('/', '', regex=True)
+    df = df.replace('[^-\w\.]', '', regex=True)
+    df = df.replace('\-$', '0', regex=True)
+    df = df.replace('', '0')
     df = df.set_index('날짜')
     df = df.astype({'시가': np.float64, '고가': np.float64,
                     '저가': np.float64, '종가': np.float64,
@@ -1028,4 +1028,4 @@ def get_shorting_balance_by_date(fromdate: str, todate: str, ticker: str) -> Dat
 
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
-    print( get_shorting_balance_by_date("20200106", "20200110", "005930"))
+    print( get_index_ohlcv_by_date("19800101", "20200831", "1001"))
