@@ -115,6 +115,19 @@ class StockFundamentalByDate(unittest.TestCase):
         self.assertEqual(temp.sum(), 6)
         self.assertEqual(len(df), 4)
 
+    def test_in_kosdaq(self):
+        df = stock.get_market_fundamental_by_date("20200101", "20200430", "263720")
+        #              BPS    PER   PBR  EPS  DIV  DPS
+        # 날짜
+        # 2020-01-02  3033  48.78  6.59  410  0.0    0
+        # 2020-01-03  3033  45.24  6.12  410  0.0    0
+        # 2020-01-06  3033  43.90  5.93  410  0.0    0
+        # 2020-01-07  3033  45.73  6.18  410  0.0    0
+        # 2020-01-08  3033  44.15  5.97  410  0.0    0
+        self.assertIsInstance(df, pd.DataFrame)
+        temp = np.isclose(df.iloc[0], [3033, 48.78,  6.59, 410, 0.0, 0])
+        self.assertEqual(temp.sum(), 6)
+
 
 class StockFundamentalByTicker(unittest.TestCase):
     def test_with_valid_a_business_day(self):

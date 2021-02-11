@@ -1,5 +1,5 @@
 from pykrx.website.comm import dataframe_empty_handler
-from pykrx.website.krx.market.ticker import get_stock_ticker_isin
+from pykrx.website.krx.market.ticker import get_stock_ticker_isin, get_stock_ticekr_market
 from pykrx.website.krx.market.core import (개별종목시세, 전종목등락률, PER_PBR_배당수익률_전종목,
                                            PER_PBR_배당수익률_개별, 전종목시세, 외국인보유량_개별추이,
                                            외국인보유량_전종목, 투자자별_순매수상위종목,
@@ -186,14 +186,13 @@ def get_market_fundamental_by_ticker(date: str, market: str="KOSPI") -> DataFram
 
 
 @dataframe_empty_handler
-def get_market_fundamental_by_date(fromdate: str, todate: str, ticker:str, market: str="KOSPI") -> DataFrame:
+def get_market_fundamental_by_date(fromdate: str, todate: str, ticker:str) -> DataFrame:
     """날짜로 정렬된 종목별 BPS/PER/PBR/배당수익률
 
     Args:
         fromdate (str          ): 조회 시작 일자 (YYYYMMDD)
         todate   (str          ): 조회 종료 일자 (YYYYMMDD)
         ticker   (str          ): 종목의 티커
-        market   (str, optional): 조회 시장 (KOSPI/KOSDAQ/ALL)
 
     Returns:
         DataFrame:
@@ -205,9 +204,10 @@ def get_market_fundamental_by_date(fromdate: str, todate: str, ticker:str, marke
             2015-07-23  953266  8.062500  1.290039  153105  1.620117  20000
             2015-07-24  953266  8.031250  1.290039  153105  1.629883  20000
     """
-    market = {"ALL": "ALL", "KOSPI": "STK", "KOSDAQ": "KSQ", "KONEX": "KNX"}.\
-        get(market, "ALL")
+    # market = {"ALL": "ALL", "KOSPI": "STK", "KOSDAQ": "KSQ", "KONEX": "KNX"}.\
+    #     get(market, "ALL")
     isin = get_stock_ticker_isin(ticker)
+    market = get_stock_ticekr_market(ticker)
 
     df = PER_PBR_배당수익률_개별().fetch(fromdate, todate, market, isin)
 

@@ -16,11 +16,13 @@ class StockTicker:
 
     @dataframe_empty_handler
     def __fetch(self, what, market="전체"):
-        market = {"코스피": "STK", "코스닥": "KSQ", "코넥스": "KNX", "전체": "ALL"}.get(market, "ALL")
+        market_dict = {"코스피": "STK", "코스닥": "KSQ", "코넥스": "KNX", "전체": "ALL"}
+        market = market_dict.get(market, "ALL")
         df = what().fetch(market)
         df = df[['short_code', 'codeName', 'full_code', 'marketName']]
         df = df.replace("유가증권", "코스피")
         df.columns = ['티커', '종목', 'ISIN', '시장']
+        df['시장'] = df['시장'].apply(lambda x:market_dict[x])
         df = df.set_index('티커')
         return df
 
@@ -61,6 +63,12 @@ def get_stock_name(ticker):
 def get_stock_ticker_isin(ticker):
     s = StockTicker().get(ticker)
     return s['ISIN']
+
+
+@dataframe_empty_handler
+def get_stock_ticekr_market(ticker):
+    s = StockTicker().get(ticker)
+    return s['시장']
 
 
 # ----------------------------------------------------------------------------------------------------
