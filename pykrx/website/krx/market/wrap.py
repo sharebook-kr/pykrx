@@ -218,8 +218,8 @@ def get_market_fundamental_by_date(fromdate: str, todate: str, ticker:str, marke
     df = df.replace('/', '', regex=True)
     df = df.replace('', '0', regex=True)
     df = df.replace(',', '', regex=True)
-    df = df.astype({"DIV": np.float32, "BPS": np.int32, "PER": np.float16,
-                    "PBR": np.float16, "EPS": np.int32, "DIV": np.float16,
+    df = df.astype({"DIV": np.float32, "BPS": np.int32, "PER": np.float64,
+                    "PBR": np.float32, "EPS": np.int32, "DIV": np.float32,
                     "DPS": np.int32}, )
     df = df.set_index('날짜')
     df.index = pd.to_datetime(df.index, format='%Y%m%d')

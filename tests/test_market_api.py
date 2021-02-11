@@ -80,15 +80,15 @@ class StockOhlcvByTickerTest(unittest.TestCase):
 class StockFundamentalByDate(unittest.TestCase):
     def test_with_valid_business_days(self):
         df = stock.get_market_fundamental_by_date("20210104", "20210108", "005930")
-        #               BPS        PER       PBR   EPS       DIV   DPS
+        #               BPS    PER   PBR   EPS   DIV   DPS
         # 날짜
-        # 2021-01-04  37528  26.218750  2.210938  3166  1.709961  1416
-        # 2021-01-05  37528  26.500000  2.240234  3166  1.690430  1416
-        # 2021-01-06  37528  25.953125  2.189453  3166  1.719727  1416
-        # 2021-01-07  37528  26.187500  2.210938  3166  1.709961  1416
-        # 2021-01-08  37528  28.046875  2.369141  3166  1.589844  1416
+        # 2021-01-04  37528  26.22  2.21  3166  1.71  1416
+        # 2021-01-05  37528  26.50  2.24  3166  1.69  1416
+        # 2021-01-06  37528  25.96  2.19  3166  1.72  1416
+        # 2021-01-07  37528  26.18  2.21  3166  1.71  1416
+        # 2021-01-08  37528  28.05  2.37  3166  1.59  1416
         self.assertIsInstance(df, pd.DataFrame)
-        temp = np.isclose(df.iloc[0], [37528, 26.218750,  2.210938, 3166, 1.709961, 1416])
+        temp = np.isclose(df.iloc[0], [37528, 26.22,  2.21, 3166, 1.71, 1416])
         self.assertEqual(temp.sum(), 6)
         self.assertEqual(len(df), 5)
 
@@ -96,7 +96,7 @@ class StockFundamentalByDate(unittest.TestCase):
         # 20210104 monday / 20210109 saturday
         df = stock.get_market_fundamental_by_date("20210104", "20210109", "005930")
         self.assertIsInstance(df, pd.DataFrame)
-        temp = np.isclose(df.iloc[0], [37528, 26.218750,  2.210938, 3166, 1.709961, 1416])
+        temp = np.isclose(df.iloc[0], [37528, 26.22,  2.21, 3166, 1.71, 1416])
         self.assertEqual(temp.sum(), 6)
         self.assertEqual(len(df), 5)
 
@@ -104,14 +104,14 @@ class StockFundamentalByDate(unittest.TestCase):
         # 20210103 sunday / 20210110 sunday
         df = stock.get_market_fundamental_by_date("20210103", "20210110", "005930")
         self.assertIsInstance(df, pd.DataFrame)
-        temp = np.isclose(df.iloc[0], [37528, 26.218750,  2.210938, 3166, 1.709961, 1416])
+        temp = np.isclose(df.iloc[0], [37528, 26.22,  2.21, 3166, 1.71, 1416])
         self.assertEqual(temp.sum(), 6)
         self.assertEqual(len(df), 5)
 
     def test_with_freq(self):
         df = stock.get_market_fundamental_by_date("20200101", "20200430", "005930", freq="m")
         self.assertIsInstance(df, pd.DataFrame)
-        temp = np.isclose(df.iloc[0], [35342, 8.539062,  1.559570, 6461, 2.570312, 1416])
+        temp = np.isclose(df.iloc[0], [35342, 8.54,  1.56, 6461, 2.57, 1416])
         self.assertEqual(temp.sum(), 6)
         self.assertEqual(len(df), 4)
 
