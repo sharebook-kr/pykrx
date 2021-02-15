@@ -51,7 +51,7 @@ def get_market_ohlcv_by_date(fromdate: str, todate: str, ticker: str) -> DataFra
     df = df.replace('', '0')
     df = df.astype({
         "시가":np.int32, "고가":np.int32, "저가":np.int32, "종가":np.int32,
-        "거래량":np.int32, "거래대금":np.int64, "등락률":np.float16} )
+        "거래량":np.int32, "거래대금":np.int64, "등락률":np.float32} )
     return df.sort_index()
 
 
@@ -61,7 +61,7 @@ def get_market_ohlcv_by_ticker(date: str, market: str="KOSPI") -> DataFrame:
 
     Args:
         date   (str): 조회 일자 (YYYYMMDD)
-        market (str): 조회 시장 (KOSPI/KOSDAQ/ALL)
+        market (str): 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
 
     Returns:
         DataFrame:
@@ -84,7 +84,7 @@ def get_market_ohlcv_by_ticker(date: str, market: str="KOSPI") -> DataFrame:
     df = df.set_index('티커')
     df = df.astype({
         "시가":np.int32, "고가":np.int32, "저가":np.int32, "종가":np.int32,
-        "거래량":np.int32, "거래대금":np.int64, "등락률":np.float16 } )
+        "거래량":np.int32, "거래대금":np.int64, "등락률":np.float32 } )
     return df
 
 
