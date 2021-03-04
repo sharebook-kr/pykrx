@@ -77,6 +77,33 @@ class StockOhlcvByTickerTest(unittest.TestCase):
         self.assertTrue((temp == 0).all(axis=None))
 
 
+class StockPriceChangeByTicker(unittest.TestCase):
+    def test_with_valid_business_days(self):
+        df = stock.get_market_price_change_by_ticker(fromdate="20210104", todate="20210111")
+        #            종목명      시가    종가  변동폭    등락률       거래량      거래대금
+        # 티커
+        # 095570   AJ네트웍스    4615    4360    -255    -553.0      3445854   16332546190
+        # 006840     AK홀딩스   25150   24800    -350    -139.0       605351   15190840550
+        # 027410          BGF    4895    4690    -205    -419.0      3296226   16198124270
+        # 282330    BGF리테일  135500  135500       0       0.0       399330   54474898000
+        # 138930  BNK금융지주    5680    5720      40      70.0      2211455  125465685660
+        self.assertIsInstance(df, pd.DataFrame)
+        temp = df.iloc[0:5, 1] == np.array([4615, 25150, 4895, 135500, 5680])
+        self.assertEqual(temp.sum(), 5)
+
+    def test_with_holiday(self):
+        df = stock.get_market_price_change_by_ticker(fromdate="20210101", todate="20210111")
+        #            종목명      시가    종가  변동폭    등락률       거래량      거래대금
+        # 티커
+        # 095570   AJ네트웍스    4615    4360    -255    -553.0      3445854   16332546190
+        # 006840     AK홀딩스   25150   24800    -350    -139.0       605351   15190840550
+        # 027410          BGF    4895    4690    -205    -419.0      3296226   16198124270
+        # 282330    BGF리테일  135500  135500       0       0.0       399330   54474898000
+        # 138930  BNK금융지주    5680    5720      40      70.0      2211455  125465685660
+        self.assertIsInstance(df, pd.DataFrame)
+        temp = df.iloc[0:5, 1] == np.array([4615, 25150, 4895, 135500, 5680])
+        self.assertEqual(temp.sum(), 5)
+
 class StockFundamentalByDate(unittest.TestCase):
     def test_with_valid_business_days(self):
         df = stock.get_market_fundamental_by_date("20210104", "20210108", "005930")

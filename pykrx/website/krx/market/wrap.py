@@ -279,7 +279,9 @@ def get_market_price_change_by_ticker(fromdate: str, todate: str, market: str="K
                   '등락률', '거래량', '거래대금']
     df = df.set_index('티커')
 
-    df = df.replace(',', '', regex=True)
+    df = df.replace('[^-\w]', '', regex=True)
+    df = df.replace('\-$', '', regex=True)
+    df = df.replace('', '0')
     df = df.astype({"시가": np.int32, "종가": np.int32,
                     "변동폭": np.int32, "등락률": np.float64,
                     "거래량": np.int64, "거래대금": np.int64})
@@ -1028,4 +1030,5 @@ def get_shorting_balance_by_date(fromdate: str, todate: str, ticker: str) -> Dat
 
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
-    print( get_index_ohlcv_by_date("19800101", "20200831", "1001"))
+    df = get_market_price_change_by_ticker(fromdate="20210101", todate="20210111")
+    print(df)

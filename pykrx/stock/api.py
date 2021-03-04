@@ -366,23 +366,19 @@ def get_market_price_change_by_ticker(fromdate, todate):
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
 
-    df_a = krx.get_market_price_change_by_ticker(fromdate, todate)
-    if df_a.empty:
-        return df_a
+    # businessday check
+    fromdate = get_nearest_business_day_in_a_week(fromdate, prev=False)
+    todate = get_nearest_business_day_in_a_week(todate)
 
-    # 상장 폐지 종목은 제외한 정보를 전달하기 때문에, 시작일의 가격 정보 중에서 시가를 가져온다.
-    # - 시작일이 주말일 경우를 고려해서 가까운 미래의 평일의 날짜를 얻어온다.
-    # - 동화약품(000020)은 가장 오래된 상장 회사
-    dt = datetime.date(int(fromdate[:4]), int(fromdate[4:6]), int(fromdate[6:]))
-    dt += datetime.timedelta(days=7)
-    hack = get_market_ohlcv_by_date(fromdate, dt.strftime("%Y%m%d"), "000020")
-    fromdate = hack.index[0].strftime("%Y%m%d")
+    df_0 = krx.get_market_price_change_by_ticker(fromdate, todate)
+    if df_0.empty:
+        return df_0
 
+    # - 시작일에는 존재하지만 기간 동안 없는(상폐) 종목을 찾아낸다.
     # - 시작일 하루간의 가격 정보를 얻어온다.
     df_1 = krx.get_market_price_change_by_ticker(fromdate, fromdate)
-    # - 시작일에는 존재하지만 기간 동안 없는(상폐) 종목을 찾아낸다.
     # - 종가/대비/등락률/거래량/거래대금을 0으로 업데이트한다.
-    cond = ~df_1.index.isin(df_a.index)
+    cond = ~df_1.index.isin(df_0.index)
     if len(df_1[cond]) >= 1:
         df_1.loc[cond, '종가'    ] = 0
         df_1.loc[cond, '변동폭'  ] = -df_1.loc[cond, '시가']
@@ -390,8 +386,8 @@ def get_market_price_change_by_ticker(fromdate, todate):
         df_1.loc[cond, '거래량'  ] = 0
         df_1.loc[cond, '거래대금'] = 0
         # 조회 정보에 상장 폐지 정보를 추가한다.
-        df_a = df_a.append(df_1[cond])
-    return df_a
+        df_0 = df_0.append(df_1[cond])
+    return df_0
 
 
 def get_market_fundamental_by_date(fromdate: str, todate: str, ticker: str, freq: str='d', name_display: bool=False) -> DataFrame:
@@ -1627,5 +1623,5 @@ def get_etf_tracking_error(fromdate, todate, ticker) -> DataFrame:
 
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
-    print(get_shorting_volume_by_ticker("20210103"))
+    print(get_market_price_change_by_ticker(fromdate="20210101", todate="20210111"))
 
