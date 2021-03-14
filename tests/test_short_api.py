@@ -51,13 +51,13 @@ class ShortStatusByDate(unittest.TestCase):
 class ShortVolumeByTicker(unittest.TestCase):
     def test_with_default_param(self):
         df = stock.get_shorting_volume_by_ticker("20210125")
-        #        공매도     매수      비중
+        #        공매도     매수  비중
         # 티커
-        # 095570     32   180458  0.020004
-        # 006840     79   386257  0.020004
-        # 027410  18502  8453962  0.219971
-        # 282330     96    82986  0.119995
-        # 138930   1889  1181748  0.160034
+        # 095570     32   180458  0.02
+        # 006840     79   386257  0.02
+        # 027410  18502  8453962  0.22
+        # 282330     96    82986  0.12
+        # 138930   1889  1181748  0.16
         self.assertIsInstance(df, pd.DataFrame)
         temp = df.iloc[0:5, 0] == np.array([32, 79, 18502, 96, 1889])
         self.assertEqual(temp.sum(), 5)
@@ -168,13 +168,13 @@ class ShortVolumeByDate(unittest.TestCase):
 class ShortValueByDate(unittest.TestCase):
     def test_with_default_param(self):
         df = stock.get_shorting_value_by_date("20210104", "20210108", "005930")
-        #                공매도           매수      비중
+        #                공매도           매수  비중
         # 날짜
-        # 2021-01-04  771889500  3185356823460  0.020004
-        # 2021-01-05   14011100  2915618322800  0.000000
-        # 2021-01-06   80855100  3506903681680  0.000000
-        # 2021-01-07   63634800  2726112459660  0.000000
-        # 2021-01-08     534000  5083939899952  0.000000
+        # 2021-01-04  771889500  3185356823460  0.02
+        # 2021-01-05   14011100  2915618322800  0.00
+        # 2021-01-06   80855100  3506903681680  0.00
+        # 2021-01-07   63634800  2726112459660  0.00
+        # 2021-01-08     534000  5083939899952  0.00
         self.assertIsInstance(df, pd.DataFrame)
         self.assertTrue(df.index[0] < df.index[-1])
         temp = df.iloc[0:5, 0] == np.array([771889500, 14011100, 80855100, 63634800, 534000])

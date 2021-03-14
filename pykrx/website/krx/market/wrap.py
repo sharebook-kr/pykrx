@@ -724,7 +724,8 @@ def get_shorting_status_by_date(fromdate, todate, ticker):
     """
     isin = get_stock_ticker_isin(ticker)
     df = 개별종목_공매도_종합정보().fetch(fromdate, todate, isin)
-
+    df = df[['TRD_DD', 'CVSRTSELL_TRDVOL', 'STR_CONST_VAL1', 'CVSRTSELL_TRDVAL',
+       'STR_CONST_VAL2']]
     df.columns = ['날짜', '거래량', '잔고수량', '거래대금', '잔고금액']
     df = df.set_index('날짜')
     df.index = pd.to_datetime(df.index, format='%Y/%m/%d')
@@ -755,29 +756,30 @@ def get_shorting_trading_value_and_volume_by_date(fromdate: str, todate: str, ti
 
             >> get_shorting_trading_value_and_volume("20201226", "20210126", "005930")
 
-                        거래량                        거래대금
-                        공매도      매수      비중      공매도           매수      비중
+                       거래량                    거래대금
+                       공매도      매수  비중      공매도           매수  비중
             날짜
-            2020/12/28    6924  40085044  0.020004   544918800  3172810866091  0.020004
-            2020/12/29   15834  30339449  0.049988  1236917300  2368814098000  0.049988
-            2020/12/30    2978  29417421  0.010002   239159500  2344317462700  0.010002
-            2021/01/04    9279  38655276  0.020004   771889500  3185356823460  0.020004
-            2021/01/05     169  35335669  0.000000    14011100  2915618322800  0.000000
+            2020-12-28   6924  40085044  0.02   544918800  3172810866091  0.02
+            2020-12-29  15834  30339449  0.05  1236917300  2368814098000  0.05
+            2020-12-30   2978  29417421  0.01   239159500  2344317462700  0.01
+            2021-01-04   9279  38655276  0.02   771889500  3185356823460  0.02
+            2021-01-05    169  35335669  0.00    14011100  2915618322800  0.00
     """
     isin = get_stock_ticker_isin(ticker)
     df = 개별종목_공매도_거래_개별추이().fetch(fromdate, todate, isin)
 
     df = df.set_index('TRD_DD')
     df.index.name = "날짜"
+    df = df[['CVSRTSELL_TRDVOL', 'ACC_TRDVOL', 'TRDVOL_WT', 'CVSRTSELL_TRDVAL', 'ACC_TRDVAL', 'TRDVAL_WT']]
     df.columns = pd.MultiIndex.from_product([['거래량', '거래대금'], ['공매도','매수', '비중']])
     df = df.replace('[^-\w\.]', '', regex=True).replace('', '0')
     df = df.astype({
         ("거래량"  , "공매도"): np.int64,
         ("거래량"  , "매수"  ): np.int64,
-        ("거래량"  , "비중"  ): np.float16,
+        ("거래량"  , "비중"  ): np.float32,
         ("거래대금", "공매도"): np.int64,
         ("거래대금", "매수"  ): np.int64,
-        ("거래대금", "비중"  ): np.float16
+        ("거래대금", "비중"  ): np.float32
     })
     df.index = pd.to_datetime(df.index, format='%Y/%m/%d')
     return df.sort_index()
@@ -821,7 +823,7 @@ def get_shorting_trading_value_and_volume_by_ticker(date: str, market: str, incl
 
     df = df.set_index('ISU_CD')
     df.index.name = "티커"
-    df = df[df.columns[2:]]
+    df = df[['CVSRTSELL_TRDVOL', 'ACC_TRDVOL', 'TRDVOL_WT', 'CVSRTSELL_TRDVAL', 'ACC_TRDVAL', 'TRDVAL_WT' ]]
     df.columns = pd.MultiIndex.from_product([['거래량', '거래대금'], ['공매도','매수', '비중']])
     df = df.replace('[^-\w\.]', '', regex=True).replace('', '0')
     df = df.astype({
@@ -1030,5 +1032,6 @@ def get_shorting_balance_by_date(fromdate: str, todate: str, ticker: str) -> Dat
 
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
-    df = get_market_price_change_by_ticker(fromdate="20210101", todate="20210111")
+    # df = get_market_price_change_by_ticker(fromdate="20210101", todate="20210111")
+    df = get_shorting_trading_value_and_volume_by_date("20201226", "20210126", "005930")
     print(df)
