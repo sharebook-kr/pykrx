@@ -1538,6 +1538,72 @@ def get_etf_ohlcv_by_date(fromdate: str, todate: str, ticker: str, freq: str="d"
     return resample_ohlcv(df, freq, how)
 
 
+def get_etf_ohlcv_by_ticker(date: str) -> DataFrame:
+    """특정 일자의 전종목의 OHLCV 조회
+        - 휴일일 경우 비어있는 DataFrame을 반환
+    Args:
+        date(str): 조회 일자 (YYYYMMDD)
+
+    Returns:
+        DataFrame:
+            >> get_etf_ohlcv_by_ticker("20210325")
+
+                          NAV   시가   고가   저가    종가 거래량    거래대금  기초지수
+            티커
+            152100   41887.33  41705  42145  41585   41835  59317  2479398465    408.53
+            295820   10969.41  10780  10945  10780   10915     69      750210   2364.03
+            253150   46182.13  45640  46700  45540   46145   1561    71730335   2043.75
+            253160    4344.07   4400   4400   4295    4340  58943   256679440   2043.75
+            278420    9145.45   9055   9150   9055    9105   1164    10598375   1234.03
+
+            >> get_etf_ohlcv_by_ticker("20210321")
+
+            Empty DataFrame
+            Columns: []
+            Index: []
+    """
+    if isinstance(date, datetime.datetime):
+        date = _datetime2string(date)
+
+    df = krx.get_etf_ohlcv_by_ticker(date)
+    if (df == 0).all(axis=None):
+        return DataFrame()
+    return df
+
+
+def get_etf_price_change_by_ticker(fromdate: str, todate: str) -> DataFrame:
+    """특정 기간동안 전종의 등락률 조회
+
+    Args:
+        fromdate(str): 조회 시작 일자 (YYYYMMDD)
+        todate  (str): 조회 종료 일자 (YYYYMMDD)
+
+    Returns:
+        DataFrame:
+
+            >> get_etf_price_change_by_ticker("20210325", "20210402")
+
+                      시가    종가  변동폭  등락률   거래량     거래대금
+              티커
+            152100   41715   43405    1690    4.05  1002296  42802174550
+            295820   10855   11185     330    3.04     1244     13820930
+            253150   45770   49735    3965    8.66    13603    650641700
+            253160    4380    4015    -365   -8.33   488304   2040509925
+            278420    9095    9385     290    3.19     9114     84463155
+
+    """
+    if isinstance(fromdate, datetime.datetime):
+        fromdate = _datetime2string(fromdate)
+
+    if isinstance(todate, datetime.datetime):
+        todate = _datetime2string(todate)
+
+    fromdate = get_nearest_business_day_in_a_week(fromdate, prev=False)
+    todate = get_nearest_business_day_in_a_week(todate)
+
+    return krx.get_etf_price_change_by_ticker(fromdate, todate)
+
+
 def get_etf_portfolio_deposit_file(ticker: str, date: str=None) -> DataFrame:
     """PDF 상세 내역 조회
 
@@ -1623,5 +1689,5 @@ def get_etf_tracking_error(fromdate, todate, ticker) -> DataFrame:
 
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
-    print(get_market_price_change_by_ticker(fromdate="20210101", todate="20210111"))
-
+    # print(get_market_price_change_by_ticker(fromdate="20210101", todate="20210111"))
+    print(get_etf_ohlcv_by_ticker("20210321"))

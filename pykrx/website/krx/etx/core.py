@@ -149,6 +149,34 @@ class 전종목시세_ETF(KrxWebIo):
         return DataFrame(result['output'])
 
 
+class 전종목등락률_ETF(KrxWebIo):
+    @property
+    def bld(self):
+        return "dbms/MDC/STAT/standard/MDCSTAT04401"
+
+    def fetch(self, fromdate: str, todate: str) -> DataFrame:
+        """[13102] 전종목 등락률
+
+        Args:
+            fromdate (str): 조회 시작 일자 (YYMMDD)
+            todate   (str): 조회 종료 일자 (YYMMDD)
+
+        Returns:
+            DataFrame: 전종목의 기간별 가격 정보
+
+                >> 전종목등락률_ETF().fetch("20210325", "20210402")
+
+                        ISU_SRT_CD                 ISU_ABBRV  BAS_PRC   CLSPRC FLUC_TP_CD CMP_PRC FLUC_RT ACC_TRDVOL      ACC_TRDVAL
+                    0       152100               ARIRANG 200   41,715   43,405          1   1,690    4.05  1,002,296  42,802,174,550
+                    1       295820       ARIRANG 200동일가중   10,855   11,185          1     330    3.04      1,244      13,820,930
+                    2       253150   ARIRANG 200선물레버리지   45,770   49,735          1   3,965    8.66     13,603     650,641,700
+                    3       253160   ARIRANG 200선물인버스2X    4,380    4,015          2    -365   -8.33    488,304   2,040,509,925
+                    4       278420       ARIRANG ESG우수기업    9,095    9,385          1     290    3.19      9,114      84,463,155
+        """
+        result = self.read(strtDd=fromdate, endDd=todate)
+        return DataFrame(result['output'])
+
+
 class PDF(KrxWebIo):
     @property
     def bld(self):
@@ -231,7 +259,7 @@ if __name__ == "__main__":
     import pandas as pd
     pd.set_option('display.width', None)
     # print(상장종목검색().fetch("ETF"))
-    print(ELW_전종목기본종목().fetch())
+    print(전종목등락률_ETF().fetch("20210325", "20210402"))
     # print(개별종목시세_ETF().fetch("20210111", "20210119", "KR7152100004"))
     # print(전종목시세_ETF().fetch("20210119"))
     # print(PDF().fetch("20210119", "KR7152100004"))

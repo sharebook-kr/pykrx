@@ -101,8 +101,55 @@ class EtfOhlcvByDate(unittest.TestCase):
         self.assertIsInstance(df.index[0], pd._libs.tslibs.timestamps.Timestamp)
         self.assertTrue(df.index[0] < df.index[-1])
 
+
+class EtfOhlcvByTicker(unittest.TestCase):
+    def test_with_business_day(self):
+        df = stock.get_etf_ohlcv_by_ticker("20210325")
+        #           NAV   시가   고가   저가    종가 거래량    거래대금  기초지수
+        # 티커
+        # 152100   41887.33  41705  42145  41585   41835  59317  2479398465    408.53
+        # 295820   10969.41  10780  10945  10780   10915     69      750210   2364.03
+        # 253150   46182.13  45640  46700  45540   46145   1561    71730335   2043.75
+        # 253160    4344.07   4400   4400   4295    4340  58943   256679440   2043.75
+        # 278420    9145.45   9055   9150   9055    9105   1164    10598375   1234.03
+        temp = df.iloc[0:5, 0] == np.array([41887.33, 10969.41, 46182.13, 4344.07, 9145.45])
+        self.assertEqual(temp.sum(), 5)
+
+    def test_with_holiday(self):
+        df = stock.get_etf_ohlcv_by_ticker("20210321")
+        self.assertTrue(df.empty)
+
+
+class EtfPriceChange(unittest.TestCase):
+    def test_with_business_day(self):
+        df = stock.get_etf_price_change_by_ticker("20210325", "20210402")
+        #           시가    종가  변동폭  등락률   거래량     거래대금
+        # 152100   41715   43405    1690    4.05  1002296  42802174550
+        # 295820   10855   11185     330    3.04     1244     13820930
+        # 253150   45770   49735    3965    8.66    13603    650641700
+        # 253160    4380    4015    -365   -8.33   488304   2040509925
+        # 278420    9095    9385     290    3.19     9114     84463155
+        temp = df.iloc[0:5, 2] == np.array([1690, 330, 3965, -365, 290])
+        self.assertEqual(temp.sum(), 5)
+
+    def test_with_holiday_0(self):
+        df = stock.get_etf_price_change_by_ticker("20210321", "20210325")
+        #           시가    종가  변동폭  등락률   거래량     거래대금
+        # 152100   42225   41835    -390   -0.92   577936  24345828935
+        # 295820   10990   10915     -75   -0.68      239      2611835
+        # 253150   47095   46145    -950   -2.02     9099    422031050
+        # 253160    4270    4340      70    1.64   297894   1290824525
+        # 278420    9190    9105     -85   -0.92     5312     48491950
+        temp = df.iloc[0:5, 2] == np.array([-390, -75, -950, 70, -85])
+        self.assertEqual(temp.sum(), 5)
+
+    def test_with_holiday_1(self):
+        df = stock.get_etf_price_change_by_ticker("20210321", "20210321")
+        self.assertTrue(df.empty)
+
+
 class EtfPdf(unittest.TestCase):
-    def test_with_business_day(self)
+    def test_with_business_day(self):
         df = stock.get_etf_portfolio_deposit_file("152100")
         #          계약수       금액   비중
         # 티커
