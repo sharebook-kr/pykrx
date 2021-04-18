@@ -204,12 +204,10 @@ def get_market_fundamental_by_date(fromdate: str, todate: str, ticker:str) -> Da
             2015-07-23  953266  8.062500  1.290039  153105  1.620117  20000
             2015-07-24  953266  8.031250  1.290039  153105  1.629883  20000
     """
-    # market = {"ALL": "ALL", "KOSPI": "STK", "KOSDAQ": "KSQ", "KONEX": "KNX"}.\
-    #     get(market, "ALL")
     isin = get_stock_ticker_isin(ticker)
-    market = get_stock_ticekr_market(ticker)
+    # market = get_stock_ticekr_market(ticker)
 
-    df = PER_PBR_배당수익률_개별().fetch(fromdate, todate, market, isin)
+    df = PER_PBR_배당수익률_개별().fetch(fromdate, todate, "ALL", isin)
 
     df = df[['TRD_DD', 'BPS', 'PER', 'PBR', 'EPS', 'DVD_YLD', 'DPS']]
     df.columns = ['날짜', 'BPS', 'PER', 'PBR', 'EPS', 'DIV', 'DPS']
