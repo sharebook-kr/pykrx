@@ -25,7 +25,7 @@ from pykrx import stock
 코스피 종목의 주가 관련 정보를 얻는 API 입니다.
 
 #### 2.1.1.1 Ticker 조회
-`get_market_ticker_list` 메서드는 지정한 일자(YYMMDD)의 `코스피` 시장에 상장된 ticker를 리스트로 반환합니다.
+`get_market_ticker_list` 메서드는 지정한 일자(YYYYMMDD)의 `코스피` 시장에 상장된 ticker를 리스트로 반환합니다.
 ```python
 tickers = stock.get_market_ticker_list("20190225")
 print(tickers)
