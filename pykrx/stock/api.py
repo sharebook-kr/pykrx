@@ -330,7 +330,7 @@ def get_exhaustion_rates_of_foreign_investment_by_date(fromdate: str, todate: st
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
 
-    return krx.get_exhaustion_rates_of_foreign_investment_by_ticker(fromdate, todate, ticker)
+    return krx.get_exhaustion_rates_of_foreign_investment_by_date(fromdate, todate, ticker)
 
 
 @market_valid_check()

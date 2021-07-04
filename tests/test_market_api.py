@@ -464,12 +464,18 @@ class StockTradingVolumeByDateTest(unittest.TestCase):
         self.assertIsInstance(df.index   , pd.core.indexes.datetimes.DatetimeIndex)
         self.assertIsInstance(df.index[0], pd._libs.tslibs.timestamps.Timestamp)
 
-class StockExhaustionRatesOfForeignInvestmentByTicker(unittest.TestCase):
+class StockExhaustionRatesOfForeignInvestmentByTickerTest(unittest.TestCase):
     def test_kospi_for_specific_day(self):
         df = stock.get_exhaustion_rates_of_foreign_investment_by_ticker('20210118', "KOSPI")
         self.assertEqual(len(df), 917)
         df = stock.get_exhaustion_rates_of_foreign_investment_by_ticker('20210118', "KOSPI", True)
         self.assertEqual(len(df), 18)
+
+
+class StockExhaustionRatesOfForeignInvestmentByDateTest(unittest.TestCase):
+    def test_kospi_for_specific_day(self):
+        df = stock.get_exhaustion_rates_of_foreign_investment_by_date("20200120", "20200120", "005930")
+        self.assertEqual(len(df), 1)
 
 
 if __name__ == '__main__':
