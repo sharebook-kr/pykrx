@@ -37,7 +37,6 @@ class EtnTickerList(unittest.TestCase):
         self.assertIsInstance(tickers, list)
         self.assertGreater(len(tickers), 0)
 
-
 class ElwTickerList(unittest.TestCase):
     def test_ticker_list(self):
         tickers = stock.get_elw_ticker_list()
@@ -150,16 +149,26 @@ class EtfPriceChange(unittest.TestCase):
 
 class EtfPdf(unittest.TestCase):
     def test_with_business_day(self):
-        df = stock.get_etf_portfolio_deposit_file("152100")
+        df = stock.get_etf_portfolio_deposit_file("152100", "20210402")
         #          계약수       금액   비중
         # 티커
-        # 005930   8140.0  667480000  31.77
-        # 000660    968.0  118580000   5.69
-        # 035420    218.0   74774000   3.57
-        # 051910     79.0   72443000   3.53
-        # 068270    184.0   59616000   3.21
-        temp = df.iloc[0:5, 0] == np.array([8140.0, 968.0, 218.0, 79.0, 184.0])
+        # 005930  8140.0  674806000  31.74
+        # 000660   968.0  136004000   6.28
+        # 035420   218.0   82513000   3.80
+        # 051910    79.0   64701000   3.01
+        # 006400    89.0   59363000   2.73
+        temp = df.iloc[0:5, 0] == np.array([8140.0, 968.0, 218.0, 79.0, 89.0])
         self.assertEqual(temp.sum(), 5)
+    
+    def test_with_negative_value(self):
+        # 음수 -3.28 확인
+        df = stock.get_etf_portfolio_deposit_file("114800", "20210402")
+        # 069500 -324.00                     0  0.0
+        # 101R90   -3.58  18446744073334367616  0.0
+        #           0.00                     0  0.0
+        #           0.00                     0  0.0
+        self.assertAlmostEqual(df.iloc[1, 0], -3.58)
+
 
 if __name__ == '__main__':
     unittest.main()

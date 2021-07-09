@@ -177,7 +177,7 @@ def get_market_fundamental_by_ticker(date: str, market: str="KOSPI") -> DataFram
     df.columns = ['티커', 'BPS', 'PER', 'PBR', 'EPS', 'DIV', 'DPS']
     df.set_index('티커', inplace=True)
 
-    df = df.replace('-', '0', regex=True)
+    df = df.replace('\-$', '0', regex=True)
     df = df.replace('', '0', regex=True)
     df = df.replace(',', '', regex=True)
     df = df.astype({"DIV": np.float32, "BPS": np.int32, "PER": np.float16, "PBR": np.float16, "EPS": np.int32,
@@ -212,7 +212,7 @@ def get_market_fundamental_by_date(fromdate: str, todate: str, ticker:str) -> Da
     df = df[['TRD_DD', 'BPS', 'PER', 'PBR', 'EPS', 'DVD_YLD', 'DPS']]
     df.columns = ['날짜', 'BPS', 'PER', 'PBR', 'EPS', 'DIV', 'DPS']
 
-    df = df.replace('-', '0', regex=True)
+    df = df.replace('\-$', '0', regex=True)
     df = df.replace('/', '', regex=True)
     df = df.replace('', '0', regex=True)
     df = df.replace(',', '', regex=True)

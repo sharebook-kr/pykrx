@@ -2,7 +2,7 @@ from pykrx.website.comm import dataframe_empty_handler
 from pykrx.website.krx.etx.core import (개별종목시세_ETF, 전종목시세_ETF,
                                        전종목등락률_ETF, PDF, 추적오차율추이,
                                        괴리율추이)
-from pykrx.website.krx.etx.ticker import get_etx_isin
+from pykrx.website.krx.etx.ticker import get_etx_isin, get_etx_name, get_etx_ticker_list
 import numpy as np
 import decimal
 import pandas as pd
@@ -141,8 +141,9 @@ def get_etf_portfolio_deposit_file(date: str, ticker: str) -> DataFrame:
     df = df.replace(',', '', regex=True)
     # - empty string은 int, float로 형변환 불가
     #  -> 이 문제를 해결하기 위해 '-' 문자는 0으로 치환
-    df = df.replace('-', '0', regex=True)
+    df = df.replace('\-$', '0', regex=True)
     df = df.astype({"계약수": np.float64, "금액": np.uint64, "비중": np.float32 })
+    df = df[(df.T != 0).any()]
     return df
 
 
@@ -216,4 +217,4 @@ if __name__ == "__main__":
     # print( get_etf_price_deviation("20200101", "20200401", "295820"))
     # print(get_etf_tracking_error("20200101", "20200401", "295820"))
 
-    print(get_etf_ohlcv_by_ticker("20210321"))
+    print(get_etf_portfolio_deposit_file("20210705", "114800"))
