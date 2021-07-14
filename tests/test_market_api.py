@@ -91,6 +91,12 @@ class StockPriceChangeByTicker(unittest.TestCase):
         temp = df.iloc[0:5, 1] == np.array([4615, 25150, 4895, 135500, 5680])
         self.assertEqual(temp.sum(), 5)
 
+    def test_with_holidays(self):
+        df = stock.get_market_price_change_by_ticker(fromdate="20210710", todate="20210711")        
+        self.assertIsInstance(df, pd.DataFrame)        
+        self.assertTrue(df.empty)
+    
+
     def test_with_holiday(self):
         df = stock.get_market_price_change_by_ticker(fromdate="20210101", todate="20210111")
         #            종목명      시가    종가  변동폭    등락률       거래량      거래대금

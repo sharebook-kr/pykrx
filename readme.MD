@@ -173,6 +173,12 @@ print(df.loc["051170"])
 거래대금       0
 ```
 
+`get_market_price_change_by_ticker` 함수는 기본적으로 `KOSPI` 시장을 조회합니다. `market` 파라미터에 `KOSDAQ` 또는 `ALL`을 입력할 수 있습니다. `ALL`은 모든 시장의 가격 변동폭을 조회합니다. 
+```python
+df = stock.get_market_price_change_by_ticker("20180301", "20180320", market="KOSDAQ")
+print(df.head(2))
+```
+
 #### 2.1.1.5 종목별 DIV/BPS/PER/EPS 조회
 `get_market_fundamental_by_ticker` 함수는 코스피 시장의 DIV/BPS/PER/EPS/PBR를 조회합니다.
 ```python

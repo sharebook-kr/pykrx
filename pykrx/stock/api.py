@@ -359,7 +359,7 @@ def get_exhaustion_rates_of_foreign_investment_by_ticker(date: str, market: str=
     return krx.get_exhaustion_rates_of_foreign_investment_by_ticker(date, market, balance_limit)
 
 
-def get_market_price_change_by_ticker(fromdate, todate):
+def get_market_price_change_by_ticker(fromdate: str, todate: str, market: str="KOSPI", adjusted: bool=True):
     if isinstance(fromdate, datetime.datetime):
         fromdate = _datetime2string(fromdate)
 
@@ -370,13 +370,13 @@ def get_market_price_change_by_ticker(fromdate, todate):
     fromdate = get_nearest_business_day_in_a_week(fromdate, prev=False)
     todate = get_nearest_business_day_in_a_week(todate)
 
-    df_0 = krx.get_market_price_change_by_ticker(fromdate, todate)
+    df_0 = krx.get_market_price_change_by_ticker(fromdate, todate, market, adjusted)
     if df_0.empty:
         return df_0
 
     # - 시작일에는 존재하지만 기간 동안 없는(상폐) 종목을 찾아낸다.
     # - 시작일 하루간의 가격 정보를 얻어온다.
-    df_1 = krx.get_market_price_change_by_ticker(fromdate, fromdate)
+    df_1 = krx.get_market_price_change_by_ticker(fromdate, fromdate, market, adjusted)
     # - 종가/대비/등락률/거래량/거래대금을 0으로 업데이트한다.
     cond = ~df_1.index.isin(df_0.index)
     if len(df_1[cond]) >= 1:
@@ -1689,5 +1689,5 @@ def get_etf_tracking_error(fromdate, todate, ticker) -> DataFrame:
 
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
-    # print(get_market_price_change_by_ticker(fromdate="20210101", todate="20210111"))
+    print(get_market_price_change_by_ticker(fromdate="20210101", todate="20210111"))
     print(get_etf_ohlcv_by_ticker("20210321"))
