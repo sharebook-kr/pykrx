@@ -277,7 +277,7 @@ def get_market_price_change_by_ticker(fromdate: str, todate: str, market: str="K
                   '등락률', '거래량', '거래대금']
     df = df.set_index('티커')
 
-    df = df.replace('[^-\w]', '', regex=True)
+    df = df.replace('[^-.\w]', '', regex=True)
     df = df.replace('\-$', '', regex=True)
     df = df.replace('', '0')
     df = df.astype({"시가": np.int32, "종가": np.int32,
