@@ -574,7 +574,7 @@ def get_market_net_purchases_of_equities_by_ticker(fromdate: str, todate: str, m
     """
     market = {"ALL": "ALL", "KOSPI": "STK", "KOSDAQ": "KSQ", "KONEX": "KNX"}.get(market, "ALL")
     investor = {"금융투자": 1000, "보험": 2000, "투신": 3000, "사모": 3100, "은행": 4000,
-                "기타금융": 5000, "연기금": 6000, "기관": 7050, "기타법인": 7100,
+                "기타금융": 5000, "연기금": 6000, "기관합계": 7050, "기타법인": 7100,
                 "개인": 8000, "외국인": 9000, "기타외국인": 9001, "전체": 9999}.get(investor, "9999")
 
     df = 투자자별_순매수상위종목().fetch(fromdate, todate, market, investor)
