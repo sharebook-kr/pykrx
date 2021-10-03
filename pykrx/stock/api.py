@@ -189,6 +189,12 @@ def get_market_ohlcv_by_date(fromdate: str, todate: str, ticker: str, freq: str=
 
     if adjusted:
         df = naver.get_market_ohlcv_by_date(fromdate, todate, ticker)
+        # 상장 폐지 종목은 네이버에 데이터가 존재하지 않는다. 
+        # - None을 반환하고 끝내야 할지에 추후 대응 방법을 고민해야 함
+        # - 우선 수종 종가가 아닌 KRX의 데이터라도 반환함        
+        if not isinstance(df, DataFrame) and df == None:
+            df = krx.get_market_ohlcv_by_date(fromdate, todate, ticker)   
+            df = df[["시가", "고가", "저가", "종가", "거래량"]] 
     else:
         df = krx.get_market_ohlcv_by_date(fromdate, todate, ticker)
 
@@ -1689,5 +1695,6 @@ def get_etf_tracking_error(fromdate, todate, ticker) -> DataFrame:
 
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
-    print(get_market_price_change_by_ticker(fromdate="20210101", todate="20210111"))
-    print(get_etf_ohlcv_by_ticker("20210321"))
+    # print(get_market_price_change_by_ticker(fromdate="20210101", todate="20210111"))
+    # print(get_etf_ohlcv_by_ticker("20210321"))
+    print(get_market_ohlcv_by_date("19991220", "20191231", "008480"))

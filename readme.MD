@@ -73,7 +73,20 @@ SK하이닉스
 df = stock.get_market_ohlcv_by_date("20150720", "20150810", "005930")
 print(df.head(3))
 ```
-과거 일자의 OHLCV가 위쪽에 위치하는 것을 확인할 수 있습니다.
+과거 일자의 OHLCV가 위쪽에 위치하는 것을 확인할 수 있습니다. 수정주가를 네이버에서 스크래핑합니다. 
+```
+               시가     고가     저가     종가     거래량
+날짜                                            
+2015-07-20  25820  26080  25460  25500  128928
+2015-07-21  25500  25540  24940  25260  194055
+2015-07-22  24880  25200  24700  25060  268323
+```
+
+`adjusted` 옵션을 사용하면 KRX가 제공하는 수정되지 않은 종가 정보를 가져올 수 있습니다. 
+```python
+df = stock.get_market_ohlcv_by_date("20150720", "20150810", "005930", adjusted=False)
+print(df.head(3))
+```
 ```text
                시가     고가     저가     종가  거래량      거래대금    등락률
 날짜
@@ -102,6 +115,7 @@ for ticker in stock.get_stock_ticker_list():
     print(df.head())
     time.sleep(1)
 ```
+
 
 #### 2.1.1.3 전체 종목 시세 조회
 `get_market_ohlcv_by_ticker` 함수는 입력된 일자의 `코스피` 전종목 시세를 DataFrame으로 반환합니다.
