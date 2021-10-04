@@ -26,7 +26,7 @@ def get_market_ohlcv_by_date(fromdate, todate, ticker):
         df = df.astype(np.int32)
         return df.loc[(strtd <= df.index) & (df.index <= lastd)]
     except et.ParseError:
-        return None
+        return DataFrame()
 
 
 if __name__ == "__main__":
