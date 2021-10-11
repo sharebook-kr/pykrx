@@ -110,6 +110,17 @@ class StockPriceChangeByTicker(unittest.TestCase):
         temp = df.iloc[0:5, 1] == np.array([4615, 25150, 4895, 135500, 5680])
         self.assertEqual(temp.sum(), 5)
 
+    def test_with_dash_dates(self):
+        df = stock.get_market_price_change_by_ticker(fromdate="2021-01-04", todate="20210111")
+        temp = df.iloc[0:5, 1] == np.array([4615, 25150, 4895, 135500, 5680])
+        self.assertEqual(temp.sum(), 5)
+
+        df = stock.get_market_price_change_by_ticker(fromdate="2021-01-04", todate="2021-01-11")
+        temp = df.iloc[0:5, 1] == np.array([4615, 25150, 4895, 135500, 5680])
+        self.assertEqual(temp.sum(), 5)
+
+
+
 class StockFundamentalByDate(unittest.TestCase):
     def test_with_valid_business_days(self):
         df = stock.get_market_fundamental_by_date("20210104", "20210108", "005930")

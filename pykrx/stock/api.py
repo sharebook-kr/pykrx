@@ -187,6 +187,9 @@ def get_market_ohlcv_by_date(fromdate: str, todate: str, ticker: str, freq: str=
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
 
+    fromdate = fromdate.replace("-", "")
+    todate   =   todate.replace("-", "")
+
     if adjusted:
         df = naver.get_market_ohlcv_by_date(fromdate, todate, ticker)
         # 상장 폐지 종목은 네이버에 데이터가 존재하지 않는다. 
@@ -241,6 +244,8 @@ def get_market_ohlcv_by_ticker(date, market="KOSPI"):
     if isinstance(date, datetime.datetime):
         date = _datetime2string(date)
 
+    date = date.replace("-", "")
+
     return krx.get_market_ohlcv_by_ticker(date, market)
 
 
@@ -268,6 +273,9 @@ def get_market_cap_by_date(fromdate: str, todate: str, ticker: str, freq: str='d
 
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
+
+    fromdate = fromdate.replace("-", "")
+    todate   =   todate.replace("-", "")
 
     df = krx.get_market_cap_by_date(fromdate, todate, ticker)
 
@@ -299,6 +307,8 @@ def get_market_cap_by_ticker(date, market="ALL", acending=False):
     """
     if isinstance(date, datetime.datetime):
         date = _datetime2string(date)
+
+    date = date.replace("-", "")    
 
     df = krx.get_market_cap_by_ticker(date, market, acending)
     holiday = (df[['종가', '시가총액', '거래량', '거래대금']] == 0).all(axis=None)
@@ -335,6 +345,9 @@ def get_exhaustion_rates_of_foreign_investment_by_date(fromdate: str, todate: st
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
 
+    fromdate = fromdate.replace("-", "")
+    todate   =   todate.replace("-", "")
+
     return krx.get_exhaustion_rates_of_foreign_investment_by_date(fromdate, todate, ticker)
 
 
@@ -361,6 +374,9 @@ def get_exhaustion_rates_of_foreign_investment_by_ticker(date: str, market: str=
     """
     if isinstance(date, datetime.datetime):
         date = _datetime2string(date)
+
+    date = date.replace("-", "")    
+
     return krx.get_exhaustion_rates_of_foreign_investment_by_ticker(date, market, balance_limit)
 
 
@@ -370,6 +386,9 @@ def get_market_price_change_by_ticker(fromdate: str, todate: str, market: str="K
 
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
+
+    fromdate = fromdate.replace("-", "")
+    todate   =   todate.replace("-", "")
 
     # businessday check
     fromdate = get_nearest_business_day_in_a_week(fromdate, prev=False)
@@ -433,6 +452,9 @@ def get_market_fundamental_by_date(fromdate: str, todate: str, ticker: str, freq
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
 
+    fromdate = fromdate.replace("-", "")
+    todate   =   todate.replace("-", "")
+
     df = krx.get_market_fundamental_by_date(fromdate, todate, ticker)
     if df.empty:
         return df
@@ -466,6 +488,8 @@ def get_market_fundamental_by_ticker(date: str, market: str="KOSPI") -> DataFram
     """
     if isinstance(date, datetime.datetime):
         date = _datetime2string(date)
+
+    date = date.replace("-", "")
 
     return krx.get_market_fundamental_by_ticker(date, market)
 
@@ -525,6 +549,9 @@ def __get_market_trading_value_and_volume_by_investor(fromdate: str, todate: str
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
 
+    fromdate = fromdate.replace("-", "")
+    todate   =   todate.replace("-", "")
+
     if ticker in ["KOSPI", "KOSDAQ", "KONEX", "ALL"]:
         df = krx.get_market_trading_value_and_volume_on_market_by_investor(fromdate, todate, ticker, etf, etn, elw)
     else:
@@ -579,6 +606,14 @@ def get_market_trading_value_by_investor(fromdate: str, todate: str, ticker: str
             사모          999084910863     846067212945  -153017697918
             은행          886226324790     936210985810    49984661020
     """
+    if isinstance(fromdate, datetime.datetime):
+        fromdate = _datetime2string(fromdate)
+    if isinstance(todate, datetime.datetime):
+        todate = _datetime2string(todate)
+
+    fromdate = fromdate.replace("-", "")
+    todate   =   todate.replace("-", "")
+
     return __get_market_trading_value_and_volume_by_investor(fromdate, todate, ticker, etf, etn, elw, '거래대금')
 
 
@@ -628,6 +663,14 @@ def get_market_trading_volume_by_investor(fromdate: str, todate: str, ticker: st
             사모          31673292     26585281   -5088011
             은행          44279242     51690814    7411572
     """
+    if isinstance(fromdate, datetime.datetime):
+        fromdate = _datetime2string(fromdate)
+    if isinstance(todate, datetime.datetime):
+        todate = _datetime2string(todate)
+        
+    fromdate = fromdate.replace("-", "")
+    todate   =   todate.replace("-", "")
+
     return __get_market_trading_value_and_volume_by_investor(fromdate, todate, ticker, etf, etn, elw, '거래량')
 
 
@@ -686,6 +729,9 @@ def get_market_trading_value_by_date(fromdate: str, todate: str, ticker: str, et
         fromdate = _datetime2string(fromdate)
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
+        
+    fromdate = fromdate.replace("-", "")
+    todate   =   todate.replace("-", "")
 
     if ticker in ["KOSPI", "KOSDAQ", "KONEX", "ALL"]:
         df = krx.get_market_trading_value_and_volume_on_market_by_date(fromdate, todate, ticker, etf, etn, elw, "거래대금",
@@ -742,6 +788,9 @@ def get_market_trading_volume_by_date(fromdate: str, todate: str, ticker: str, e
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
 
+    fromdate = fromdate.replace("-", "")
+    todate   =   todate.replace("-", "")
+
     if ticker in ["KOSPI", "KOSDAQ", "KONEX", "ALL"]:
         df = krx.get_market_trading_value_and_volume_on_market_by_date(fromdate, todate, ticker, etf, etn, elw, "거래량",
                                                                        on, detail)
@@ -776,17 +825,20 @@ def get_market_net_purchases_of_equities_by_ticker(fromdate: str, todate: str, m
             096770 SK이노베이션      4848359    5515777        667418  1298854139000  1478890602000   180036463000
     """
     if isinstance(fromdate, datetime.datetime):
-        date = _datetime2string(fromdate)
+        fromdate = _datetime2string(fromdate)
 
     if isinstance(todate, datetime.datetime):
-        date = _datetime2string(todate)
+        todate = _datetime2string(todate)
+
+    fromdate = fromdate.replace("-", "")
+    todate   =   todate.replace("-", "")
 
     return krx.get_market_net_purchases_of_equities_by_ticker(fromdate, todate, market, investor)
 
 
 @deprecated(version='1.1', reason="You should use get_market_net_purchases_of_equities_by_ticker() instead")
-def get_market_trading_value_and_volume_by_ticker(fromdate: str, todate: str, market: str="KOSPI", investor: str="개인"):
-    get_market_net_purchases_of_equities_by_ticker(fromdate, todate, market, investor)
+def get_market_trading_value_and_volume_by_ticker(fromdate: str, todate: str, market: str="KOSPI", investor: str="개인"):    
+    return get_market_net_purchases_of_equities_by_ticker(fromdate, todate, market, investor)
 
 
 # -----------------------------------------------------------------------------
@@ -812,6 +864,8 @@ def get_index_ticker_list(date: str=None, market: str="KOSPI") -> list:
         date = datetime.datetime.now()
     if isinstance(date, datetime.datetime):
         date = _datetime2string(date)
+
+    date = date.replace("-", "")    
 
     return krx.IndexTicker().get_ticker(market, date)
 
@@ -852,6 +906,8 @@ def get_index_portfolio_deposit_file(ticker: str, date: str=None) -> list:
 
     if isinstance(target_date, datetime.datetime):
         target_date = _datetime2string(target_date)
+
+    target_date = target_date.replace("-", "")     
 
     pdf = krx.get_index_portfolio_deposit_file(target_date, ticker)
     # 주말 or 비영업일 여부를 확인하는 것 자체가 상대적으로 오랜 시간 걸려 lazy 판단
@@ -903,6 +959,9 @@ def get_index_ohlcv_by_date(fromdate: str, todate: str, ticker: str, freq: str='
 
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
+
+    fromdate = fromdate.replace("-", "")
+    todate   =   todate.replace("-", "")
 
     df = krx.get_index_ohlcv_by_date(fromdate, todate, ticker)
 
@@ -974,6 +1033,9 @@ def get_index_price_change_by_ticker(fromdate: str, todate: str, market: str="KO
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
 
+    fromdate = fromdate.replace("-", "")
+    todate   =   todate.replace("-", "")
+
     # KRX 웹 서버의 제약으로 인한 영업일 검사
     fromdate = get_nearest_business_day_in_a_week(fromdate, prev=False)
     todate   = get_nearest_business_day_in_a_week(todate)
@@ -1032,7 +1094,9 @@ def get_shorting_value_by_ticker(date: str, market: str="KOSPI", include: list=N
             138930   10635610   6658032800  0.160034
     """
     if isinstance(date, datetime.datetime):
-        date = _datetime2string(date)
+        date = _datetime2string(date)    
+
+    date = date.replace("-", "")
 
     if include is None:
         include = ["주식"]
@@ -1075,6 +1139,8 @@ def get_shorting_volume_by_ticker(date: str, market: str="KOSPI", include: list=
     if isinstance(date, datetime.datetime):
         date = _datetime2string(date)
 
+    date = date.replace("-", "")
+
     if include is None:
         include = ["주식"]
 
@@ -1115,6 +1181,9 @@ def get_shorting_volume_by_date(fromdate: str, todate: str, ticker: str) -> Data
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
 
+    fromdate = fromdate.replace("-", "")
+    todate   =   todate.replace("-", "")
+
     df = krx.get_shorting_trading_value_and_volume_by_date(fromdate, todate, ticker)
     return df['거래량']
 
@@ -1144,6 +1213,9 @@ def get_shorting_value_by_date(fromdate: str, todate: str, ticker: str) -> DataF
         fromdate = _datetime2string(fromdate)
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
+
+    fromdate = fromdate.replace("-", "")
+    todate   =   todate.replace("-", "")
 
     df = krx.get_shorting_trading_value_and_volume_by_date(fromdate, todate, ticker)
     return df['거래대금']
@@ -1176,6 +1248,9 @@ def get_shorting_investor_volume_by_date(fromdate: str, todate: str, market: str
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
 
+    fromdate = fromdate.replace("-", "")
+    todate   =   todate.replace("-", "")
+
     return krx.get_shorting_investor_by_date(fromdate, todate, market, "거래량")
 
 
@@ -1205,6 +1280,9 @@ def get_shorting_investor_value_by_date(fromdate: str, todate: str, market: str=
         fromdate = _datetime2string(fromdate)
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
+
+    fromdate = fromdate.replace("-", "")
+    todate   =   todate.replace("-", "")
 
     return krx.get_shorting_investor_by_date(fromdate, todate, market, "거래대금")
 
@@ -1242,6 +1320,8 @@ def get_shorting_volume_top50(date: str, market: str="KOSPI") -> DataFrame:
     """
     if isinstance(date, datetime.datetime):
         date = _datetime2string(date)
+
+    date = date.replace("-", "")
 
     return krx.get_shorting_volume_top50(date, market)
 
@@ -1281,6 +1361,8 @@ def get_shorting_balance_top50(date: str, market: str="KOSPI") -> DataFrame:
     if isinstance(date, datetime.datetime):
         date = _datetime2string(date)
 
+    date = date.replace("-", "")
+
     return krx.get_shorting_balance_top50(date, market)
 
 
@@ -1307,6 +1389,9 @@ def get_shorting_balance_by_ticker(date: str, market: str="KOSPI") -> DataFrame:
     """
     if isinstance(date, datetime.datetime):
         date = _datetime2string(date)
+
+    date = date.replace("-", "")
+
     return krx.get_shorting_balance_by_ticker(date, market)
 
 
@@ -1336,6 +1421,9 @@ def get_shorting_balance_by_date(fromdate: str, todate: str, ticker: str) -> Dat
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
 
+    fromdate = fromdate.replace("-", "")
+    todate   =   todate.replace("-", "")
+
     return krx.get_shorting_balance_by_date(fromdate, todate, ticker)
 
 
@@ -1363,6 +1451,8 @@ def get_etx_ticker_list(market: str, date: str=None) -> list:
     if isinstance(date, datetime.datetime):
         date = _datetime2string(date)
 
+    date = date.replace("-", "")
+
     return krx.get_etx_ticker_list(date, market)
 
 
@@ -1384,6 +1474,8 @@ def get_etf_ticker_list(date: str=None) -> list:
         date = get_nearest_business_day_in_a_week()
     if isinstance(date, datetime.datetime):
         date = _datetime2string(date)
+
+    date = date.replace("-", "")
 
     return krx.get_etx_ticker_list(date, "ETF")
 
@@ -1407,6 +1499,8 @@ def get_etn_ticker_list(date: str=None) -> list:
     if isinstance(date, datetime.datetime):
         date = _datetime2string(date)
 
+    date = date.replace("-", "")
+
     return krx.get_etx_ticker_list(date, "ETN")
 
 
@@ -1428,6 +1522,8 @@ def get_elw_ticker_list(date: str=None) -> list:
         date = get_nearest_business_day_in_a_week()
     if isinstance(date, datetime.datetime):
         date = _datetime2string(date)
+
+    date = date.replace("-", "")
 
     return krx.get_etx_ticker_list(date, "ELW")
 
@@ -1535,6 +1631,9 @@ def get_etf_ohlcv_by_date(fromdate: str, todate: str, ticker: str, freq: str="d"
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
 
+    fromdate = fromdate.replace("-", "")
+    todate   =   todate.replace("-", "")
+
     df = krx.get_etf_ohlcv_by_date(fromdate, todate, ticker)
 
     how = {'NAV': 'first', '시가': 'first', '고가': 'max', '저가': 'min', '종가': 'last', '거래량': 'sum', '거래대금': 'sum',
@@ -1570,6 +1669,8 @@ def get_etf_ohlcv_by_ticker(date: str) -> DataFrame:
     if isinstance(date, datetime.datetime):
         date = _datetime2string(date)
 
+    date = date.replace("-", "")
+
     df = krx.get_etf_ohlcv_by_ticker(date)
     if (df == 0).all(axis=None):
         return DataFrame()
@@ -1602,6 +1703,9 @@ def get_etf_price_change_by_ticker(fromdate: str, todate: str) -> DataFrame:
 
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
+
+    fromdate = fromdate.replace("-", "")
+    todate   =   todate.replace("-", "")
 
     fromdate = get_nearest_business_day_in_a_week(fromdate, prev=False)
     todate = get_nearest_business_day_in_a_week(todate)
@@ -1660,6 +1764,9 @@ def get_etf_price_deviation(fromdate: str, todate: str, ticker: str) -> DataFram
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
 
+    fromdate = fromdate.replace("-", "")
+    todate   =   todate.replace("-", "")
+
     return krx.get_etf_price_deviation(fromdate, todate, ticker)
 
 
@@ -1689,6 +1796,9 @@ def get_etf_tracking_error(fromdate, todate, ticker) -> DataFrame:
     if isinstance(todate, datetime.datetime):
         todate = _datetime2string(todate)
 
+    fromdate = fromdate.replace("-", "")
+    todate   =   todate.replace("-", "")
+    
     return krx.get_etf_tracking_error(fromdate, todate, ticker)
 
 
