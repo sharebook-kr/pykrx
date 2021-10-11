@@ -491,6 +491,8 @@ def get_market_fundamental_by_ticker(date: str, market: str="KOSPI") -> DataFram
 
     date = date.replace("-", "")
 
+    date = get_nearest_business_day_in_a_week(date, prev=False)    
+
     return krx.get_market_fundamental_by_ticker(date, market)
 
 
@@ -1806,4 +1808,5 @@ if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
     # print(get_market_price_change_by_ticker(fromdate="20210101", todate="20210111"))
     # print(get_etf_ohlcv_by_ticker("20210321"))
-    print(get_market_ohlcv_by_date("19991220", "20191231", "008480"))
+    # print(get_market_ohlcv_by_date("19991220", "20191231", "008480"))
+    print(get_market_fundamental_by_ticker("20210101"))
