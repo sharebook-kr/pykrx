@@ -12,5 +12,6 @@ try:
     else:
         # fonts = [x.name for x in fm.fontManager.ttflist if 'Malgun Gothic' in x.name]
         plt.rc('font', family="Malgun Gothic")
+        plt.rcParams['axes.unicode_minus'] = False
 except:
     pass
