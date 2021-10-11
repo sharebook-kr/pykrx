@@ -313,10 +313,9 @@ def get_market_cap_by_ticker(date, market="ALL", acending=False):
     df = krx.get_market_cap_by_ticker(date, market, acending)
     holiday = (df[['종가', '시가총액', '거래량', '거래대금']] == 0).all(axis=None)
     if holiday:
-        target_date = get_nearest_business_day_in_a_week(date=date)
+        target_date = get_nearest_business_day_in_a_week(date=date, prev=False)
         df = krx.get_market_cap_by_ticker(target_date, market, acending)
-        print(f"The date you entered {date} seems to be a holiday. PYKRX changes the date parameter to {target_date} to " \
-                "query the requested information.")
+        print(f"The date you entered {date} seems to be a holiday. PYKRX changes the date parameter to {target_date}.")
 
     return df
 
@@ -455,7 +454,8 @@ def get_market_fundamental_by_date(fromdate: str, todate: str, ticker: str, freq
     fromdate = fromdate.replace("-", "")
     todate   =   todate.replace("-", "")
 
-    df = krx.get_market_fundamental_by_date(fromdate, todate, ticker)
+    df = krx.get_market_fundamental_by_date(fromdate, todate, ticker)    
+
     if df.empty:
         return df
 
@@ -491,9 +491,13 @@ def get_market_fundamental_by_ticker(date: str, market: str="KOSPI") -> DataFram
 
     date = date.replace("-", "")
 
-    date = get_nearest_business_day_in_a_week(date, prev=False)    
-
-    return krx.get_market_fundamental_by_ticker(date, market)
+    df = krx.get_market_fundamental_by_ticker(date, market)
+    holiday = (df[['BPS', 'PER', 'PBR', 'EPS', 'DIV', 'DPS']] == 0).all(axis=None)
+    if holiday:
+        target_date = get_nearest_business_day_in_a_week(date=date, prev=False)
+        df = krx.get_market_fundamental_by_ticker(target_date, market)
+        print(f"The date you entered {date} seems to be a holiday. PYKRX changes the date parameter to {target_date}.")
+    return df
 
 
 def __get_market_trading_value_and_volume_by_investor(fromdate: str, todate: str, ticker: str, etf: bool, etn: bool,
@@ -1809,4 +1813,4 @@ if __name__ == "__main__":
     # print(get_market_price_change_by_ticker(fromdate="20210101", todate="20210111"))
     # print(get_etf_ohlcv_by_ticker("20210321"))
     # print(get_market_ohlcv_by_date("19991220", "20191231", "008480"))
-    print(get_market_fundamental_by_ticker("20210101"))
+    print(get_market_cap_by_ticker("20210101"))
