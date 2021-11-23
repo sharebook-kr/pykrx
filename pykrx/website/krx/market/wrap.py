@@ -495,6 +495,7 @@ def get_market_trading_value_and_volume_on_market_by_date(fromdate: str, todate:
     df = df.replace('[^-\w]', '', regex=True)
     df = df.replace('', '0')
     df = df.astype(np.int64)
+    df['전체'] = df.iloc[:, 0:-1].sum(axis=1)
     return df.sort_index()
 
 
