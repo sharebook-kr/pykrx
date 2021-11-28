@@ -25,6 +25,8 @@ class EtxTicker:
         return df.set_index('ticker')
 
     def get_ticker(self, market, date):
+        if market == "ALL":
+            return self.df.index.to_list()
         cond1 = self.df['시장'] == market if market else  True
         cond2 = self.df['상장일'] <= date
         return self.df[cond1 & cond2].index.to_list()
@@ -49,9 +51,7 @@ def get_etx_ticker_list(date: str, market: str) -> list:
 
     Returns:
         list:  ['069500', '069660', ....]
-    """
-    if market == "ALL":
-        market = None
+    """    
     return EtxTicker().get_ticker(market.upper(), date)
 
 

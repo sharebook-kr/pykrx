@@ -555,6 +555,48 @@ class 개별지수시세(KrxWebIo):
         result = self.read(indIdx2=ticker, indIdx=group_id, strtDd=fromdate, endDd=todate)
         return DataFrame(result['output'])
 
+
+class 전체지수시세(KrxWebIo):
+    @property
+    def bld(self):
+        return "dbms/MDC/STAT/standard/MDCSTAT00101"
+
+    def fetch(self, trdDd: str, idxIndMidclssCd: str) -> DataFrame:
+        """[11001] 전체지수 시세
+
+        Args:
+            trdDd           (str): 조회 시작 일자 (YYMMDD)            
+            idxIndMidclssCd (str): 검색 시장
+             - 01: KRX
+             - 02: KOSPI
+             - 03: KOSDAQ
+             - 04: 테마
+
+        Returns:
+            DataFrame
+
+            >> 전체지수시세().fetch("20211126", "01")
+
+                        IDX_NM CLSPRC_IDX FLUC_TP_CD CMPPREVDD_IDX FLUC_RT OPNPRC_IDX  HGPRC_IDX  LWPRC_IDX   ACC_TRDVOL          ACC_TRDVAL                 MKTCAP
+                0      KRX 300   1,770.31          2        -28.95   -1.61   1,794.31   1,804.44   1,765.64  195,701,215  12,073,173,651,861  2,021,911,406,190,965
+                1      KTOP 30  10,474.88          2       -194.69   -1.82  10,621.85  10,677.23  10,448.27   35,084,853   3,590,583,333,556  1,110,875,284,982,930
+                2      KRX 100   6,099.23          2        -98.21   -1.58   6,177.12   6,213.58   6,083.65  118,353,920   8,948,592,533,231  1,705,817,023,537,590
+                3    KRX 자동차   2,072.14          2        -55.88   -2.63   2,122.03   2,122.81   2,067.39    8,993,829     490,044,360,120    125,029,489,225,115
+                4    KRX 반도체   3,689.43          2        -55.31   -1.48   3,736.03   3,776.01   3,664.35   24,833,578   1,050,786,237,050    124,684,859,892,510
+
+            >> 전체지수시세().fetch("20211126", "02")
+
+                               IDX_NM CLSPRC_IDX FLUC_TP_CD CMPPREVDD_IDX FLUC_RT OPNPRC_IDX  HGPRC_IDX  LWPRC_IDX   ACC_TRDVOL          ACC_TRDVAL                 MKTCAP
+                0  코스피 (외국주포함)          -                        -       -          -          -          -  595,597,647  11,901,297,731,572  2,167,444,597,231,403       
+                1              코스피   2,936.44          2        -43.83   -1.47   2,973.04   2,985.77   2,930.31  594,707,257  11,894,910,355,357  2,165,631,236,658,233
+                2          코스피 200     385.07          2         -6.86   -1.75     390.61     392.81     384.19  145,771,166   8,625,603,922,656  1,831,345,766,736,180
+                3          코스피 100   2,906.68          2        -50.79   -1.72   2,947.18   2,963.27   2,900.41  100,357,121   7,370,285,846,691  1,661,265,294,441,780
+                4           코스피 50   2,700.81          2        -45.96   -1.67   2,736.77   2,752.70   2,693.90   52,627,040   5,768,837,287,881  1,453,136,066,992,400
+        """
+        result = self.read(idxIndMidclssCd=idxIndMidclssCd, trdDd=trdDd)
+        return DataFrame(result['output'])
+
+
 class 전체지수등락률(KrxWebIo):
     @property
     def bld(self):
@@ -869,5 +911,6 @@ class 개별종목_공매도_잔고(KrxWebIo):
 
 if __name__ == "__main__":
     pd.set_option('display.width', None)
-    print(개별종목_공매도_잔고().fetch("20200106", "20200110", "KR7005930003"))
+    # print(개별종목_공매도_잔고().fetch("20200106", "20200110", "KR7005930003"))
+    print(전체지수시세().fetch("20211126", "02"))
 

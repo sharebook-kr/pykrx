@@ -67,10 +67,10 @@ SK하이닉스
 ```
 
 #### 2.1.1.2 일자별 OHLCV 조회
-`get_market_ohlcv_by_date` 함수는 시작일/종료일/티커 세 개의 파라미터를 입력받아 OHLCV를 일자별로 정렬하여 DataFrame으로 반환합니다.
+`get_market_ohlcv` 함수는 시작일/종료일/티커 세 개의 파라미터를 입력받아 OHLCV를 일자별로 정렬하여 DataFrame으로 반환합니다.
 
 ```python
-df = stock.get_market_ohlcv_by_date("20150720", "20150810", "005930")
+df = stock.get_market_ohlcv("20150720", "20150810", "005930")
 print(df.head(3))
 ```
 과거 일자의 OHLCV가 위쪽에 위치하는 것을 확인할 수 있습니다. 
@@ -82,9 +82,9 @@ print(df.head(3))
 2015-07-22  24880  25200  24700  25060  268323
 ```
 
-get_market_ohlcv_by_date() 함수에 frequency 파라미터(d/m/y)를 추가할 수 있습니다. d는 일자, m은 월, y는 연도를 의미합니다. 다음은 20180810부터 20181212까지의 삼성전자 월별 OHLCV 데이터를 출력합니다.
+get_market_ohlcv() 함수에 frequency 파라미터(d/m/y)를 추가할 수 있습니다. d는 일자, m은 월, y는 연도를 의미합니다. 다음은 20180810부터 20181212까지의 삼성전자 월별 OHLCV 데이터를 출력합니다.
 ```python
-df = stock.get_market_ohlcv_by_date("20180810", "20181212", "005930", "m")
+df = stock.get_market_ohlcv("20180810", "20181212", "005930", "m")
 print(df.head(3))
 ```
 ```text
@@ -98,15 +98,15 @@ get_stock_ticker_list() 함수와 함께 사용하면 전종목의 OHLCV를 가�
 ```python
 import time
 for ticker in stock.get_stock_ticker_list():
-    df = stock.get_market_ohlcv_by_date("20181210", "20181212", ticker)
+    df = stock.get_market_ohlcv("20181210", "20181212", ticker)
     print(df.head())
     time.sleep(1)
 ```
 
-`get_market_ohlcv_by_date` 함수는 기본적으로 네이버에서 수정 주가를 스크래핑합니다. 네이버는 현재 상장 폐지된 종목의 과거 데이터를 제공하지 않기 때문에 과거 데이터의 일부는 얻어올 수 없습니다. 데이터가 존재하지 않는다면 비어있는 데이터프레임을 반환하니 다음과 같이 데이터의 존재 유무를 확인하고 사용하세요.
+`get_market_ohlcv` 함수는 기본적으로 네이버에서 수정 주가를 스크래핑합니다. 네이버는 현재 상장 폐지된 종목의 과거 데이터를 제공하지 않기 때문에 과거 데이터의 일부는 얻어올 수 없습니다. 데이터가 존재하지 않는다면 비어있는 데이터프레임을 반환하니 다음과 같이 데이터의 존재 유무를 확인하고 사용하세요.
 
 ```
-df = stock.get_market_ohlcv_by_date("20150720", "20150810", "005930")
+df = stock.get_market_ohlcv("20150720", "20150810", "005930")
 if df.empty :
     print("error")
 else:
@@ -115,7 +115,7 @@ else:
 
 KRX는 상장 폐지된 종목의 과거 데이터도 제공합니다. 다만 수정 종가가 아니라는 사실에 주의하세요. `adjusted` 옵션을 사용해서 KRX가 제공하는 OHLCV 정보를 가져올 수 있습니다.
 ```python
-df = stock.get_market_ohlcv_by_date("20150720", "20150810", "005930", adjusted=False)
+df = stock.get_market_ohlcv("20150720", "20150810", "005930", adjusted=False)
 print(df.head(3))
 ```
 ```text
@@ -127,10 +127,10 @@ print(df.head(3))
 ```
 
 #### 2.1.1.3 전체 종목 시세 조회
-`get_market_ohlcv_by_ticker` 함수는 입력된 일자의 `코스피` 전종목 시세를 DataFrame으로 반환합니다.
+`get_market_ohlcv` 함수는 입력된 일자의 `코스피` 전종목 시세를 DataFrame으로 반환합니다.
 
 ```python
-df = stock.stock.get_market_ohlcv_by_ticker("20210122")
+df = stock.stock.get_market_ohlcv("20210122")
 print(df.head(3))
 ```
 
@@ -148,17 +148,17 @@ print(df.head(3))
 - 값을 입력하지 않는다면 코스피 시장을 조회합니다.
 
 ```python
-df = stock.get_market_ohlcv_by_ticker("20200831", market="KOSPI")
-df = stock.get_market_ohlcv_by_ticker("20200831", market="KOSDAQ")
-df = stock.get_market_ohlcv_by_ticker("20200831", market="KONEX")
+df = stock.get_market_ohlcv("20200831", market="KOSPI")
+df = stock.get_market_ohlcv("20200831", market="KOSDAQ")
+df = stock.get_market_ohlcv("20200831", market="KONEX")
 ```
 
 #### 2.1.1.4 모든 종목의 가격 변동 조회
-`get_market_price_change_by_ticker` 함수는 입력된 기간 동안의 가격 가격 변동 정보를 반환합니다.
+`get_market_price_change` 함수는 입력된 기간 동안의 가격 가격 변동 정보를 반환합니다.
 다음 코드는 20180301-20180320 동안의 가격 변동폭을 조회합니다.
 .
 ```python
-df = stock.get_market_price_change_by_ticker("20180301", "20180320")
+df = stock.get_market_price_change("20180301", "20180320")
 print(df.head(2))
 ```
 ```text
@@ -169,7 +169,7 @@ print(df.head(2))
 시작일의 시가 혹은 전일 종가를 가격 변동 데이터의 시가로 사용할 수 있는데, KRX 웹서버는 전일 종가를 시가로 반환합니다. 즉 20180301 전일 종가를 시가,
 20180320을 종가로 사용합니다. 동화약품(000020)의 경우를 살펴보면 2018/03/02의 전일 영업일 2018/02/28의 종가를 시가로 사용한 것을 알 수 있습니다.
 ```python
-df = stock.get_market_ohlcv_by_date("20180227", "20180320", "000020")
+df = stock.get_market_ohlcv("20180227", "20180320", "000020")
 print(df.head())
 ```
 ```text
@@ -196,16 +196,16 @@ print(df.loc["051170"])
 거래대금       0
 ```
 
-`get_market_price_change_by_ticker` 함수는 기본적으로 `KOSPI` 시장을 조회합니다. `market` 파라미터에 `KOSDAQ` 또는 `ALL`을 입력할 수 있습니다. `ALL`은 모든 시장의 가격 변동폭을 조회합니다. 
+`get_market_price_change` 함수는 기본적으로 `KOSPI` 시장을 조회합니다. `market` 파라미터에 `KOSDAQ` 또는 `ALL`을 입력할 수 있습니다. `ALL`은 모든 시장의 가격 변동폭을 조회합니다. 
 ```python
-df = stock.get_market_price_change_by_ticker("20180301", "20180320", market="KOSDAQ")
+df = stock.get_market_price_change("20180301", "20180320", market="KOSDAQ")
 print(df.head(2))
 ```
 
 #### 2.1.1.5 종목별 DIV/BPS/PER/EPS 조회
-`get_market_fundamental_by_ticker` 함수는 코스피 시장의 DIV/BPS/PER/EPS/PBR를 조회합니다.
+`get_market_fundamental` 함수는 코스피 시장의 DIV/BPS/PER/EPS/PBR를 조회합니다.
 ```python
-df = stock.get_market_fundamental_by_ticker("20210108")
+df = stock.get_market_fundamental("20210108")
 print(df.head(2))
 ```
 ```text
@@ -219,7 +219,7 @@ print(df.head(2))
 - KOSPI / KOSDAQ / KONEX / ALL 을 사용할 수 있습니다.
 
 ```python
-df = get_market_fundamental_by_ticker("20210104", market="KOSDAQ")
+df = get_market_fundamental("20210104", market="KOSDAQ")
 print(df.head(2))
 ```
 ```text
@@ -230,9 +230,9 @@ print(df.head(2))
 ```
 
 #### 2.1.1.6 일자별 DIV/BPS/PER/EPS 조회
-`get_market_fundamental_by_date` 함수는 특정 종목에 대해 입력된 기간의 DIV/BPS/PER/EPS/PBR를 조회합니다.
+`get_market_fundamental` 함수는 특정 종목에 대해 입력된 기간의 DIV/BPS/PER/EPS/PBR를 조회합니다.
 ```python
-df = stock.get_market_fundamental_by_date("20210104", "20210108", "005930")
+df = stock.get_market_fundamental("20210104", "20210108", "005930")
 print(df.head(2))
 ```
 ```text
@@ -241,9 +241,9 @@ print(df.head(2))
 2021-01-04  37528  26.218750  2.210938  3166  1.709961  1416
 2021-01-05  37528  26.500000  2.240234  3166  1.690430  1416
 ```
-get_market_fundamental_by_date() 함수에 frequency 파라미터(d/m/y)를 추가할 수 있습니다. d는 일자, m은 월, y는 연도를 의미합니다. 다음은 20180810부터 20181212까지의 삼성전자 월별 DIV/BPS/PER/EPS를 출력합니다. 이때 해당 월의 종가를 기준으로 값이 출력됩니다.
+get_market_fundamental() 함수에 frequency 파라미터(d/m/y)를 추가할 수 있습니다. d는 일자, m은 월, y는 연도를 의미합니다. 다음은 20180810부터 20181212까지의 삼성전자 월별 DIV/BPS/PER/EPS를 출력합니다. 이때 해당 월의 종가를 기준으로 값이 출력됩니다.
 ```python
-df = stock.get_market_fundamental_by_date("20200101", "20200430", "005930", freq="m")
+df = stock.get_market_fundamental("20200101", "20200430", "005930", freq="m")
 print(df.head(2))
 ```
 ```text
@@ -539,9 +539,9 @@ print(df.head())
 ```
 
 #### 2.1.1.11 투자자별 순매수 상위종목
-`get_market_net_purchases_of_equities_by_ticker` 함수는 순매수 금액 순서로 정렬된 종목 리스트를 반환합니다. 다음은 코스피 시장에서 2021-01-15 부터 2021-01-22 까지 개인의 순매수 금액이 높은 순서대로 종목을 정렬해서 반환합니다.
+`get_market_net_purchases_of_equities` 함수는 순매수 금액 순서로 정렬된 종목 리스트를 반환합니다. 다음은 코스피 시장에서 2021-01-15 부터 2021-01-22 까지 개인의 순매수 금액이 높은 순서대로 종목을 정렬해서 반환합니다.
 ```python
-df = stock.get_market_net_purchases_of_equities_by_ticker("20210115", "20210122", "KOSPI", "개인")
+df = stock.get_market_net_purchases_of_equities("20210115", "20210122", "KOSPI", "개인")
 print(df.head())
 ```
 
@@ -559,10 +559,10 @@ print(df.head())
 - 금융투자 / 보험 / 투신 / 사모 / 은행 / 기타금융 / 연기금 / 기관합계 / 기타법인 / 개인 / 외국인 / 기타외국인 / 전체
 
 #### 2.1.1.12 종목별 시가 총액 조회
-`get_market_cap_by_ticker` 함수는 특정 일자의 종목별 시가총액/거래량/거래대금/상장주식수/외국인보유주식수를 조회합니다.
+`get_market_cap` 함수는 특정 일자의 종목별 시가총액/거래량/거래대금/상장주식수/외국인보유주식수를 조회합니다.
 시가총액과 거래대금의 단위는 원입니다. 외국인보유주식수는 D-2 (영업일 기준)일 까지 유효한 값이 출력되며, D-1일은 0으로 표기됩니다.
 ```python
-df = stock.get_market_cap_by_ticker("20200625")
+df = stock.get_market_cap("20200625")
 print(df.head())
 ```
 ```text
@@ -576,9 +576,9 @@ print(df.head())
 ```
 
 #### 2.1.1.13 일자별 시가 총액 조회
-`get_market_cap_by_date` 함수는 특정 종목의 일자별 시가총액을 조회합니다. 거래량/거래대금/상장주식수가 함께 조회됩니다.
+`get_market_cap` 함수는 특정 종목의 일자별 시가총액을 조회합니다. 거래량/거래대금/상장주식수가 함께 조회됩니다.
 ```python
-df = stock.get_market_cap_by_date("20190101", "20190131", "005930")
+df = stock.get_market_cap("20190101", "20190131", "005930")
 print(df.head())
 ```
 ```text
@@ -591,13 +591,13 @@ print(df.head())
 2015-07-24  181030885  196584  241383636000  147299337
 ```
 
-get_market_cap_by_date() 함수에 frequency 파라미터(d/m/y)를 추가할 수 있습니다.
+get_market_cap() 함수에 frequency 파라미터(d/m/y)를 추가할 수 있습니다.
 d는 일자, m은 월, y는 연도를 의미합니다.
 다음은 20200101부터 20200430까지의 월별 시가총액을 조회합니다.
 시가총액과 상장주식수는 월별 마지막 거래일의 값을 사용하며, 거래량과 거래대금은 합산된 결과가
 출력됩니다. 조회 기간이 길 수록 데이터를 획득하기 까지의 시간이 오래 걸립니다.
 ```python
-df = stock.get_market_cap_by_date("20200101", "20200430", "005930", "m")
+df = stock.get_market_cap("20200101", "20200430", "005930", "m")
 print(df.head())
 ```
 
@@ -612,11 +612,11 @@ print(df.head())
 
 #### 2.1.1.14 티커별 외국인 보유량 및 외국인 한도소진률
 
-`get_exhaustion_rates_of_foreign_investment_by_ticker` 함수는 상장주식수/외국인한도수량/외국인보유수량/외국인한도소진률 정보를
+`get_exhaustion_rates_of_foreign_investment` 함수는 상장주식수/외국인한도수량/외국인보유수량/외국인한도소진률 정보를
 조회합니다. 외국인 보유수량 및 한도소진율은 장개시 시점 기준(금융감독원 외국인투자 관리시스템 제공 전일자 확정치)입니다.
 
 ```python
-df = stock.get_exhaustion_rates_of_foreign_investment_by_ticker('20200703')
+df = stock.get_exhaustion_rates_of_foreign_investment('20200703')
 print(df.head())
 ```
 
@@ -632,23 +632,22 @@ print(df.head())
 
 두 번째 파라미터 `market`은 코스피(KOSPI)/코스닥(KOSDAQ)/코넥스(KONEX) 시장을 지정해서 조회할 수 있습니다.
 ```python
-df = stock.get_exhaustion_rates_of_foreign_investment_by_ticker('20200703', "KOSPI")
+df = stock.get_exhaustion_rates_of_foreign_investment('20200703', "KOSPI")
 print(df.head())
 ```
 
 세 번째 파라미터 `balance_limit`을 `True`로 지정하면 외국인 보유한도의 제한 종목만 검색할 수 있습니다. 지정하지 않으면 `False` 입니다.
  ```python
-df = stock.get_exhaustion_rates_of_foreign_investment_by_ticker('20200703', "KOSPI",
+df = stock.get_exhaustion_rates_of_foreign_investment('20200703', "KOSPI",
 balance_limit=True)
 print(df.head())
 ```
 
 #### 2.1.1.15 일자별 외국인 보유량 및 외국인 한도소진률
-`get_exhaustion_rates_of_foreign_investment_by_date` 함수는 특정한 종목의 일자별로 정렬된 상장주식수/외국인한도수량/외국인보유수량/외국인한도소진률 정보를
-조회합니다. 외국인 보유수량 및 한도소진율은 장개시 시점 기준(금융감독원 외국인투자 관리시스템 제공 전일자 확정치)입니다.
+`get_exhaustion_rates_of_foreign_investment` 함수는 특정한 종목의 일자별로 정렬된 상장주식수/외국인한도수량/외국인보유수량/외국인한도소진률 정보를 조회합니다. 외국인 보유수량 및 한도소진율은 장개시 시점 기준(금융감독원 외국인투자 관리시스템 제공 전일자 확정치)입니다.
 
 ```python
-df = stock.get_exhaustion_rates_of_foreign_investment_by_date("20210108", "20210115", "005930")
+df = stock.get_exhaustion_rates_of_foreign_investment("20210108", "20210115", "005930")
 print(df.head())
 ```
 
@@ -745,9 +744,9 @@ print(len(pdf), pdf)
 
 
 #### 2.1.2.3 인덱스 OHLCV 조회
-get_index_ohlcv_by_date() 함수는 입력된 기간 동안의 인덱스 OHLCV를 조회합니다. 다음은 20190101-20190228 동안의 "코스피 200" 인덱스의 OHLCV를 조회합니다.
+get_index_ohlcv() 함수는 입력된 기간 동안의 인덱스 OHLCV를 조회합니다. 다음은 20190101-20190228 동안의 "코스피 200" 인덱스의 OHLCV를 조회합니다.
 ```python
-df = stock.get_index_ohlcv_by_date("20190101", "20190228", "1028")
+df = stock.get_index_ohlcv("20190101", "20190228", "1028")
 print(df.head(2))
 ```
 ```text
@@ -755,10 +754,10 @@ print(df.head(2))
 20190102  263.350006  263.769989  257.470001  258.230011  69950000
 20190103  258.190002  258.700012  255.350006  255.770004  90521000
 ```
-get_index_ohlcv_by_date() 함수에 frequency 파라미터(d/m/y)를 추가할 수 있습니다.
+get_index_ohlcv() 함수에 frequency 파라미터(d/m/y)를 추가할 수 있습니다.
 d는 일자, m은 월, y는 연도를 의미합니다. 다음은 20190101부터 20190228까지의 "코스피 200"의 월별 OHLCV를 출력합니다.
 ```python
-df = stock.get_index_ohlcv_by_date("20190101", "20190228", "1028", "m")
+df = stock.get_index_ohlcv("20190101", "20190228", "1028", "m")
 print(df.head(2))
 ```
 ```text
@@ -786,11 +785,11 @@ print(df.head())
 
 
 #### 2.1.2.5 인덱스 등락률 조회
-get_index_price_change_by_ticker() 함수는 지수의 등락률/거래량/거래대금을 반환하며, KRX / KOSPI / KOSDAQ 세 개의 지수를
+get_index_price_change() 함수는 지수의 등락률/거래량/거래대금을 반환하며, KRX / KOSPI / KOSDAQ 세 개의 지수를
 지원합니다.
 코스피, 코스닥 지수의 통계(거래량, 거래대금 등)는 외국주 등까지 포함한 시장 전체 통계입니다.
 ```python
-df = stock.get_index_price_change_by_ticker("20200520", "20200527", "KOSDAQ")
+df = stock.get_index_price_change("20200520", "20200527", "KOSDAQ")
 print(df.head())
 ```
 ```text

@@ -9,7 +9,7 @@ from pykrx.website.krx.market.core import (개별종목시세, 전종목등락�
 from pykrx.website.krx.market.core import (개별종목_공매도_종합정보, 개별종목_공매도_거래_전종목, 개별종목_공매도_거래_개별추이,
                                            투자자별_공매도_거래, 전종목_공매도_잔고, 개별종목_공매도_잔고,
                                            공매도_거래상위_50종목, 공매도_잔고상위_50종목)
-from pykrx.website.krx.market.core import (전체지수기본정보, 개별지수시세, 전체지수등락률, 지수구성종목)
+from pykrx.website.krx.market.core import (전체지수기본정보, 개별지수시세, 전체지수등락률, 전체지수시세, 지수구성종목)
 import numpy as np
 import pandas as pd
 from pandas import Series, DataFrame
@@ -295,7 +295,7 @@ def get_exhaustion_rates_of_foreign_investment_by_date(fromdate: str, todate: st
 
     Returns:
         DataFrame:
-                        상장주식수    보유수량    지분율    한도수량 한도소진율
+                        상장주식수     보유수량     지분율     한도수량  한도소진률
             날짜
             2021-01-08  5969782550  3314966371  55.53125  5969782550   55.53125
             2021-01-11  5969782550  3324115988  55.68750  5969782550   55.68750
@@ -308,13 +308,13 @@ def get_exhaustion_rates_of_foreign_investment_by_date(fromdate: str, todate: st
     df = 외국인보유량_개별추이().fetch(fromdate, todate, isin)
 
     df = df[['TRD_DD', 'LIST_SHRS', 'FORN_HD_QTY', 'FORN_SHR_RT', 'FORN_ORD_LMT_QTY', 'FORN_LMT_EXHST_RT']]
-    df.columns = ['날짜', '상장주식수', '보유수량', '지분율', '한도수량', '한도소진율']
+    df.columns = ['날짜', '상장주식수', '보유수량', '지분율', '한도수량', '한도소진률']
 
     df = df.replace('/', '', regex=True)
     df = df.replace('', '0', regex=True)
     df = df.replace(',', '', regex=True)
     df = df.astype({"상장주식수": np.int64, "보유수량": np.int64, "지분율": np.float16,
-                    "한도수량": np.int64, "한도소진율": np.float16})
+                    "한도수량": np.int64, "한도소진률": np.float16})
     df = df.set_index('날짜')
     df.index = pd.to_datetime(df.index, format='%Y%m%d')
     return df.sort_index()
@@ -332,7 +332,7 @@ def get_exhaustion_rates_of_foreign_investment_by_ticker(date: str, market: str,
 
     Returns:
         DataFrame:
-                   상장주식수   보유수량     지분율   한도수량 한도소진율
+                    상장주식수    보유수량     지분율    한도수량  한도소진률
             티커
             003490   94844634   12350096  13.023438   47412833  26.046875
             003495    1110794      29061   2.619141     555286   5.230469
@@ -345,11 +345,11 @@ def get_exhaustion_rates_of_foreign_investment_by_ticker(date: str, market: str,
     df = 외국인보유량_전종목().fetch(date, market, balance_limit)
 
     df = df[['ISU_SRT_CD', 'LIST_SHRS', 'FORN_HD_QTY', 'FORN_SHR_RT', 'FORN_ORD_LMT_QTY', 'FORN_LMT_EXHST_RT']]
-    df.columns = ['티커', '상장주식수', '보유수량', '지분율', '한도수량', '한도소진율']
+    df.columns = ['티커', '상장주식수', '보유수량', '지분율', '한도수량', '한도소진률']
     df = df.replace('', '0', regex=True)
     df = df.replace(',', '', regex=True)
     df = df.astype({"상장주식수": np.int64, "보유수량": np.int64, "지분율": np.float16,
-                    "한도수량": np.int64, "한도소진율": np.float16})
+                    "한도수량": np.int64, "한도소진률": np.float16})
     df = df.set_index('티커')
     return df.sort_index()
 
@@ -626,9 +626,44 @@ def get_index_ohlcv_by_date(fromdate: str, todate: str, ticker: str) -> DataFram
     df.index = pd.to_datetime(df.index, format='%Y%m%d')
     return df.sort_index()
 
+@dataframe_empty_handler
+def get_index_ohlcv_by_ticker(date: str, market: str="KOSPI") -> DataFrame:
+    """전종목 지수 OHLCV
+
+    Args:
+        fromdate (str         ): 조회 일자 (YYYYMMDD)        
+        계열구분 (str, optional): KRX/KOSPI/KOSDAQ/테마
+
+    Returns:
+        DataFrame:
+
+            > get_index_ohlcv_by_date("20211126", "KOSPI")
+
+                                    시가      고가      저가       종가     거래량         거래대금
+            지수명
+            코스피외국주포함         0.00      0.00      0.00      0.00  595597647  11901297731572
+            코스피               2973.04   2985.77   2930.31   2936.44  594707257  11894910355357
+            코스피200             390.61    392.81    384.19    385.07  145771166   8625603922656
+            코스피100            2947.18   2963.27   2900.41   2906.68  100357121   7370285846691
+            코스피50             2736.77   2752.70   2693.90   2700.81   52627040   5768837287881
+    """
+    market = {"KRX": "01", "KOSPI": "02", "KOSDAQ": "03", "테마": "04"}[market]
+    df = 전체지수시세().fetch(date, market)
+    df = df[['IDX_NM', 'OPNPRC_IDX', 'HGPRC_IDX', 'LWPRC_IDX',
+             'CLSPRC_IDX', 'ACC_TRDVOL', 'ACC_TRDVAL']]
+    df.columns = ['지수명', '시가', '고가', '저가', '종가', '거래량', '거래대금']
+    df = df.replace('[^-\w\.]', '', regex=True)
+    df = df.replace('\-$', '0', regex=True)
+    df = df.replace('', '0')
+    df = df.set_index('지수명')
+    df = df.astype({'시가': np.float64, '고가': np.float64,
+                    '저가': np.float64, '종가': np.float64,
+                    '거래량': np.int64, '거래대금': np.int64})
+    return df
+
 
 @dataframe_empty_handler
-def get_index_listing_date(계열구분: str="KOSPI") -> DataFrame:
+def get_index_listing_date(market: str="KOSPI") -> DataFrame:
     """[11004] 전체지수 기본정보
 
     Args:
@@ -644,8 +679,8 @@ def get_index_listing_date(계열구분: str="KOSPI") -> DataFrame:
             코스피 50            2000.01.04  2000.03.02     1000.0      50
             코스피 200 중소형주  2010.01.04  2015.07.13     1000.0     101
     """
-    계열구분 = {"KRX": "01", "KOSPI": "02", "KOSDAQ": "03", "테마": "04"}[계열구분]
-    df = 전체지수기본정보().fetch(계열구분)
+    market = {"KRX": "01", "KOSPI": "02", "KOSDAQ": "03", "테마": "04"}[market]
+    df = 전체지수기본정보().fetch(market)
     df = df[['IDX_NM', 'BAS_TM_CONTN', 'ANNC_TM_CONTN', 'BAS_IDX_CONTN', 'COMPST_ISU_CNT']]
     df.columns = ['지수명', '기준시점', '발표시점', '기준지수', '종목수']
     df = df.set_index('지수명')
@@ -1031,5 +1066,6 @@ def get_shorting_balance_by_date(fromdate: str, todate: str, ticker: str) -> Dat
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
     # df = get_market_price_change_by_ticker(fromdate="20210101", todate="20210111")
-    df = get_shorting_trading_value_and_volume_by_date("20201226", "20210126", "005930")
+    # df = get_shorting_trading_value_and_volume_by_date("20201226", "20210126", "005930")
+    df = get_index_ohlcv_by_date("20211126", "KOSPI")
     print(df)
