@@ -8,6 +8,7 @@ from deprecated import deprecated
 from pandas import DataFrame
 import re
 
+
 yymmdd = re.compile(r"\d{4}[-/]?\d{2}[-/]?\d{2}")
 
 def market_valid_check(param=None):
@@ -1247,7 +1248,7 @@ def get_index_ohlcv(*args, **kwargs):
         return get_index_ohlcv_by_ticker(*args, **kwargs)
 
 
-def get_index_ohlcv_by_ticker(date, market="KOSPI", prev=False):
+def get_index_ohlcv_by_ticker(date, market="KOSPI", prev=True):
     """티커별로 정리된 전종목 OHLCV
 
     Args:
@@ -1293,7 +1294,7 @@ def get_index_ohlcv_by_ticker(date, market="KOSPI", prev=False):
     return df
 
 
-def get_index_ohlcv_by_date(fromdate: str, todate: str, ticker: str, freq: str='d', name_display: bool=False) -> DataFrame:
+def get_index_ohlcv_by_date(fromdate: str, todate: str, ticker: str, freq: str='d', name_display: bool=True) -> DataFrame:
     """일자별로 정렬된 인덱스 OHLCV 조회
 
     Args:
@@ -1342,6 +1343,129 @@ def get_index_ohlcv_by_date(fromdate: str, todate: str, ticker: str, freq: str='
 
     how = {'시가': 'first', '고가': 'max', '저가': 'min', '종가': 'last', '거래량': 'sum'}
     return resample_ohlcv(df, freq, how)
+
+
+def get_index_fundamental(*args, **kwargs):
+    """종목의 PER/PBR/배당수익률 조회
+
+    Args:
+        특정 종목의 지정된 기간 PER/PBR/배당수익률 조회
+
+        fromdate     (str           ): 조회 시작 일자 (YYYYMMDD)
+        todate       (str           ): 조회 종료 일자 (YYYYMMDD)
+        ticker       (str           ): 조회 종목 티커
+        freq         (str , optional): d - 일 / m - 월 / y - 년
+        name_display (bool, optional): 종목 이름 출력 여부 (True/False)
+
+        특정 일자의 전종목 PER/PBR/배당수익률 조회
+
+        date   (str           ): 조회 일자 (YYMMDD)
+        market (str,  optional): 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
+        prev   (bool, optional): 조회 일자가 휴일일 경우 이전 영업일 혹은 이후 영업일 선택
+
+    Returns:
+        DataFrame:
+
+            특정 종목의 지정된 기간 PER/PBR/배당수익률 조회
+
+            >> get_index_fundamental("20210101", "20210130", "1001")            
+        
+                           종가 등락률       PER 선행PER   PBR  배당수익률
+            날짜
+            2021-01-04  2944.45  2.47  30.200001    0.0  1.19      1.44
+            2021-01-05  2990.57  1.57  30.680000    0.0  1.20      1.42
+            2021-01-06  2968.21 -0.75  30.450001    0.0  1.20      1.43
+            2021-01-07  3031.68  2.14  31.110001    0.0  1.22      1.40
+            2021-01-08  3152.18  3.97  32.349998    0.0  1.27      1.35
+
+    
+            특정 일자의 전종목 PER/PBR/배당수익률 조회
+
+            > get_index_fundamental("20210122")
+
+                                     종가   등락률         PER  선행PER   PBR  배당수익률
+            지수명
+            코스피                 3140.63  -0.64    32.259998    0.0   1.27       1.35
+            코스피 200              427.13  -0.73    29.760000    0.0   1.36       1.39
+            코스피 100             3266.10  -0.78    28.910000    0.0   1.36       1.41
+            코스피 50              3008.02  -0.79    28.530001    0.0   1.40       1.38
+            코스피 200 중소형주      1264.5   0.40    62.820000    0.0   1.19       0.98    
+    """
+    dates = list(filter(yymmdd.match, args))
+    if len(dates) == 2:        
+        return get_index_fundamental_by_date(*args, **kwargs)
+    else:        
+        return get_index_fundamental_by_ticker(*args, **kwargs)
+
+
+def get_index_fundamental_by_ticker(date: str, market: str="KOSPI", prev: bool=True):
+    """특정 일자의 전종목 PER/PBR/배당수익률 조회
+
+    Args:
+        date   (str           ): 조회 일자 (YYYYMMDD)
+        market (str           ): 조회 시장 (KOSPI/KOSDAQ/KRX/테마)
+        prev   (bool, optional): 이전 영업일을 조회할지 이후 영업일을 조회할지 조정하는 flag
+
+    Returns:
+        DataFrame:
+
+            >> get_index_fundamental_by_ticker("20210122")
+
+                                     종가   등락률         PER  선행PER   PBR  배당수익률
+            지수명
+            코스피                 3140.63  -0.64    32.259998    0.0   1.27       1.35
+            코스피 200              427.13  -0.73    29.760000    0.0   1.36       1.39
+            코스피 100             3266.10  -0.78    28.910000    0.0   1.36       1.41
+            코스피 50              3008.02  -0.79    28.530001    0.0   1.40       1.38
+            코스피 200 중소형주      1264.5   0.40    62.820000    0.0   1.19       0.98        
+    """
+    if isinstance(date, datetime.datetime):
+        date = _datetime2string(date)
+
+    date = date.replace("-", "")
+
+    df = krx.get_index_fundamental_by_ticker(date, market)    
+    holiday = (df[['종가', '등락률', 'PER', '선행PER', 'PBR', '배당수익률']] == 0).all(axis=None)
+    if holiday:
+        target_date = get_nearest_business_day_in_a_week(date=date, prev=prev)
+        df = krx.get_index_fundamental_by_ticker(target_date, market)
+        # print(f"The date you entered {date} seems to be a holiday. PYKRX changes the date parameter to {target_date}.")
+    return df
+
+
+def get_index_fundamental_by_date(fromdate: str, todate: str, ticker: str, prev: bool=True) -> DataFrame:
+    """특정 종목의 지정된 기간 PER/PBR/배당수익률 조회
+
+    Args:
+        fromdate     (str           ): 조회 시작 일자 (YYMMDD)
+        todate       (str           ): 조회 종료 일자 (YYMMDD)
+        ticker       (str           ): 조회 인덱스 티커        
+        prev         (bool, optional): 이전 영업일을 조회할지 이후 영업일을 조회할지 조정하는 flag
+
+    Returns:
+        DataFrame:
+
+        >> get_index_fundamental_by_date("20210101", "20210130", "1001")            
+        
+                       종가 등락률       PER 선행PER   PBR  배당수익률
+        날짜
+        2021-01-04  2944.45  2.47  30.200001    0.0  1.19      1.44
+        2021-01-05  2990.57  1.57  30.680000    0.0  1.20      1.42
+        2021-01-06  2968.21 -0.75  30.450001    0.0  1.20      1.43
+        2021-01-07  3031.68  2.14  31.110001    0.0  1.22      1.40
+        2021-01-08  3152.18  3.97  32.349998    0.0  1.27      1.35
+    """
+    if isinstance(fromdate, datetime.datetime):
+        fromdate = _datetime2string(fromdate, prev)
+
+    if isinstance(todate, datetime.datetime):
+        todate = _datetime2string(todate)
+
+    fromdate = fromdate.replace("-", "")
+    todate   =   todate.replace("-", "")
+
+    df = krx.get_index_fundamental_by_date(fromdate, todate, ticker)
+    return df
 
 
 def get_index_listing_date(계열구분: str="KOSPI") -> DataFrame:
@@ -2258,4 +2382,6 @@ if __name__ == "__main__":
     # print(get_market_cap_by_ticker("20210101"))
     # print(get_market_ohlcv("20150720", "20150810", "005930", adjusted=False))
     # print(get_market_ohlcv("20210122"))
-    print(get_market_price_change("20210101", "20210108"))
+    # print(get_index_fundamental_by_date("20210101", "20210130", "1001"))
+    print(get_index_fundamental_by_ticker("20210122"))
+    # print(get_index_fundamental("20211120", "20211128", "1001"))

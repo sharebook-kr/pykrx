@@ -627,6 +627,65 @@ class 전체지수등락률(KrxWebIo):
         return DataFrame(result['output'])
 
 
+class PER_PBR_배당수익률_전지수(KrxWebIo):
+    @property
+    def bld(self):
+        return "dbms/MDC/STAT/standard/MDCSTAT00701"
+
+    def fetch(self, trdDd: str, idxIndMidclssCd: str) -> DataFrame:
+        """[11007] PER/PBR/배당수익률
+
+        Args:
+            trdDd           (str): 조회 일자 (YYMMDD)
+            idxIndMidclssCd (str): 검색할 시장
+             - 01 : KRX
+             - 02 : KOSPI
+             - 03 : KOSDAQ
+             - 04 : 테마
+
+        Returns:
+            DataFrame:
+                     IDX_NM   CLSPRC_IDX FLUC_TP_CD PRV_DD_CMPR FLUC_RT WT_PER FWD_PER WT_STKPRC_NETASST_RTO DIV_YD
+            0       KRX 300     1,753.96          2      -16.35   -0.92  13.61       -                  1.24   2.01
+            1       KTOP 30    10,348.84          2     -126.04   -1.20  12.67       -                  1.22   2.33
+            2       KRX 100     6,045.16          2      -54.07   -0.89  13.42       -                  1.22   1.97
+            3     KRX 자동차     2,030.72         2      -41.42   -2.00  11.94       -                  0.79   1.42
+            4     KRX 반도체     3,649.78         2      -39.65   -1.07  21.48       -                  2.59   0.61        
+        """
+        result = self.read(idxIndMidclssCd=idxIndMidclssCd, trdDd=trdDd)
+        return DataFrame(result['output'])
+
+
+class PER_PBR_배당수익률_개별지수(KrxWebIo):
+    @property
+    def bld(self):
+        return "dbms/MDC/STAT/standard/MDCSTAT00702"
+
+    def fetch(self, strtDd: str, endDd: str, indTpCd: str, indTpCd2: str) -> DataFrame:
+        """[11007] PER/PBR/배당수익률
+
+        Args:
+            strtDd   (str): 조회 시작 일자 (YYMMDD)
+            endDd    (str): 조회 종료 일자 (YYMMDD)
+            indTpCd  (str): index group id
+            indTpCd2 (str): index ticker
+     
+        Returns:
+            DataFrame:
+
+                > PER_PBR_배당수익률_개별지수().fetch("20211122", "20211129", 5, 300)
+
+                       TRD_DD CLSPRC_IDX FLUC_TP_CD PRV_DD_CMPR FLUC_RT WT_PER FWD_PER WT_STKPRC_NETASST_RTO DIV_YD
+                0  2021/11/29   1,753.96          2      -16.35   -0.92  13.61       -                  1.24   2.01
+                1  2021/11/26   1,770.31          2      -28.95   -1.61  13.73       -                  1.26   1.99
+                2  2021/11/25   1,799.26          2      -16.10   -0.89  13.96       -                  1.28   1.96
+                3  2021/11/24   1,815.36          2       -2.39   -0.13  14.08       -                  1.29   1.94
+                4  2021/11/23   1,817.75          2      -14.91   -0.81  14.10       -                  1.29   1.94  
+        """
+        result = self.read(indTpCd=indTpCd, indTpCd2=indTpCd2, strtDd=strtDd, endDd=endDd)
+        return DataFrame(result['output'])
+
+
 class 지수구성종목(KrxWebIo):
     @property
     def bld(self):
@@ -912,5 +971,5 @@ class 개별종목_공매도_잔고(KrxWebIo):
 if __name__ == "__main__":
     pd.set_option('display.width', None)
     # print(개별종목_공매도_잔고().fetch("20200106", "20200110", "KR7005930003"))
-    print(전체지수시세().fetch("20211126", "02"))
+    print(PER_PBR_배당수익률_개별지수().fetch("20211122", "20211129", 5, 300))
 

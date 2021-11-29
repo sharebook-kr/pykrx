@@ -119,8 +119,8 @@ if __name__ == "__main__":
     pd.set_option('display.width', None)
     # print(StockTicker().get("000660"))
     # print(IndexTicker().df.head())
-    print(IndexTicker().get_ticker("KOSPI", "19800104"))
-    tickers = IndexTicker().get_ticker("KOSPI", "20200917")
+    # print(IndexTicker().get_ticker("KOSPI", "19800104"))
+    tickers = IndexTicker().get_ticker("KRX", "20200917")
     for ticker in tickers:
         print(ticker, IndexTicker().get_name(ticker))
 

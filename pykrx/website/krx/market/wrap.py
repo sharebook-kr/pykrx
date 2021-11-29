@@ -9,7 +9,8 @@ from pykrx.website.krx.market.core import (개별종목시세, 전종목등락�
 from pykrx.website.krx.market.core import (개별종목_공매도_종합정보, 개별종목_공매도_거래_전종목, 개별종목_공매도_거래_개별추이,
                                            투자자별_공매도_거래, 전종목_공매도_잔고, 개별종목_공매도_잔고,
                                            공매도_거래상위_50종목, 공매도_잔고상위_50종목)
-from pykrx.website.krx.market.core import (전체지수기본정보, 개별지수시세, 전체지수등락률, 전체지수시세, 지수구성종목)
+from pykrx.website.krx.market.core import (전체지수기본정보, 개별지수시세, 전체지수등락률, 전체지수시세, 지수구성종목,
+                                           PER_PBR_배당수익률_전지수, PER_PBR_배당수익률_개별지수)
 import numpy as np
 import pandas as pd
 from pandas import Series, DataFrame
@@ -626,6 +627,7 @@ def get_index_ohlcv_by_date(fromdate: str, todate: str, ticker: str) -> DataFram
     df.index = pd.to_datetime(df.index, format='%Y%m%d')
     return df.sort_index()
 
+
 @dataframe_empty_handler
 def get_index_ohlcv_by_ticker(date: str, market: str="KOSPI") -> DataFrame:
     """전종목 지수 OHLCV
@@ -720,6 +722,78 @@ def get_index_price_change_by_ticker(fromdate: str, todate: str, market: str) ->
     df = df.replace('', 0)
     df = df.astype({"시가": np.float64, "종가": np.float64, "등락률": np.float16, "거래량": np.int64, "거래대금": np.int64})
     return df
+
+
+@dataframe_empty_handler
+def get_index_fundamental_by_ticker(date: str, market: str="KOSPI") -> DataFrame:
+    """[11004] 전체지수 기본정보
+
+    Args
+        date    (str          ): 조회 일자 (YYMMDD)
+        계열구분 (str, optional): KRX/KOSPI/KOSDAQ/테마
+
+    Returns:
+        DataFrame:
+
+            > get_index_fundamental_by_ticker("20211129", "KRX")
+
+                          종가   등락률       PER  선행PER      PBR   배당수익률
+            지수명
+            KRX 300     1753.96  -0.92  13.609375    0.0  1.240234    2.009766
+            KTOP 30    10348.84  -1.20  12.671875    0.0  1.219727    2.330078
+            KRX 100     6045.16  -0.89  13.421875    0.0  1.219727    1.969727
+            KRX 자동차   2030.72  -2.00  11.937500    0.0  0.790039    1.419922
+            KRX 반도체   3649.78  -1.07  21.484375    0.0  2.589844    0.609863
+
+    """
+    market = {"KRX": "01", "KOSPI": "02", "KOSDAQ": "03", "테마": "04"}.get(market, "02")
+    df = PER_PBR_배당수익률_전지수().fetch(date, market)
+    df = df[['IDX_NM', 'CLSPRC_IDX', 'FLUC_RT', 'WT_PER', 'FWD_PER', 'WT_STKPRC_NETASST_RTO', 'DIV_YD']]
+    df.columns = ['지수명', '종가', '등락률', 'PER', '선행PER', 'PBR', '배당수익률']
+    df = df.set_index('지수명')
+    df = df.replace('^-$', 0, regex=True)
+    df = df.replace(',', '', regex=True)    
+    df = df.replace('', 0)
+    df = df.astype({"종가": np.float64, "등락률": np.float64, "PER": np.float32, "선행PER": np.float32, 
+                    "PBR": np.float32, "배당수익률": np.float32})
+    return df
+
+
+@dataframe_empty_handler
+def get_index_fundamental_by_date(fromdate: str, todate: str, ticker: str) -> DataFrame:
+    """일자별 특정 지수의 OHLCV
+
+    Args:
+        fromdate (str): 조회 시작 일자 (YYYYMMDD)
+        todate   (str): 조회 종료 일자 (YYYYMMDD)
+        ticker   (str): 인덱스 티커
+
+    Returns:
+        DataFrame:
+
+            > get_index_fundamental_by_date("20211122", "20211129", "5300")
+
+                           종가   등락률     PER  선행PER   PBR  배당수익률
+            날짜
+            2021-11-22  1832.66    1.92   14.22      0.0  1.30      1.92
+            2021-11-23  1817.75   -0.81   14.10      0.0  1.29      1.94
+            2021-11-24  1815.36   -0.13   14.08      0.0  1.29      1.94
+            2021-11-25  1799.26   -0.89   13.96      0.0  1.28      1.96
+            2021-11-26  1770.31   -1.61   13.73      0.0  1.26      1.99 
+    """
+
+    df = PER_PBR_배당수익률_개별지수().fetch(fromdate, todate, ticker[0], ticker[1:])
+    df = df[['TRD_DD', 'CLSPRC_IDX', 'FLUC_RT', 'WT_PER',
+             'FWD_PER', 'WT_STKPRC_NETASST_RTO', 'DIV_YD']]
+    df.columns = ['날짜', '종가', '등락률', 'PER', '선행PER', 'PBR', '배당수익률']
+    df = df.set_index('날짜')
+    df.index = pd.to_datetime(df.index)    
+    df = df.replace('^-$', 0, regex=True)
+    df = df.replace(',', '', regex=True)    
+    df = df.replace('', 0)
+    df = df.astype({"종가": np.float64, "등락률": np.float64, "PER": np.float32, "선행PER": np.float32, 
+                    "PBR": np.float32, "배당수익률": np.float32})
+    return df.sort_index()
 
 
 @dataframe_empty_handler
@@ -1067,5 +1141,6 @@ if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
     # df = get_market_price_change_by_ticker(fromdate="20210101", todate="20210111")
     # df = get_shorting_trading_value_and_volume_by_date("20201226", "20210126", "005930")
-    df = get_index_ohlcv_by_date("20211126", "KOSPI")
-    print(df)
+    # df = get_index_fundamental_by_date("20211122", "20211129", "5300")
+    df = get_index_fundamental_by_ticker("20211128")
+    print(df.head())
