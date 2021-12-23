@@ -8,7 +8,6 @@ from deprecated import deprecated
 from pandas import DataFrame
 import re
 
-
 yymmdd = re.compile(r"\d{4}[-/]?\d{2}[-/]?\d{2}")
 
 def market_valid_check(param=None):
@@ -2380,6 +2379,30 @@ def get_etf_tracking_error(fromdate, todate, ticker) -> DataFrame:
     return krx.get_etf_tracking_error(fromdate, todate, ticker)
 
 
+def get_stock_major_changes(ticker: str) -> DataFrame:
+    """기업 주요 변동사항
+
+    Args:        
+        ticker   (str): 조회 종목 티커
+
+    Returns:
+
+        DataFrame:
+
+            >> get_stock_major_changes("005930")
+
+                            상호변경전    상호변경후    업종변경전   업종변경후  액면변경전 액면변경후                             대표이사변경전                                            대표이사변경후    
+            날짜                         
+            1975-06-11        -         삼성전자공업주      -            -           0          0                                     -                                                          -
+            1979-03-13        -             -               -           -        1000        500                                     -                                                          -
+            1984-03-23  삼성전자공업주    삼성전자주         -           -           0          0                                     -                                                          -
+            1987-01-05        -             -               -           -         500       5000                                     -                                                          -
+            2000-01-20        -             -               -           -           0          0                    이건희윤종용이윤우이학수진대제문병대                        이건희윤종용이윤우이학수진대제최도석이상현임형규      
+            2001-03-21        -             -               -           -           0          0    이건희윤종용이윤우이학수진대제최도석이상현임형규이기태이상완황창규한용외           이건희윤종용이학수이윤우진
+    """
+    return krx.get_stock_major_changes(ticker)
+
+
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
     # print(get_market_price_change_by_ticker(fromdate="20210101", todate="20210111"))
@@ -2388,6 +2411,6 @@ if __name__ == "__main__":
     # print(get_market_cap_by_ticker("20210101"))
     # print(get_market_ohlcv("20150720", "20150810", "005930", adjusted=False))
     # print(get_market_ohlcv("20210122"))
-    # print(get_index_fundamental_by_date("20210101", "20210130", "1001"))
-    print(get_index_fundamental_by_ticker("20210122"))
-    # print(get_index_fundamental("20211120", "20211128", "1001"))
+    # print(get_market_price_change("20210101", "20210108"))
+    df = get_stock_major_changes("005930")
+    print(df)

@@ -968,8 +968,41 @@ class 개별종목_공매도_잔고(KrxWebIo):
         return DataFrame(result['OutBlock_1'])
 
 
+# ------------------------------------------------------------------------------------------
+# 깊이있는 통계
+class 기업주요변동사항(KrxWebIo):
+    @property
+    def bld(self):
+        return "dbms/MDC/HARD/MDCHARD04801"
+
+    def fetch(self, isuCd: str) -> DataFrame:
+        """기업 주요 변동사항
+
+        Args:            
+            isuCd  (str): 조회 종목 ISIN
+
+        Returns:
+
+            DataFrame:
+
+                >> 기업주요변동사항().fetch("KR7005930003")
+
+                           DD            BFCOM              AFCOM  BFIND AFIND                                    BFPAR                                                  AFPAR     BFCEO    AFCEO
+                0  1975/06/11                     삼성전자공업(주)
+                1  1979/03/13                                       1000   500
+                2  1984/03/23  삼성전자공업(주)        삼성전자(주)
+                3  1987/01/05                                        500  5000
+                4  2000/01/20                                                   이건희,윤종용,이윤우,이학수,진대제,문병대  이건희,윤종용,이윤우,이학수,진대제,최도석,이상현,임형규     
+        """
+        result = self.read(isuCd=isuCd)        
+        return DataFrame(result['block1'])
+
+
 if __name__ == "__main__":
     pd.set_option('display.width', None)
     # print(개별종목_공매도_잔고().fetch("20200106", "20200110", "KR7005930003"))
-    print(PER_PBR_배당수익률_개별지수().fetch("20211122", "20211129", 5, 300))
+    # print(PER_PBR_배당수익률_개별지수().fetch("20211122", "20211129", 5, 300))
+    # print(전체지수시세().fetch("20211126", "02"))
+    print(기업주요변동사항().fetch("KR7005930003"))
+
 
