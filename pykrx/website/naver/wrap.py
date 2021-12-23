@@ -8,9 +8,10 @@ from datetime import datetime
 # fromdate, todate, isin
 def get_market_ohlcv_by_date(fromdate, todate, ticker):
     strtd = datetime.strptime(fromdate, '%Y%m%d')
-    lastd = datetime.strptime(todate, '%Y%m%d')
+    lastd = datetime.strptime(todate, '%Y%m%d')    
     today = datetime.now()
-    elapsed = today - strtd
+    elapsed = today - strtd + pd.Timedelta(days=1)
+
     xml = Sise().fetch(ticker, elapsed.days)
 
     result = []
@@ -31,6 +32,9 @@ def get_market_ohlcv_by_date(fromdate, todate, ticker):
 
 if __name__ == "__main__":
     # df = get_market_ohlcv_by_date("20010101", "20190820", "005930")
-    # df = get_market_ohlcv_by_date("20200226", "20200227", "000020")
-    df = get_market_ohlcv_by_date("19991220", "20191231", "008480")
+    # df = get_market_ohlcv_by_date("20191220", "20200227", "000020")
+    # df = get_market_ohlcv_by_date("19991220", "20191231", "008480")
+    df = get_market_ohlcv_by_date("20211213", "20230222", "005930")
+    # df = get_market_ohlcv_by_date("20211221", "20211222", "005930")
+    # df = get_market_ohlcv_by_date("20200121", "20200222", "005930")
     print(df)
