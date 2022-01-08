@@ -27,7 +27,7 @@ class 상장종목검색(KrxWebIo):
             3  KR7054620000     054620   APS홀딩스        KSQ     코스닥        KOSDAQ        16
             4  KR7265520007     265520    AP시스템        KSQ     코스닥        KOSDAQ        16
         """
-        result = self.read(mktsel=mktsel, searchText=searchText, typeNo=0)
+        result = self.read(locale="ko_KR", mktsel=mktsel, searchText=searchText, typeNo=0)
         return DataFrame(result['block1'])
 
 
