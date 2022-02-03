@@ -1054,7 +1054,7 @@ def get_market_trading_volume_by_date(fromdate: str, todate: str, ticker: str, e
     return resample_ohlcv(df, freq, sum)
 
 
-def get_market_net_purchases_of_equities_by_ticker(fromdate: str, todate: str, market: str="KOSPI", investor: str="개인"):
+def get_market_net_purchases_of_equities(fromdate: str, todate: str, market: str="KOSPI", investor: str="개인"):
     """입력된 투자자에 대한 티커별로 나열된 순매수 상위종목
     Args:
             fromdate (str): 조회 시작 일자 (YYMMDD)
