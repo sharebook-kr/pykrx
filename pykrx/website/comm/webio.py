@@ -17,8 +17,10 @@ class Get:
 
 
 class Post:
-    def __init__(self):
-        self.headers = {"User-Agent": "Mozilla/5.0"}
+    def __init__(self, headers=None):
+        self.headers = {"User-Agent": "Mozilla/5.0"}    
+        if headers != None:
+            self.headers.update(headers)
 
     def read(self, **params):
         resp = requests.post(self.url, headers=self.headers, data=params)

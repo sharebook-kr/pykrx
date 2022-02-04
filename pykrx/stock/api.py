@@ -27,14 +27,6 @@ def market_valid_check(param=None):
         return wrapper
     return _market_valid_check
 
-def _datetime2string(dt, freq='d'):
-    if freq.upper() == 'Y':
-        return dt.strftime("%Y")
-    elif freq.upper() == 'M':
-        return dt.strftime("%Y%m")
-    else:
-        return dt.strftime("%Y%m%d")
-
 
 def resample_ohlcv(df, freq, how):
     """
@@ -52,6 +44,13 @@ def resample_ohlcv(df, freq, how):
             raise RuntimeError
     return df
 
+def _datetime2string(dt, freq='d'):
+    if freq.upper() == 'Y':
+        return dt.strftime("%Y")
+    elif freq.upper() == 'M':
+        return dt.strftime("%Y%m")
+    else:
+        return dt.strftime("%Y%m%d")
 
 def get_nearest_business_day_in_a_week(date: str=None, prev: bool=True) -> str:
     """인접한 영업일을 조회한다.
@@ -63,24 +62,7 @@ def get_nearest_business_day_in_a_week(date: str=None, prev: bool=True) -> str:
     Returns:
         str: 날짜 (YYMMDD)
     """
-    if date == None:
-        curr = datetime.datetime.now()
-    else:
-        curr = datetime.datetime.strptime(date, "%Y%m%d")
-
-    if prev:
-        prev = curr - datetime.timedelta(days=7)
-        curr = _datetime2string(curr)
-        prev = _datetime2string(prev)
-        df = krx.get_index_ohlcv_by_date(prev, curr, "1001")
-        return df.index[-1].strftime("%Y%m%d")
-    else:
-        next = curr + datetime.timedelta(days=7)
-        next = _datetime2string(next)
-        curr = _datetime2string(curr)
-        df = krx.get_index_ohlcv_by_date(curr, next, "1001")
-        return df.index[0].strftime("%Y%m%d")
-
+    return krx.get_nearest_business_day_in_a_week(date, prev)
 
 # -----------------------------------------------------------------------------
 # 주식 API
@@ -95,7 +77,7 @@ def get_market_ticker_list(date: str=None, market: str="KOSPI") -> list:
     Returns:
         list: 티커가 담긴 리스트
     """
-    if date is None:
+    if date is None:        
         date = get_nearest_business_day_in_a_week()
 
     s = krx.get_market_ticker_and_name(date, market)
