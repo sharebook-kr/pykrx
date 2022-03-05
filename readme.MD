@@ -131,7 +131,7 @@ print(df.head(3))
 `get_market_ohlcv` 함수는 입력된 일자의 `코스피` 전종목 시세를 DataFrame으로 반환합니다.
 
 ```python
-df = stock.stock.get_market_ohlcv("20210122")
+df = stock.get_market_ohlcv("20210122")
 print(df.head(3))
 ```
 
