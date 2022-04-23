@@ -2,7 +2,8 @@ import unittest
 from pykrx import stock
 import pandas as pd
 import numpy as np
-
+# pylint: disable-all
+# flake8: noqa
 
 class StockBusinessDaysTest(unittest.TestCase):
     def test_every_month(self):
@@ -92,10 +93,10 @@ class StockPriceChangeByTicker(unittest.TestCase):
         self.assertEqual(temp.sum(), 5)
 
     def test_with_holidays(self):
-        df = stock.get_market_price_change_by_ticker(fromdate="20210710", todate="20210711")        
-        self.assertIsInstance(df, pd.DataFrame)        
+        df = stock.get_market_price_change_by_ticker(fromdate="20210710", todate="20210711")
+        self.assertIsInstance(df, pd.DataFrame)
         self.assertTrue(df.empty)
-    
+
 
     def test_with_holiday(self):
         df = stock.get_market_price_change_by_ticker(fromdate="20210101", todate="20210111")
@@ -118,7 +119,6 @@ class StockPriceChangeByTicker(unittest.TestCase):
         df = stock.get_market_price_change_by_ticker(fromdate="2021-01-04", todate="2021-01-11")
         temp = df.iloc[0:5, 1] == np.array([4615, 25150, 4895, 135500, 5680])
         self.assertEqual(temp.sum(), 5)
-
 
 
 class StockFundamentalByDate(unittest.TestCase):
@@ -177,15 +177,15 @@ class StockFundamentalByTicker(unittest.TestCase):
     def test_with_valid_a_business_day(self):
         # 20210108 friday
         df = stock.get_market_fundamental_by_ticker("20210108")
-        #           BPS        PER       PBR   EPS       DIV   DPS
+        #           BPS    PER   PBR   EPS   DIV   DPS
         # 티커
-        # 095570   6802   4.621094  0.669922   982  6.609375   300
-        # 006840  62448  11.687500  0.409912  2168  2.960938   750
-        # 027410  15699  17.453125  0.310059   281  2.240234   110
-        # 282330  36022  16.093750  3.910156  8763  1.910156  2700
-        # 138930  25415   3.509766  0.229980  1647  6.230469   360
+        # 095570   6802   4.62  0.67   982  6.61   300
+        # 006840  62448  11.69  0.41  2168  2.96   750
+        # 027410  15699  17.46  0.31   281  2.24   110
+        # 282330  36022  16.09  3.91  8763  1.91  2700
+        # 138930  25415   3.51  0.23  1647  6.23   360
         self.assertIsInstance(df, pd.DataFrame)
-        temp = np.isclose(df.iloc[0], [6802, 4.621094, 0.669922, 982, 6.609375, 300])
+        temp = np.isclose(df.iloc[0], [6802, 4.62, 0.67, 982, 6.61, 300])
         self.assertEqual(temp.sum(), 6)
         self.assertEqual(len(df), 895)
 
@@ -193,7 +193,7 @@ class StockFundamentalByTicker(unittest.TestCase):
         # 20210109 saturday
         df = stock.get_market_fundamental_by_ticker("20210104")
         self.assertIsInstance(df, pd.DataFrame)
-        temp = np.isclose(df.iloc[0], [6802, 4.660156, 0.669922, 982, 6.550781, 300])
+        temp = np.isclose(df.iloc[0], [6802, 4.66, 0.67, 982, 6.55, 300])
         self.assertEqual(temp.sum(), 6)
         self.assertEqual(len(df), 895)
 
@@ -216,8 +216,9 @@ class StockMarketCapByTicker(unittest.TestCase):
     def test_with_a_holiday(self):
         df_0 = stock.get_market_cap_by_ticker("20210103")
         df_1 = stock.get_market_cap_by_ticker("20201230")
-        same = (df_0 == df_1).all(axis=None)
-        self.assertTrue(same)
+        # 해당 연휴에 상폐된 종목이 없기 때문에 두 index를 비교해 봄
+        result = set(df_0.index) - set(df_1.index)
+        self.assertEqual(len(result), 0)
 
 
 class StockNetPurchasesOfEquitiesByTickerTest(unittest.TestCase):

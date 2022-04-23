@@ -1,7 +1,6 @@
-import io
 from abc import abstractmethod
-from pykrx.website.comm.webio import Get, Post
-import logging
+from pykrx.website.comm.webio import Post
+
 
 class KrxWebIo(Post):
     def read(self, **params):
@@ -26,4 +25,3 @@ class KrxWebIo(Post):
     @abstractmethod
     def fetch(self, **params):
         return NotImplementedError
-

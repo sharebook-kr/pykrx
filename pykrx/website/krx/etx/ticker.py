@@ -1,7 +1,8 @@
 from pykrx.website.comm import dataframe_empty_handler, singleton
-from pykrx.website.krx.etx.core import (ETF_전종목기본종목, ETN_전종목기본종목, ELW_전종목기본종목)
+from pykrx.website.krx.etx.core import (
+    ETF_전종목기본종목, ETN_전종목기본종목, ELW_전종목기본종목
+)
 import pandas as pd
-import datetime
 
 
 @singleton
@@ -11,30 +12,34 @@ class EtxTicker:
 
     @dataframe_empty_handler
     def _get_tickers(self):
-        df_etf = ETF_전종목기본종목().fetch()[["ISU_CD", "ISU_SRT_CD", "ISU_ABBRV", "LIST_DD"]]
+        df_etf = ETF_전종목기본종목().fetch()
+        df_etf = df_etf[["ISU_CD", "ISU_SRT_CD", "ISU_ABBRV", "LIST_DD"]].copy()
         df_etf['CATEGORY'] = "ETF"
-        df_etn = ETN_전종목기본종목().fetch()[["ISU_CD", "ISU_SRT_CD", "ISU_ABBRV", "LIST_DD"]]
+
+        df_etn = ETN_전종목기본종목().fetch()
+        df_etn = df_etn[["ISU_CD", "ISU_SRT_CD", "ISU_ABBRV", "LIST_DD"]].copy()
         df_etn['CATEGORY'] = "ETN"
-        df_elw = ELW_전종목기본종목().fetch()[["ISU_CD", "ISU_SRT_CD", "ISU_ABBRV", "LIST_DD"]]
+
+        df_elw = ELW_전종목기본종목().fetch()
+        df_elw = df_elw[["ISU_CD", "ISU_SRT_CD", "ISU_ABBRV", "LIST_DD"]].copy()
         df_elw['CATEGORY'] = "ELW"
 
         df = pd.concat([df_etf, df_etn, df_elw])
-
         df.columns = ["isin", "ticker", "종목명", "상장일", "시장"]
         df = df.replace('/', '', regex=True)
         return df.set_index('ticker')
 
-    def get_ticker(self, market, date):
+    def get_ticker(self, market, date) -> list:
         if market == "ALL":
             return self.df.index.to_list()
-        cond1 = self.df['시장'] == market if market else  True
+        cond1 = self.df['시장'] == market
         cond2 = self.df['상장일'] <= date
         return self.df[cond1 & cond2].index.to_list()
 
-    def get_name(self, ticker):
+    def get_name(self, ticker) -> str:
         return self.df.loc[ticker, '종목명']
 
-    def get_market(self, ticker):
+    def get_market(self, ticker) -> str:
         return self.df.loc[ticker].index['시장']
 
 
@@ -51,7 +56,7 @@ def get_etx_ticker_list(date: str, market: str) -> list:
 
     Returns:
         list:  ['069500', '069660', ....]
-    """    
+    """
     return EtxTicker().get_ticker(market.upper(), date)
 
 
@@ -60,7 +65,6 @@ def get_etx_isin(ticker):
 
 
 if __name__ == "__main__":
-    import pandas as pd
     pd.set_option('display.width', None)
     df = get_etx_ticker_list("ETF", "20021014")
     print(df)

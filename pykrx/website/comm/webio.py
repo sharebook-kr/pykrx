@@ -18,7 +18,7 @@ class Get:
 
 class Post:
     def __init__(self, headers=None):
-        self.headers = {"User-Agent": "Mozilla/5.0"}    
+        self.headers = {"User-Agent": "Mozilla/5.0"}
         if headers != None:
             self.headers.update(headers)
 

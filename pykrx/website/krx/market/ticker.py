@@ -1,11 +1,10 @@
 from pykrx.website.comm import dataframe_empty_handler, singleton
-from pykrx.website.krx.market.core import 상장종목검색, 상폐종목검색, 전체지수기본정보
+from pykrx.website.krx.market.core import (
+    상장종목검색, 상폐종목검색, 전체지수기본정보
+)
 from pandas import DataFrame
 import pandas as pd
 
-# ----------------------------------------------------------------------------------------------------
-# Stock
-# ----------------------------------------------------------------------------------------------------
 
 @singleton
 class StockTicker:
@@ -21,7 +20,7 @@ class StockTicker:
         df = df[['short_code', 'codeName', 'full_code', 'marketName']]
         df = df.replace("유가증권", "코스피")
         df.columns = ['티커', '종목', 'ISIN', '시장']
-        df['시장'] = df['시장'].apply(lambda x:market_dict[x])
+        df['시장'] = df['시장'].apply(lambda x: market_dict[x])
         df = df.set_index('티커')
         return df
 
@@ -87,14 +86,19 @@ class IndexTicker:
         # - 04 : 테마
         data = []
         for market in ["01", "02", "03", "04"]:
-            df  = 전체지수기본정보().fetch(market)
+            df = 전체지수기본정보().fetch(market)
             df = df[['IDX_IND_CD', 'IDX_NM', 'BAS_TM_CONTN', 'IND_TP_CD']]
             df.columns = ['티커', '지수명', '기준일', '그룹']
 
-            code = {"01":"KRX", "02":"KOSPI", "03":"KOSDAQ", "04":"테마"}
-            df['시장'] = code[market]
-            # 다른 지수에 같은 티커가 존재함. 중복 문제를 피하기 위해 코스피 1xxx 코스닥 2xxx로
-            # 내부에서 사용함
+            code2market = {
+                "01": "KRX",
+                "02": "KOSPI",
+                "03": "KOSDAQ",
+                "04": "테마"
+            }
+            df['시장'] = code2market[market]
+            # 다른 지수에 같은 티커가 존재함. 중복 문제를 피하기 위해 코스피
+            # 1xxx 코스닥 2xxx로 내부에서 사용함
             #    full_code short_code    codeName marketCode marketName
             # 29         1        001      코스피        STK      KOSPI
             # 75         2        001      코스닥        KSQ     KOSDAQ
@@ -122,4 +126,3 @@ if __name__ == "__main__":
     tickers = IndexTicker().get_ticker("KRX", "20200917")
     for ticker in tickers:
         print(ticker, IndexTicker().get_name(ticker))
-

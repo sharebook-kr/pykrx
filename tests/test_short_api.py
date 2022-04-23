@@ -2,7 +2,8 @@ import unittest
 from pykrx import stock
 import pandas as pd
 import numpy as np
-
+# pylint: disable-all
+# flake8: noqa
 
 class ShortStatusByDate(unittest.TestCase):
     def test_with_a_business_day(self):

@@ -3,17 +3,19 @@ from .etx import *
 from .bond import *
 import datetime
 
-def get_nearest_business_day_in_a_week(date: str=None, prev: bool=True) -> str:
+def get_nearest_business_day_in_a_week(date: str = None, prev: bool = True) \
+         -> str:
     """인접한 영업일을 조회한다.
 
     Args:
-        date (str , optional): 조회할 날짜로 입력하지 않으면 현재 시간으로 대체 됩
-        prev (bool, optional): 이전 영업일을 조회할지 이후 영업일을 조회할지 조정하는 flag
+        date (str , optional): 조회할 날짜로 입력하지 않으면 현재 시간으로 대체
+        prev (bool, optional): 이전 영업일을 조회할지 이후 영업일을 조회할지
+                               조정하는 flag
 
     Returns:
         str: 날짜 (YYMMDD)
     """
-    if date == None:
+    if date is None:
         curr = datetime.datetime.now()
     else:
         curr = datetime.datetime.strptime(date, "%Y%m%d")
