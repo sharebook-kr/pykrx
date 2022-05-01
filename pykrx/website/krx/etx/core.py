@@ -222,6 +222,7 @@ class 추적오차율추이(KrxWebIo):
                 3   2021/01/13  43,994.16       0.58         430.38        0.58           1.0         0.44
                 4   2021/01/12  43,740.55      -0.77         427.87       -0.76           1.0         0.44
         """  # pylint: disable=line-too-long # noqa: E501
+
         result = self.read(strtDd=fromdate, endDd=todate, isuCd=isin)
         return DataFrame(result['output'])
 
@@ -247,8 +248,76 @@ class 괴리율추이(KrxWebIo):
                 2   2020/12/23          1  37,325  37,391.69    -0.18
                 3   2020/12/24          1  38,060  38,182.05    -0.32
                 4   2020/12/28          1  38,240  38,259.11    -0.05
-        """
+        """  # pylint: disable=line-too-long # noqa: E501
+
         result = self.read(strtDd=fromdate, endDd=todate, isuCd=isin)
+        return DataFrame(result['output'])
+
+
+class 투자자별거래실적_기간합계(KrxWebIo):
+    @property
+    def bld(self):
+        return "dbms/MDC/STAT/standard/MDCSTAT04801"
+
+    def fetch(self, fromdate: str, todate: str) -> DataFrame:
+        """[13106] 투자자별 거래실적
+
+        Args:
+            fromdate        (str          ): 조회 시작 일자 (YYMMDD)
+            todate          (str          ): 조회 종료 일자 (YYMMDD)
+
+        Returns:
+            DataFrame:
+                       CONV_OBJ_TP_CD   INVST_NM     ASK_TRDVOL     BID_TRDVOL NETBID_TRDVOL          ASK_TRDVAL          BID_TRDVAL     NETBID_TRDVAL
+                0                       금융투자    375,220,036    328,066,683   -47,153,353   3,559,580,094,684   3,040,951,626,908  -518,628,467,776
+                1                           보험     15,784,738     15,490,448      -294,290     309,980,189,819     293,227,931,019   -16,752,258,800
+                2                           투신     14,415,013     15,265,023       850,010     287,167,721,259     253,185,404,050   -33,982,317,209
+                3                           사모      6,795,002      7,546,735       751,733      58,320,840,040     120,956,023,820    62,635,183,780
+                4                           은행      6,570,977      9,467,402     2,896,425     106,123,094,255     132,603,184,900    26,480,090,645
+                5                       기타금융        100,246      1,681,577     1,581,331       1,792,061,245      20,509,577,290    18,717,516,045
+                6                      연기금 등        957,118      2,181,586     1,224,468      28,277,039,165      30,542,533,835     2,265,494,670
+                7                  TS   기관합계    419,843,130    379,699,454   -40,143,676   4,351,241,040,467   3,891,976,281,822  -459,264,758,645
+                8                       기타법인     35,263,516     37,663,547     2,400,031     117,444,886,665     137,823,724,670    20,378,838,005
+                9                           개인    617,032,814    631,206,545    14,173,731   5,499,376,677,035   5,697,273,858,895   197,897,181,860
+                10                        외국인    598,813,573    621,924,695    23,111,122   3,053,886,652,320   3,293,074,770,415   239,188,118,095
+                11                    기타외국인        607,652      1,066,444       458,792       3,774,516,875       5,575,137,560     1,800,620,685
+                12                 TS       전체  1,671,560,685  1,671,560,685             0  13,025,723,773,362  13,025,723,773,362                 0
+        """  # pylint: disable=line-too-long # noqa: E501
+
+        result = self.read(strtDd=fromdate, endDd=todate)
+        return DataFrame(result['output'])
+
+
+class 투자자별거래실적_일별추이(KrxWebIo):
+    @property
+    def bld(self):
+        return "dbms/MDC/STAT/standard/MDCSTAT04802"
+
+    def fetch(self, fromdate: str, todate: str, inqCondTpCd1: int,
+              inqCondTpCd2: int) -> DataFrame:
+        """[13106] 투자자별 거래실적
+           당일자 최종 매매내역은 오후 6시 이후에 제공됩니다.
+
+        Args:
+            fromdate        (str): 조회 시작 일자 (YYMMDD)
+            todate          (str): 조회 종료 일자 (YYMMDD)
+            inqCondTpCd1    (int): 1 - 거래대금 / 2 - 거래량
+            inqCondTpCd2    (int): 1 - 순매수 / 2 - 매수 / 3 - 매도
+
+        Returns:
+            DataFrame:
+                       TRD_DD     NUM_ITM_VAL21  NUM_ITM_VAL22   NUM_ITM_VAL23    NUM_ITM_VAL24 NUM_ITM_VAL25
+                0  2022/04/22   -10,628,831,870  2,032,673,735  39,477,777,530  -30,881,619,395             0
+                1  2022/04/21   -33,385,835,805  2,835,764,290  35,920,390,975   -5,370,319,460             0
+                2  2022/04/20  -235,935,697,655  8,965,445,880  19,247,888,605  207,722,363,170             0
+                3  2022/04/19   -36,298,873,785  7,555,666,910  -1,968,998,025   30,712,204,900             0
+                4  2022/04/18  -168,362,290,065   -871,791,310  88,115,812,520   81,118,268,855             0
+                5  2022/04/15    25,346,770,535   -138,921,500  17,104,310,255  -42,312,159,290             0
+        """  # pylint: disable=line-too-long # noqa: E501
+
+        result = self.read(
+            strtDd=fromdate, endDd=todate,
+            inqCondTpCd1=inqCondTpCd1, inqCondTpCd2=inqCondTpCd2)
         return DataFrame(result['output'])
 
 
@@ -256,7 +325,8 @@ if __name__ == "__main__":
     import pandas as pd
     pd.set_option('display.width', None)
     # print(상장종목검색().fetch("ETF"))
-    print(전종목등락률_ETF().fetch("20210325", "20210402"))
+    # print(전종목등락률_ETF().fetch("20210325", "20210402"))
+    print(투자자별거래실적_기간합계().fetch("20220415", "20220422"))
     # print(개별종목시세_ETF().fetch("20210111", "20210119", "KR7152100004"))
     # print(전종목시세_ETF().fetch("20210119"))
     # print(PDF().fetch("20210119", "KR7152100004"))

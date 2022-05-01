@@ -191,8 +191,9 @@ def get_market_ohlcv(*args, **kwargs):
 
     """  # pylint: disable=line-too-long # noqa: E501
 
-    dates = list(filter(yymmdd.match, args))
-    if len(dates) == 2:
+    dates = list(filter(yymmdd.match, [str(x) for x in args]))
+    if len(dates) == 2 or ('fromdate' in kwargs and
+                           'todate' in kwargs):
         return get_market_ohlcv_by_date(*args, **kwargs)
     else:
         return get_market_ohlcv_by_ticker(*args, **kwargs)
@@ -352,8 +353,9 @@ def get_market_cap(*args, **kwargs):
 
     """  # pylint: disable=line-too-long # noqa: E501
 
-    dates = list(filter(yymmdd.match, args))
-    if len(dates) == 2:
+    dates = list(filter(yymmdd.match, [str(x) for x in args]))
+    if len(dates) == 2 or ('fromdate' in kwargs and
+                           'todate' in kwargs):
         return get_market_cap_by_date(*args, **kwargs)
     else:
         return get_market_cap_by_ticker(*args, **kwargs)
@@ -486,8 +488,10 @@ def get_exhaustion_rates_of_foreign_investment(*args, **kwargs):
             017670   80745711   28962369  35.875000   39565398  73.187500
             020560  223235294   13871465   6.210938  111595323  12.429688
     """
-    dates = list(filter(yymmdd.match, args))
-    if len(dates) == 2:
+
+    dates = list(filter(yymmdd.match, [str(x) for x in args]))
+    if len(dates) == 2 or ('fromdate' in kwargs and
+                           'todate' in kwargs):
         return get_exhaustion_rates_of_foreign_investment_by_date(
             *args, **kwargs)
     else:
@@ -586,8 +590,9 @@ def get_market_price_change(*args, **kwargs):
             138930  BNK금융지주    5680    5780   100   1.76  18363844  103453756550
     """  # pylint: disable=line-too-long # noqa: E501
 
-    dates = list(filter(yymmdd.match, args))
-    if len(dates) == 2:
+    dates = list(filter(yymmdd.match, [str(x) for x in args]))
+    if len(dates) == 2 or ('fromdate' in kwargs and
+                           'todate' in kwargs):
         return get_market_price_change_by_ticker(*args, **kwargs)
     else:
         raise NotImplementedError
@@ -681,8 +686,9 @@ def get_market_fundamental(*args, **kwargs):
                 282330   36022  15.062500  3.660156  8763  2.050781  2700
                 138930   25415   3.380859  0.219971  1647  6.468750   360
     """
-    dates = list(filter(yymmdd.match, args))
-    if len(dates) == 2:
+    dates = list(filter(yymmdd.match, [str(x) for x in args]))
+    if len(dates) == 2 or ('fromdate' in kwargs and
+                           'todate' in kwargs):
         return get_market_fundamental_by_date(*args, **kwargs)
     else:
         return get_market_fundamental_by_ticker(*args, **kwargs)
@@ -1333,8 +1339,9 @@ def get_index_ohlcv(*args, **kwargs):
             코스피50             3034.99   3055.71   3008.02   3008.02   110775949  13083864634083
     """  # pylint: disable=line-too-long # noqa: E501
 
-    dates = list(filter(yymmdd.match, args))
-    if len(dates) == 2:
+    dates = list(filter(yymmdd.match, [str(x) for x in args]))
+    if len(dates) == 2 or ('fromdate' in kwargs and
+                           'todate' in kwargs):
         return get_index_ohlcv_by_date(*args, **kwargs)
     else:
         return get_index_ohlcv_by_ticker(*args, **kwargs)
@@ -1495,8 +1502,9 @@ def get_index_fundamental(*args, **kwargs):
             코스피 200 중소형주    1264.5    0.40    62.820000    0.0   1.19       0.98
     """  # pylint: disable=line-too-long # noqa: E501
 
-    dates = list(filter(yymmdd.match, args))
-    if len(dates) == 2:
+    dates = list(filter(yymmdd.match, [str(x) for x in args]))
+    if len(dates) == 2 or ('fromdate' in kwargs and
+                           'todate' in kwargs):
         return get_index_fundamental_by_date(*args, **kwargs)
     else:
         return get_index_fundamental_by_ticker(*args, **kwargs)
@@ -1728,15 +1736,11 @@ def get_index_price_change_by_ticker(
 #             코스피50             3034.99   3055.71   3008.02   3008.02   110775949  13083864634083
 #     """  # pylint: disable=line-too-long # noqa: E501
 #
-#     dates = list(filter(yymmdd.match, args))
+#     dates = list(filter(yymmdd.match, [str(x) for x in args]))
 #     if len(dates) == 2:
 #         return get_shorting_status_by_date(*args, **kwargs)
 #     else:
 #         return get_shorting_status_by_ticker(*args, **kwargs)
-
-
-def get_shorting_balance_by_ticker(date: str, market: str) -> DataFrame:
-    pass
 
 
 def get_shorting_status_by_date(fromdate: str, todate: str, ticker: str) \
@@ -2076,12 +2080,64 @@ def get_shorting_balance_top50(date: str, market: str = "KOSPI") -> DataFrame:
             263750   4      443142    13189850  139944243600  4.165355e+12  3.359375
             078130   5     4034831   126348384   18297958585  5.729899e+11  3.189453
     """  # pylint: disable=line-too-long # noqa: E501
+
     if isinstance(date, datetime.datetime):
         date = _datetime2string(date)
 
     date = date.replace("-", "")
 
     return krx.get_shorting_balance_top50(date, market)
+
+
+def get_shorting_balance(*args, **kwargs) -> DataFrame:
+    """공매도 잔고 현황
+
+    1) 일자별로 정렬된 공매도 잔고 현황
+
+    Args:
+        fromdate (str): 조회 시작 일자 (YYMMDD)
+        todate   (str): 조회 종료 일자 (YYMMDD)
+        ticker   (str): 조회 종목 티커
+
+    Returns:
+        DataFrame:
+
+            >> get_shorting_balance("20200106", "20200110", "005930")
+
+                     공매도잔고  상장주식수    공매도금액      시가총액      비중
+            날짜
+            2020-01-06  5630893  5969782550  312514561500  3.313229e+14  0.090027
+            2020-01-07  5169745  5969782550  288471771000  3.331139e+14  0.090027
+            2020-01-08  5224233  5969782550  296736434400  3.390836e+14  0.090027
+            2020-01-09  5387073  5969782550  315682477800  3.498293e+14  0.090027
+            2020-01-10  5489240  5969782550  326609780000  3.552021e+14  0.090027
+
+    2) 티커로 정렬된 공매도 잔고 현황
+
+    Args:
+        date   (str): 조회 일자 (YYMMDD)
+        market (str): 조회 시장 (KOSPI/KOSDAQ/KONEX)
+
+    Returns:
+        DataFrame:
+
+            >> get_shorting_balance("20210127")
+
+                    공매도잔고   상장주식수  공매도금액      시가총액      비중
+            티커
+            095570       33055     46822295   134864400  1.910350e+11  0.070007
+            006840        4575     13247561   131760000  3.815298e+11  0.029999
+            027410       68060     95716791   449196000  6.317308e+11  0.070007
+            282330        4794     17283906   757452000  2.730857e+12  0.029999
+            138930      596477    325935246  3340271200  1.825237e+12  0.180054
+    """  # pylint: disable=line-too-long # noqa: E501
+
+    dates = list(filter(yymmdd.match, [str(x) for x in args]))
+    if len(dates) == 2 or ('fromdate' in kwargs and
+                           'todate' in kwargs):
+        return get_shorting_balance_by_date(*args, **kwargs)
+    else:
+        return get_shorting_balance_by_ticker(*args, **kwargs)
 
 
 @market_valid_check(["KOSPI", "KOSDAQ", "KONEX"])
@@ -2542,6 +2598,138 @@ def get_etf_tracking_error(fromdate, todate, ticker) -> DataFrame:
     todate = todate.replace("-", "")
 
     return krx.get_etf_tracking_error(fromdate, todate, ticker)
+
+
+def get_etf_trading_volumne_and_value(*args, **kwargs):
+    """ETF 거래량과 거래대금 조회
+    Args:
+
+        1) 주어진 기간의 투자자별 거래실적 합계
+
+        fromdate    (str): 조회 시작 일자 (YYMMDD)
+        todate      (str): 조회 종료 일자 (YYMMDD)
+
+        > get_etf_trading_volumne_and_value("20220415", "20220422")
+
+        2) 주어진 기간의 일자별 거래 실적 조회
+
+        fromdate        (str): 조회 시작 일자 (YYMMDD)
+        todate          (str): 조회 종료 일자 (YYMMDD)
+        query_type1     (str): 거래대금 / 거래량
+        query_type2     (str): 순매수 / 매수 / 매도
+
+        > get_etf_trading_volumne_and_value("20220415", "20220422", query_type1="거래대금", query_type2="순매수)
+
+    Returns:
+        DataFrame:
+
+             > get_etf_trading_volumne_and_value("20220415", "20220422")
+
+                           거래량                              거래대금
+                             매도        매수    순매수            매도            매수            순
+            매수
+            금융투자    375220036   328066683 -47153353   3559580094684   3040951626908 -518628467776
+            보험         15784738    15490448   -294290    309980189819    293227931019  -16752258800
+            투신         14415013    15265023    850010    287167721259    253185404050  -33982317209
+            사모          6795002     7546735    751733     58320840040    120956023820   62635183780
+
+            > get_etf_trading_volumne_and_value("20220415", "20220422", query_type1="거래대금", query_type2="순매수")
+
+                                기관    기타법인         개인        외국인 전체
+            날짜
+            2022-04-15   25346770535  -138921500  17104310255  -42312159290    0
+            2022-04-18 -168362290065  -871791310  88115812520   81118268855    0
+            2022-04-19  -36298873785  7555666910  -1968998025   30712204900    0
+            2022-04-20 -235935697655  8965445880  19247888605  207722363170    0
+            2022-04-21  -33385835805  2835764290  35920390975   -5370319460    0
+    """  # pylint: disable=line-too-long # noqa: E501
+
+    param_len = len(args) + len(kwargs)
+    if param_len > 2:
+        return _get_etf_trading_volumne_and_value_by_date(*args, **kwargs)
+    else:
+        return _get_etf_trading_volumne_and_value_by_investor(*args, **kwargs)
+
+
+def _get_etf_trading_volumne_and_value_by_date(
+    fromdate: str, todate: str, query_type1: bool, query_type2: str) \
+         -> DataFrame:
+    """주어진 기간의 일자별 거래 실적 조회
+
+    Args:
+        fromdate        (str): 조회 시작 일자 (YYMMDD)
+        todate          (str): 조회 종료 일자 (YYMMDD)
+        query_type1     (str): 거래대금 / 거래량
+        query_type2     (str): 순매수 / 매수 / 매도
+
+    Returns:
+        DataFrame:
+
+            > get_etf_trading_volumne_and_value_by_date("20220415", "20220422", 1, 1)
+
+                                기관    기타법인         개인        외국인 전체
+            날짜
+            2022-04-15   25346770535  -138921500  17104310255  -42312159290    0
+            2022-04-18 -168362290065  -871791310  88115812520   81118268855    0
+            2022-04-19  -36298873785  7555666910  -1968998025   30712204900    0
+            2022-04-20 -235935697655  8965445880  19247888605  207722363170    0
+            2022-04-21  -33385835805  2835764290  35920390975   -5370319460    0
+            2022-04-22  -10628831870  2032673735  39477777530  -30881619395    0
+    """  # pylint: disable=line-too-long # noqa: E501
+
+    if isinstance(fromdate, datetime.datetime):
+        fromdate = _datetime2string(fromdate)
+
+    if isinstance(todate, datetime.datetime):
+        todate = _datetime2string(todate)
+
+    str2type1 = {
+        "거래대금": 1,
+        "거래량": 2
+    }
+
+    str2type2 = {
+        "순매수": 1,
+        "매수": 2,
+        "매도": 3
+    }
+
+    inqCondTpCd1 = str2type1[query_type1]
+    inqCondTpCd2 = str2type2[query_type2]
+
+    return krx.get_etf_trading_volumne_and_value_by_date(
+        fromdate, todate, inqCondTpCd1, inqCondTpCd2)
+
+
+def _get_etf_trading_volumne_and_value_by_investor(fromdate: str, todate: str)\
+        -> DataFrame:
+    """주어진 기간의 투자자별 거래실적 합계
+
+    Args:
+        fromdate    (str): 조회 시작 일자 (YYMMDD)
+        todate      (str): 조회 종료 일자 (YYMMDD)
+
+    Returns:
+        DataFrame:
+
+            > get_etf_trading_volumne_and_value_by_investor("20220415", "20220422")
+
+                           거래량                              거래대금
+                             매도        매수    순매수            매도            매수            순
+            매수
+            금융투자    375220036   328066683 -47153353   3559580094684   3040951626908 -518628467776
+            보험         15784738    15490448   -294290    309980189819    293227931019  -16752258800
+            투신         14415013    15265023    850010    287167721259    253185404050  -33982317209
+            사모          6795002     7546735    751733     58320840040    120956023820   62635183780
+    """  # pylint: disable=line-too-long # noqa: E501
+
+    if isinstance(fromdate, datetime.datetime):
+        fromdate = _datetime2string(fromdate)
+
+    if isinstance(todate, datetime.datetime):
+        todate = _datetime2string(todate)
+
+    return krx.get_etf_trading_volumne_and_value_by_investor(fromdate, todate)
 
 
 def get_stock_major_changes(ticker: str) -> DataFrame:

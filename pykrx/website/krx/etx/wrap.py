@@ -1,7 +1,7 @@
 from pykrx.website.comm import dataframe_empty_handler
 from pykrx.website.krx.etx.core import (
     개별종목시세_ETF, 전종목시세_ETF, 전종목등락률_ETF, PDF, 추적오차율추이,
-    괴리율추이
+    괴리율추이, 투자자별거래실적_기간합계, 투자자별거래실적_일별추이
 )
 from pykrx.website.krx.etx.ticker import get_etx_isin
 import numpy as np
@@ -37,7 +37,7 @@ def get_etf_ohlcv_by_date(fromdate: str, todate: str, ticker: str) \
     df.columns = ['날짜', 'NAV', '시가', '고가', '저가', '종가', '거래량',
                   '거래대금', '기초지수']
     df = df.replace(r'^-$', '0', regex=True)
-    df = df.replace(r'\W', '', regex=True)
+    df = df.replace(r',', '', regex=True)
     df = df.set_index('날짜')
     df = df.astype({
         "NAV": np.float64,
@@ -49,7 +49,7 @@ def get_etf_ohlcv_by_date(fromdate: str, todate: str, ticker: str) \
         "거래대금": np.uint64,
         "기초지수": np.float64
     })
-    df.index = pd.to_datetime(df.index, format='%Y%m%d')
+    df.index = pd.to_datetime(df.index, format='%Y/%m/%d')
     return df.sort_index()
 
 
@@ -250,11 +250,103 @@ def get_etf_tracking_error(fromdate: str, todate: str, ticker: str) \
     return df.sort_index()
 
 
+@dataframe_empty_handler
+def get_etf_trading_volumne_and_value_by_investor(fromdate: str, todate: str) \
+        -> DataFrame:
+    """주어진 기간의 투자자별 거래실적 합계
+
+    Args:
+        fromdate    (str): 조회 시작 일자 (YYMMDD)
+        todate      (str): 조회 종료 일자 (YYMMDD)
+
+    Returns:
+        DataFrame:
+
+            > get_etf_trading_volumne_and_value_by_investor("20220415", "20220422")
+
+                           거래량                              거래대금
+                             매도        매수    순매수            매도            매수            순
+            매수
+            금융투자    375220036   328066683 -47153353   3559580094684   3040951626908 -518628467776
+            보험         15784738    15490448   -294290    309980189819    293227931019  -16752258800
+            투신         14415013    15265023    850010    287167721259    253185404050  -33982317209
+            사모          6795002     7546735    751733     58320840040    120956023820   62635183780
+    """  # pylint: disable=line-too-long # noqa: E501
+
+    df = 투자자별거래실적_기간합계().fetch(fromdate, todate)
+    df = df[df.columns[1:]]
+    # df.columns = ["투자자", "거래량-매도"]
+
+    df = df.set_index('INVST_NM')
+    df.index.name = None
+    df.columns = pd.MultiIndex.from_product(
+        [["거래량", "거래대금"], ["매도", "매수", "순매수"]])
+
+    df = df.replace(',', '', regex=True)
+    df = df.astype({
+        ("거래량", "매도"): np.uint64,
+        ("거래량", "매수"): np.uint64,
+        ("거래량", "순매수"): np.int64,
+        ("거래대금", "매도"): np.uint64,
+        ("거래대금", "매수"): np.uint64,
+        ("거래대금", "순매수"): np.int64,
+    })
+    return df
+
+
+@dataframe_empty_handler
+def get_etf_trading_volumne_and_value_by_date(
+    fromdate: str, todate: str, inqCondTpCd1: int, inqCondTpCd2: int) \
+         -> DataFrame:
+    """주어진 기간의 일자별 거래 실적 조회
+
+    Args:
+        fromdate        (str): 조회 시작 일자 (YYMMDD)
+        todate          (str): 조회 종료 일자 (YYMMDD)
+        inqCondTpCd1    (int): 1 - 거래대금 / 2 - 거래량
+        inqCondTpCd2    (int): 1 - 순매수 / 2 - 매수 / 3 - 매도
+
+    Returns:
+        DataFrame:
+
+            > get_etf_trading_volumne_and_value_by_date("20220415", "20220422", 1, 1)
+
+                                기관    기타법인         개인        외국인 전체
+            날짜
+            2022-04-15   25346770535  -138921500  17104310255  -42312159290    0
+            2022-04-18 -168362290065  -871791310  88115812520   81118268855    0
+            2022-04-19  -36298873785  7555666910  -1968998025   30712204900    0
+            2022-04-20 -235935697655  8965445880  19247888605  207722363170    0
+            2022-04-21  -33385835805  2835764290  35920390975   -5370319460    0
+            2022-04-22  -10628831870  2032673735  39477777530  -30881619395    0
+    """  # pylint: disable=line-too-long # noqa: E501
+
+    df = 투자자별거래실적_일별추이().fetch(
+        fromdate, todate, inqCondTpCd1=inqCondTpCd1, inqCondTpCd2=inqCondTpCd2)
+    df.columns = ['날짜', '기관', '기타법인', '개인', '외국인', "전체"]
+
+    df = df.set_index('날짜')
+    df.index = pd.to_datetime(df.index, format='%Y/%m/%d')
+
+    df = df.replace(',', '', regex=True)
+    df = df.astype({
+        "기관": np.int64,
+        "기타법인": np.int64,
+        "개인": np.int64,
+        "외국인": np.int64,
+        "전체": np.uint64,
+    })
+    return df.sort_index()
+
+
 if __name__ == "__main__":
     pd.set_option('display.width', None)
     # print(get_etf_ohlcv_by_date("20200101", "20200401", "295820"))
     # print(get_etf_portfolio_deposit_file("20210119", "152100"))
     # print( get_etf_price_deviation("20200101", "20200401", "295820"))
     # print(get_etf_tracking_error("20200101", "20200401", "295820"))
-
-    print(get_etf_portfolio_deposit_file("20210705", "114800"))
+    # print(get_etf_portfolio_deposit_file("20210705", "114800"))
+    df = get_etf_trading_volumne_and_value_by_investor("20220415", "20220422")
+    # df = get_etf_trading_volumne_and_value_by_date(
+    #     "20220415", "20220422", 1, 1)
+    print(df)
