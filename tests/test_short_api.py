@@ -66,7 +66,7 @@ class ShortVolumeByTicker(unittest.TestCase):
         self.assertEqual(temp.sum(), 5)
 
     def test_with_holiday(self):
-        df_0 = stock.get_shorting_volume_by_ticker("20210103")
+        df_0 = stock.get_shorting_volume_by_ticker("20210103", alternative=True)
         df_1 = stock.get_shorting_volume_by_ticker("20201230")
         same = (df_0 == df_1).all(axis=None)
         self.assertTrue(same)
@@ -128,7 +128,7 @@ class ShortValueByTicker(unittest.TestCase):
         self.assertEqual(temp.sum(), 5)
 
     def test_with_holiday(self):
-        df_0 = stock.get_shorting_value_by_ticker("20210103")
+        df_0 = stock.get_shorting_value_by_ticker("20210103", alternative=True)
         df_1 = stock.get_shorting_value_by_ticker("20201230")
         same = (df_0 == df_1).all(axis=None)
         self.assertTrue(same)

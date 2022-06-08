@@ -260,13 +260,14 @@ def get_market_ohlcv_by_date(
 
 
 @market_valid_check()
-def get_market_ohlcv_by_ticker(date, market: str = "KOSPI",
-                               prev: bool = False):
+def get_market_ohlcv_by_ticker(
+        date, market: str = "KOSPI", alternative: bool = False) -> DataFrame:
     """티커별로 정리된 전종목 OHLCV
 
     Args:
-        date   (str): 조회 일자 (YYYYMMDD)
-        market (str): 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
+        date        (str           ): 조회 일자 (YYYYMMDD)
+        market      (str           ): 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
+        alternative (bool, optional): 휴일일 경우 이전 영업일 선택 여부
 
     Returns:
         DataFrame:
@@ -300,11 +301,9 @@ def get_market_ohlcv_by_ticker(date, market: str = "KOSPI",
 
     df = krx.get_market_ohlcv_by_ticker(date, market)
     holiday = (df[['시가', '고가', '저가', '종가']] == 0).all(axis=None)
-    if holiday:
-        target_date = get_nearest_business_day_in_a_week(date=date, prev=prev)
+    if holiday and alternative:
+        target_date = get_nearest_business_day_in_a_week(date=date, prev=True)
         df = krx.get_market_ohlcv_by_ticker(target_date, market)
-        # print(f"The date you entered {date} seems to be a holiday. PYKRX "
-        #       f"changes the date parameter to {target_date}.")
     return df
 
 
@@ -403,14 +402,16 @@ def get_market_cap_by_date(
 
 
 @market_valid_check()
-def get_market_cap_by_ticker(date, market="ALL", acending=False, prev=False):
+def get_market_cap_by_ticker(
+        date, market: str = "ALL", acending: bool = False,
+        alternative: bool = False) -> DataFrame:
     """티커별로 정렬된 시가총액
 
     Args:
-        date      (str           ): 조회 일자 (YYYYMMDD)
-        market    (str , optional): 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
-        ascending (bool, optional): 정렬 기준.
-        prev      (bool, optional): 휴일일 경우 이전/이후 영업일 선택
+        date        (str           ): 조회 일자 (YYYYMMDD)
+        market      (str , optional): 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
+        ascending   (bool, optional): 정렬 기준.
+        alternative (bool, optional): 휴일일 경우 이전 영업일 선택 여부
 
     Returns:
         DataFrame :
@@ -434,12 +435,9 @@ def get_market_cap_by_ticker(date, market="ALL", acending=False, prev=False):
     df = krx.get_market_cap_by_ticker(date, market, acending)
     holiday = (df[['종가', '시가총액', '거래량', '거래대금']] == 0) \
         .all(axis=None)
-    if holiday:
-        target_date = get_nearest_business_day_in_a_week(date=date, prev=prev)
+    if holiday and alternative:
+        target_date = get_nearest_business_day_in_a_week(date=date, prev=True)
         df = krx.get_market_cap_by_ticker(target_date, market, acending)
-        # print(f"The date you entered {date} seems to be a holiday. PYKRX "
-        #       f"changes the date parameter to {target_date}.")
-
     return df
 
 
@@ -759,13 +757,14 @@ def get_market_fundamental_by_date(
 
 
 def get_market_fundamental_by_ticker(
-        date: str, market: str = "KOSPI", prev: bool = False) -> DataFrame:
+        date: str, market: str = "KOSPI", alternative: bool = False) \
+            -> DataFrame:
     """특정 일자의 전종목 PER/PBR/배당수익률 조회
 
     Args:
-        date   (str           ): 조회 일자 (YYMMDD)
-        market (str,  optional): 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
-        prev   (bool, optional): 휴일일 경우 이전/이후 영업일 선택
+        date        (str           ): 조회 일자 (YYMMDD)
+        market      (str,  optional): 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
+        alternative (bool, optional): 휴일일 경우 이전 영업일 선택 여부
 
     Returns:
         DataFrame:
@@ -788,11 +787,9 @@ def get_market_fundamental_by_ticker(
     df = krx.get_market_fundamental_by_ticker(date, market)
     holiday = (df[['BPS', 'PER', 'PBR', 'EPS', 'DIV', 'DPS']] == 0).all(
         axis=None)
-    if holiday:
-        target_date = get_nearest_business_day_in_a_week(date=date, prev=prev)
+    if holiday and alternative:
+        target_date = get_nearest_business_day_in_a_week(date=date, prev=True)
         df = krx.get_market_fundamental_by_ticker(target_date, market)
-        # print(f"The date you entered {date} seems to be a holiday. PYKRX "
-        #       f"changes the date parameter to {target_date}.")
     return df
 
 
@@ -1258,12 +1255,14 @@ def get_index_ticker_name(ticker: str) -> str:
     return krx.IndexTicker().get_name(ticker)
 
 
-def get_index_portfolio_deposit_file(ticker: str, date: str = None) -> list:
+def get_index_portfolio_deposit_file(
+        ticker: str, date: str = None, alternative: bool = False) -> list:
     """지수 구성 종목 조회
 
     Args:
-        ticker (str          ): 조회 인덱스
-        date   (str, optional): 조회 일자 (YYMMDD)
+        ticker      (str          ): 조회 인덱스
+        date        (str, optional): 조회 일자 (YYMMDD)
+        alternative (bool, optional): 휴일일 경우 이전 영업일 선택 여부
 
     NOTE: 2014년 5월 2일 까지만 조회 가능
 
@@ -1288,7 +1287,7 @@ def get_index_portfolio_deposit_file(ticker: str, date: str = None) -> list:
     pdf = krx.get_index_portfolio_deposit_file(target_date, ticker)
     # 주말 or 비영업일 여부를 확인하는 것 자체가 상대적으로 오랜 시간 걸려 lazy 판단
     # - 결과가 없으면 과거의 가장 가까운 영업일로 조회
-    if len(pdf) == 0:
+    if len(pdf) == 0 and alternative:
         target_date = get_nearest_business_day_in_a_week(target_date)
         pdf = krx.get_index_portfolio_deposit_file(target_date, ticker)
         if len(pdf) != 0 and date is not None:
@@ -1347,12 +1346,14 @@ def get_index_ohlcv(*args, **kwargs):
         return get_index_ohlcv_by_ticker(*args, **kwargs)
 
 
-def get_index_ohlcv_by_ticker(date, market="KOSPI", prev=True):
+def get_index_ohlcv_by_ticker(
+        date, market: str = "KOSPI", alternative: bool = False):
     """티커별로 정리된 전종목 OHLCV
 
     Args:
         date   (str): 조회 일자 (YYYYMMDD)
         market (str): 조회 시장 (KOSPI/KOSDAQ/KRX/테마/ALL)
+        alternative (bool, optional): 휴일일 경우 이전 영업일 선택 여부
 
     Returns:
         DataFrame:
@@ -1387,11 +1388,9 @@ def get_index_ohlcv_by_ticker(date, market="KOSPI", prev=True):
 
     df = krx.get_index_ohlcv_by_ticker(date, market)
     holiday = (df[['시가', '고가', '저가', '종가']] == 0).all(axis=None)
-    if holiday:
-        target_date = get_nearest_business_day_in_a_week(date=date, prev=prev)
+    if holiday and alternative:
+        target_date = get_nearest_business_day_in_a_week(date=date, prev=True)
         df = krx.get_index_ohlcv_by_ticker(target_date, market)
-        # print(f"The date you entered {date} seems to be a holiday. PYKRX "
-        #       f"changes the date parameter to {target_date}.")
     return df
 
 
@@ -1511,13 +1510,14 @@ def get_index_fundamental(*args, **kwargs):
 
 
 def get_index_fundamental_by_ticker(
-        date: str, market: str = "KOSPI", prev: bool = True) -> DataFrame:
+        date: str, market: str = "KOSPI", alternative: bool = False) \
+        -> DataFrame:
     """특정 일자의 전종목 PER/PBR/배당수익률 조회
 
     Args:
-        date   (str           ): 조회 일자 (YYYYMMDD)
-        market (str           ): 조회 시장 (KOSPI/KOSDAQ/KRX/테마)
-        prev   (bool, optional): 휴일일 경우 이전/이후 영업일 선택
+        date        (str           ): 조회 일자 (YYYYMMDD)
+        market      (str           ): 조회 시장 (KOSPI/KOSDAQ/KRX/테마)
+        alternative (bool, optional): 휴일일 경우 이전 영업일 선택 여부
 
     Returns:
         DataFrame:
@@ -1541,11 +1541,9 @@ def get_index_fundamental_by_ticker(
     df = krx.get_index_fundamental_by_ticker(date, market)
     holiday = (df[['종가', '등락률', 'PER', '선행PER', 'PBR', '배당수익률']]
                == 0).all(axis=None)
-    if holiday:
-        target_date = get_nearest_business_day_in_a_week(date=date, prev=prev)
+    if holiday and alternative:
+        target_date = get_nearest_business_day_in_a_week(date=date, prev=True)
         df = krx.get_index_fundamental_by_ticker(target_date, market)
-        # print(f"The date you entered {date} seems to be a holiday. PYKRX "
-        #       f"changes the date parameter to {target_date}.")
     return df
 
 
@@ -1771,14 +1769,14 @@ def get_shorting_status_by_date(fromdate: str, todate: str, ticker: str) \
 @market_valid_check(["KOSPI", "KOSDAQ", "KONEX"])
 def get_shorting_value_by_ticker(
     date: str, market: str = "KOSPI", include: list = None,
-        prev: bool = False) -> DataFrame:
+        alternative: bool = False) -> DataFrame:
     """티커별로 정리된 전종목 공매도 거래 대금
 
     Args:
-        date    (str, optional): 조회 일자 (YYYYMMDD)
-        market  (str, optional): 조회 시장 (KOSPI/KOSDAQ/KONEX)
-        include (str, optional): 증권 구분 (주식/ETF/ETN/ELW/신주인수권및증권/수익증권)
-        prev   (bool, optional): 휴일일 경우 이전/이후 영업일 선택
+        date        (str, optional): 조회 일자 (YYYYMMDD)
+        market      (str, optional): 조회 시장 (KOSPI/KOSDAQ/KONEX)
+        include     (str, optional): 증권 구분 (주식/ETF/ETN/ELW/신주인수권및증권/수익증권)
+        alternative (bool, optional): 휴일일 경우 이전 영업일 선택 여부
 
     Returns:
         DataFrame:
@@ -1805,11 +1803,11 @@ def get_shorting_value_by_ticker(
     df = krx.get_shorting_trading_value_and_volume_by_ticker(
         date, market, include)
     if df.empty:
-        target_date = get_nearest_business_day_in_a_week(date=date, prev=prev)
+        target_date = get_nearest_business_day_in_a_week(date=date, prev=True)
         df = krx.get_shorting_trading_value_and_volume_by_ticker(
             target_date, market, include)
-        print(f"The date you entered {date} seems to be a holiday. PYKRX "
-              f"changes the date parameter to {target_date}.")
+        if not alternative:
+            df.loc[:] = 0
         return df['거래대금']
 
     return df['거래대금']
@@ -1818,14 +1816,14 @@ def get_shorting_value_by_ticker(
 @market_valid_check(["KOSPI", "KOSDAQ", "KONEX"])
 def get_shorting_volume_by_ticker(
     date: str, market: str = "KOSPI", include: list = None,
-        prev: bool = False) -> DataFrame:
+        alternative: bool = False) -> DataFrame:
     """티커별로 정리된 전종목 공매도 거래량
 
     Args:
-        date    (str, optional): 조회 일자 (YYYYMMDD)
-        market  (str, optional): 조회 시장 (KOSPI/KOSDAQ/KONEX)
-        include (str, optional): 증권 구분 (주식/ETF/ETN/ELW/신주인수권및증권/수익증권)
-        prev   (bool, optional): 휴일일 경우 이전/이후 영업일 선택
+        date        (str, optional): 조회 일자 (YYYYMMDD)
+        market      (str, optional): 조회 시장 (KOSPI/KOSDAQ/KONEX)
+        include     (str, optional): 증권 구분 (주식/ETF/ETN/ELW/신주인수권및증권/수익증권)
+        alternative (bool, optional): 휴일일 경우 이전 영업일 선택 여부
 
     NOTE: include 항목을 입력하지 않으면 "주식"만 조회
 
@@ -1855,11 +1853,11 @@ def get_shorting_volume_by_ticker(
         date, market, include)
     if df.empty:
         target_date = get_nearest_business_day_in_a_week(
-            date=date, prev=prev)
+            date=date, prev=True)
         df = krx.get_shorting_trading_value_and_volume_by_ticker(
             target_date, market, include)
-        print(f"The date you entered {date} seems to be a holiday. PYKRX "
-              f"changes the date parameter to {target_date}.")
+        if not alternative:
+            df.loc[:] = 0
         return df['거래량']
 
     return df['거래량']
@@ -2770,5 +2768,6 @@ if __name__ == "__main__":
     # df = get_stock_major_changes("005930")
     st_date = "20220331"
     stock_code = "017810"
-    df = get_market_trading_volume_by_investor(st_date, st_date, stock_code)
+    # df = get_market_trading_volume_by_investor(st_date, st_date, stock_code)
+    df = get_shorting_volume_by_ticker("20220605")
     print(df)

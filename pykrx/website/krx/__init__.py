@@ -3,8 +3,9 @@ from .etx import *
 from .bond import *
 import datetime
 
+
 def get_nearest_business_day_in_a_week(date: str = None, prev: bool = True) \
-         -> str:
+        -> str:
     """인접한 영업일을 조회한다.
 
     Args:

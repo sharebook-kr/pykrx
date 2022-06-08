@@ -1,23 +1,16 @@
 from sqlite3 import NotSupportedError
 from pykrx.website import krx
-from pykrx.website import naver
-import datetime
-import inspect
-import functools
-import pandas as pd
-from deprecated import deprecated
 from pandas import DataFrame
-import re
 
 
 def get_otc_treasury_yields(*args) -> DataFrame:
     """장외 일자별 채권수익률
-    
+
     Args:
-        date   (str, optional): 조회 일자 (YYYYMMDD)        
+        date   (str, optional): 조회 일자 (YYYYMMDD)
 
     Returns:
-        DataFrame: 
+        DataFrame:
 
         > get_otc_treasury_yields_by_ticker("20220204")
 
@@ -35,17 +28,17 @@ def get_otc_treasury_yields(*args) -> DataFrame:
             회사채 BBB- (무보증 3년)  8.637  0.036
             CD(91일)                1.500  0.000
 
-    
-    Args:            
+
+    Args:
         startDd     (str): 시작 일자 (YYMMDD)
         endDd       (str): 종료 일자 (YYMMDD)
         bndKindTpCd (str): 장외 채권 티커
-            - 국고채1년  
-            - 국고채2년 
-            - 국고채3년 
-            - 국고채5년 
-            - 국고채10년 
-            - 국고채20년 
+            - 국고채1년
+            - 국고채2년
+            - 국고채3년
+            - 국고채5년
+            - 국고채10년
+            - 국고채20년
             - 국고채30년
             - 국민주택1종5년
             - 회사채AA
@@ -53,7 +46,7 @@ def get_otc_treasury_yields(*args) -> DataFrame:
             - CD
 
     Returns:
-        DataFrame: 
+        DataFrame:
 
         > get_otc_treasury_yields_by_date("20220104", "20220204", "국고채2년")
 
@@ -69,7 +62,8 @@ def get_otc_treasury_yields(*args) -> DataFrame:
     if len(args) == 1:
         df = krx.bond.get_otc_treasury_yields_by_ticker(args[0])
         if df.empty:
-            target_date = krx.get_nearest_business_day_in_a_week(date=args[0], prev=True)
+            target_date = krx.get_nearest_business_day_in_a_week(
+                date=args[0], prev=True)
             df = krx.get_otc_treasury_yields_by_ticker(target_date)
     elif len(args) == 3:
         df = krx.bond.get_otc_treasury_yields_by_date(*args)
@@ -77,9 +71,6 @@ def get_otc_treasury_yields(*args) -> DataFrame:
         raise NotSupportedError
 
     return df
-
-    
-
 
 
 if __name__ == "__main__":

@@ -72,13 +72,13 @@ class StockOhlcvByTickerTest(unittest.TestCase):
         self.assertEqual(temp.sum(), 5)
 
     def test_ohlcv_for_a_day_on_holiday1(self):
-        df0 = stock.get_market_ohlcv_by_ticker("20210123")       # Saturday
-        df1 = stock.get_market_ohlcv_by_ticker("20210125")       # Monday
+        df0 = stock.get_market_ohlcv_by_ticker("20210123", alternative=True)    # Saturday
+        df1 = stock.get_market_ohlcv_by_ticker("20210122")                      # Friday
         self.assertTrue((df0 == df1).all(axis=None))
 
     def test_ohlcv_for_a_day_on_holiday2(self):
-        df0 = stock.get_market_ohlcv_by_ticker("20210123", prev=True)   # Saturday
-        df1 = stock.get_market_ohlcv_by_ticker("20210122")              # Friday
+        df0 = stock.get_market_ohlcv_by_ticker("20210123", alternative=True)   # Saturday
+        df1 = stock.get_market_ohlcv_by_ticker("20210122")                     # Friday
         self.assertTrue((df0 == df1).all(axis=None))
 
 
