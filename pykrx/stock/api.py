@@ -1449,7 +1449,8 @@ def get_index_ohlcv_by_date(
         '고가': 'max',
         '저가': 'min',
         '종가': 'last',
-        '거래량': 'sum'
+        '거래량': 'sum',
+        '상장시가총액': 'last'
     }
     return resample_ohlcv(df, freq, how)
 

@@ -772,16 +772,25 @@ def get_index_ohlcv_by_date(fromdate: str, todate: str, ticker: str) \
 
     df = 개별지수시세().fetch(ticker[1:], ticker[0], fromdate, todate)
     df = df[['TRD_DD', 'OPNPRC_IDX', 'HGPRC_IDX', 'LWPRC_IDX',
-             'CLSPRC_IDX', 'ACC_TRDVOL', 'ACC_TRDVAL']]
-    df.columns = ['날짜', '시가', '고가', '저가', '종가', '거래량', '거래대금']
+             'CLSPRC_IDX', 'ACC_TRDVOL', 'ACC_TRDVAL', 'MKTCAP']]
+    df.columns = [
+        '날짜', '시가', '고가', '저가', '종가', '거래량', '거래대금',
+        '상장시가총액'
+    ]
 
     df = df.replace(r'[^-\w\.]', '', regex=True)
     df = df.replace(r'\-$', '0', regex=True)
     df = df.replace('', '0')
     df = df.set_index('날짜')
-    df = df.astype({'시가': np.float64, '고가': np.float64,
-                    '저가': np.float64, '종가': np.float64,
-                    '거래량': np.int64, '거래대금': np.int64})
+    df = df.astype({
+        '시가': np.float64,
+        '고가': np.float64,
+        '저가': np.float64,
+        '종가': np.float64,
+        '거래량': np.int64,
+        '거래대금': np.int64,
+        '상장시가총액': np.int64
+    })
     df.index = pd.to_datetime(df.index, format='%Y%m%d')
     return df.sort_index()
 
@@ -816,9 +825,9 @@ def get_index_ohlcv_by_ticker(date: str, market: str = "KOSPI") -> DataFrame:
     }
     df = 전체지수시세().fetch(date, market2idx[market])
     df = df[['IDX_NM', 'OPNPRC_IDX', 'HGPRC_IDX', 'LWPRC_IDX',
-             'CLSPRC_IDX', 'ACC_TRDVOL', 'ACC_TRDVAL']]
+             'CLSPRC_IDX', 'ACC_TRDVOL', 'ACC_TRDVAL', 'MKTCAP']]
     df.columns = ['지수명', '시가', '고가', '저가', '종가', '거래량',
-                  '거래대금']
+                  '거래대금', '상장시가총액']
     df = df.replace(r'[^-\w\.]', '', regex=True)
     df = df.replace(r'\-$', '0', regex=True)
     df = df.replace('', '0')
@@ -829,7 +838,8 @@ def get_index_ohlcv_by_ticker(date: str, market: str = "KOSPI") -> DataFrame:
         '저가': np.float64,
         '종가': np.float64,
         '거래량': np.int64,
-        '거래대금': np.int64
+        '거래대금': np.int64,
+        '상장시가총액': np.int64
     })
     return df
 
@@ -1465,6 +1475,8 @@ if __name__ == "__main__":
     #   "20201226", "20210126", "005930")
     # df = get_index_ohlcv_by_date("20211126", "KOSPI")
     # df = get_stock_major_changes("005930")
-    df = get_market_ohlcv_by_date(
-        "20201226", "20210126", "005930")
+    # df = get_market_ohlcv_by_date(
+    #     "20201226", "20210126", "005930")
+    df = get_index_ohlcv_by_ticker(
+        "20220602")
     print(df)
