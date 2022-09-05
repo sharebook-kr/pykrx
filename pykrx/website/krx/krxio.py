@@ -1,5 +1,20 @@
 from abc import abstractmethod
-from pykrx.website.comm.webio import Post
+from pykrx.website.comm.webio import Get, Post
+
+
+class KrxFutureIo(Get):
+    @property
+    def url(self):
+        return "http://data.krx.co.kr/comm/bldAttendant/executeForResourceBundle.cmd"
+
+    def read(self, **params):
+        resp = super().read(**params)
+        return resp.json()
+
+    @property
+    @abstractmethod
+    def fetch(self, **params):
+        return NotImplementedError
 
 
 class KrxWebIo(Post):

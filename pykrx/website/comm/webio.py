@@ -19,7 +19,7 @@ class Get:
 class Post:
     def __init__(self, headers=None):
         self.headers = {"User-Agent": "Mozilla/5.0"}
-        if headers != None:
+        if headers is not None:
             self.headers.update(headers)
 
     def read(self, **params):
@@ -30,5 +30,3 @@ class Post:
     @abstractmethod
     def url(self):
         return NotImplementedError
-
-

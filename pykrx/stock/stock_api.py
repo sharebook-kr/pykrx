@@ -51,15 +51,6 @@ def resample_ohlcv(df, freq, how):
     return df
 
 
-def _datetime2string(dt, freq='d'):
-    if freq.upper() == 'Y':
-        return dt.strftime("%Y")
-    elif freq.upper() == 'M':
-        return dt.strftime("%Y%m")
-    else:
-        return dt.strftime("%Y%m%d")
-
-
 def get_nearest_business_day_in_a_week(date: str = None, prev: bool = True) \
         -> str:
     """인접한 영업일을 조회한다.
@@ -227,10 +218,10 @@ def get_market_ohlcv_by_date(
     """
 
     if isinstance(fromdate, datetime.datetime):
-        fromdate = _datetime2string(fromdate)
+        fromdate = krx.datetime2string(fromdate)
 
     if isinstance(todate, datetime.datetime):
-        todate = _datetime2string(todate)
+        todate = krx.datetime2string(todate)
 
     fromdate = fromdate.replace("-", "")
     todate = todate.replace("-", "")
@@ -295,7 +286,7 @@ def get_market_ohlcv_by_ticker(
     """  # pylint: disable=line-too-long # noqa: E501
 
     if isinstance(date, datetime.datetime):
-        date = _datetime2string(date)
+        date = krx.datetime2string(date)
 
     date = date.replace("-", "")
 
@@ -382,10 +373,10 @@ def get_market_cap_by_date(
     """  # pylint: disable=line-too-long # noqa: E501
 
     if isinstance(fromdate, datetime.datetime):
-        fromdate = _datetime2string(fromdate)
+        fromdate = krx.datetime2string(fromdate)
 
     if isinstance(todate, datetime.datetime):
-        todate = _datetime2string(todate)
+        todate = krx.datetime2string(todate)
 
     fromdate = fromdate.replace("-", "")
     todate = todate.replace("-", "")
@@ -428,7 +419,7 @@ def get_market_cap_by_ticker(
     """  # pylint: disable=line-too-long # noqa: E501
 
     if isinstance(date, datetime.datetime):
-        date = _datetime2string(date)
+        date = krx.datetime2string(date)
 
     date = date.replace("-", "")
 
@@ -517,10 +508,10 @@ def get_exhaustion_rates_of_foreign_investment_by_date(
             2021-01-14  5969782550  3314652740  55.53125  5969782550   55.53125
     """
     if isinstance(fromdate, datetime.datetime):
-        fromdate = _datetime2string(fromdate)
+        fromdate = krx.datetime2string(fromdate)
 
     if isinstance(todate, datetime.datetime):
-        todate = _datetime2string(todate)
+        todate = krx.datetime2string(todate)
 
     fromdate = fromdate.replace("-", "")
     todate = todate.replace("-", "")
@@ -554,7 +545,7 @@ def get_exhaustion_rates_of_foreign_investment_by_ticker(
     """
 
     if isinstance(date, datetime.datetime):
-        date = _datetime2string(date)
+        date = krx.datetime2string(date)
 
     date = date.replace("-", "")
 
@@ -600,10 +591,10 @@ def get_market_price_change_by_ticker(
         fromdate: str, todate: str, market: str = "KOSPI",
         adjusted: bool = True, delist: bool = False):
     if isinstance(fromdate, datetime.datetime):
-        fromdate = _datetime2string(fromdate)
+        fromdate = krx.datetime2string(fromdate)
 
     if isinstance(todate, datetime.datetime):
-        todate = _datetime2string(todate)
+        todate = krx.datetime2string(todate)
 
     fromdate = fromdate.replace("-", "")
     todate = todate.replace("-", "")
@@ -729,10 +720,10 @@ def get_market_fundamental_by_date(
     """
 
     if isinstance(fromdate, datetime.datetime):
-        fromdate = _datetime2string(fromdate)
+        fromdate = krx.datetime2string(fromdate)
 
     if isinstance(todate, datetime.datetime):
-        todate = _datetime2string(todate)
+        todate = krx.datetime2string(todate)
 
     fromdate = fromdate.replace("-", "")
     todate = todate.replace("-", "")
@@ -780,7 +771,7 @@ def get_market_fundamental_by_ticker(
                 138930   25415   3.380859  0.219971  1647  6.468750   360
     """
     if isinstance(date, datetime.datetime):
-        date = _datetime2string(date)
+        date = krx.datetime2string(date)
 
     date = date.replace("-", "")
 
@@ -849,9 +840,9 @@ def __get_market_trading_value_and_volume_by_investor(
     """  # pylint: disable=line-too-long # noqa: E501
 
     if isinstance(fromdate, datetime.datetime):
-        fromdate = _datetime2string(fromdate)
+        fromdate = krx.datetime2string(fromdate)
     if isinstance(todate, datetime.datetime):
-        todate = _datetime2string(todate)
+        todate = krx.datetime2string(todate)
 
     fromdate = fromdate.replace("-", "")
     todate = todate.replace("-", "")
@@ -921,9 +912,9 @@ def get_market_trading_value_by_investor(
     """
 
     if isinstance(fromdate, datetime.datetime):
-        fromdate = _datetime2string(fromdate)
+        fromdate = krx.datetime2string(fromdate)
     if isinstance(todate, datetime.datetime):
-        todate = _datetime2string(todate)
+        todate = krx.datetime2string(todate)
 
     fromdate = fromdate.replace("-", "")
     todate = todate.replace("-", "")
@@ -987,9 +978,9 @@ def get_market_trading_volume_by_investor(
     """
 
     if isinstance(fromdate, datetime.datetime):
-        fromdate = _datetime2string(fromdate)
+        fromdate = krx.datetime2string(fromdate)
     if isinstance(todate, datetime.datetime):
-        todate = _datetime2string(todate)
+        todate = krx.datetime2string(todate)
 
     fromdate = fromdate.replace("-", "")
     todate = todate.replace("-", "")
@@ -1055,9 +1046,9 @@ def get_market_trading_value_by_date(
     """  # pylint: disable=line-too-long # noqa: E501
 
     if isinstance(fromdate, datetime.datetime):
-        fromdate = _datetime2string(fromdate)
+        fromdate = krx.datetime2string(fromdate)
     if isinstance(todate, datetime.datetime):
-        todate = _datetime2string(todate)
+        todate = krx.datetime2string(todate)
 
     fromdate = fromdate.replace("-", "")
     todate = todate.replace("-", "")
@@ -1120,9 +1111,9 @@ def get_market_trading_volume_by_date(
             2021-01-22 -20475792    -775181  34931834   -13680861     0
     """
     if isinstance(fromdate, datetime.datetime):
-        fromdate = _datetime2string(fromdate)
+        fromdate = krx.datetime2string(fromdate)
     if isinstance(todate, datetime.datetime):
-        todate = _datetime2string(todate)
+        todate = krx.datetime2string(todate)
 
     fromdate = fromdate.replace("-", "")
     todate = todate.replace("-", "")
@@ -1196,10 +1187,10 @@ def get_market_net_purchases_of_equities_by_ticker(
     """  # pylint: disable=line-too-long # noqa: E501
 
     if isinstance(fromdate, datetime.datetime):
-        fromdate = _datetime2string(fromdate)
+        fromdate = krx.datetime2string(fromdate)
 
     if isinstance(todate, datetime.datetime):
-        todate = _datetime2string(todate)
+        todate = krx.datetime2string(todate)
 
     fromdate = fromdate.replace("-", "")
     todate = todate.replace("-", "")
@@ -1236,7 +1227,7 @@ def get_index_ticker_list(date: str = None, market: str = "KOSPI") -> list:
     if date is None:
         date = datetime.datetime.now()
     if isinstance(date, datetime.datetime):
-        date = _datetime2string(date)
+        date = krx.datetime2string(date)
 
     date = date.replace("-", "")
 
@@ -1280,7 +1271,7 @@ def get_index_portfolio_deposit_file(
         return []
 
     if isinstance(target_date, datetime.datetime):
-        target_date = _datetime2string(target_date)
+        target_date = krx.datetime2string(target_date)
 
     target_date = target_date.replace("-", "")
 
@@ -1382,7 +1373,7 @@ def get_index_ohlcv_by_ticker(
     """  # pylint: disable=line-too-long # noqa: E501
 
     if isinstance(date, datetime.datetime):
-        date = _datetime2string(date)
+        date = krx.datetime2string(date)
 
     date = date.replace("-", "")
 
@@ -1431,10 +1422,10 @@ def get_index_ohlcv_by_date(
     """  # pylint: disable=line-too-long # noqa: E501
 
     if isinstance(fromdate, datetime.datetime):
-        fromdate = _datetime2string(fromdate, freq)
+        fromdate = krx.datetime2string(fromdate, freq)
 
     if isinstance(todate, datetime.datetime):
-        todate = _datetime2string(todate)
+        todate = krx.datetime2string(todate)
 
     fromdate = fromdate.replace("-", "")
     todate = todate.replace("-", "")
@@ -1535,7 +1526,7 @@ def get_index_fundamental_by_ticker(
     """  # pylint: disable=line-too-long # noqa: E501
 
     if isinstance(date, datetime.datetime):
-        date = _datetime2string(date)
+        date = krx.datetime2string(date)
 
     date = date.replace("-", "")
 
@@ -1574,10 +1565,10 @@ def get_index_fundamental_by_date(
     """
 
     if isinstance(fromdate, datetime.datetime):
-        fromdate = _datetime2string(fromdate, prev)
+        fromdate = krx.datetime2string(fromdate, prev)
 
     if isinstance(todate, datetime.datetime):
-        todate = _datetime2string(todate)
+        todate = krx.datetime2string(todate)
 
     fromdate = fromdate.replace("-", "")
     todate = todate.replace("-", "")
@@ -1673,9 +1664,9 @@ def get_index_price_change_by_ticker(
     """  # pylint: disable=line-too-long # noqa: E501
 
     if isinstance(fromdate, datetime.datetime):
-        fromdate = _datetime2string(fromdate)
+        fromdate = krx.datetime2string(fromdate)
     if isinstance(todate, datetime.datetime):
-        todate = _datetime2string(todate)
+        todate = krx.datetime2string(todate)
 
     fromdate = fromdate.replace("-", "")
     todate = todate.replace("-", "")
@@ -1794,7 +1785,7 @@ def get_shorting_value_by_ticker(
     """  # pylint: disable=line-too-long # noqa: E501
 
     if isinstance(date, datetime.datetime):
-        date = _datetime2string(date)
+        date = krx.datetime2string(date)
 
     date = date.replace("-", "")
 
@@ -1843,7 +1834,7 @@ def get_shorting_volume_by_ticker(
     """  # pylint: disable=line-too-long # noqa: E501
 
     if isinstance(date, datetime.datetime):
-        date = _datetime2string(date)
+        date = krx.datetime2string(date)
 
     date = date.replace("-", "")
 
@@ -1888,9 +1879,9 @@ def get_shorting_volume_by_date(
     """
 
     if isinstance(fromdate, datetime.datetime):
-        fromdate = _datetime2string(fromdate)
+        fromdate = krx.datetime2string(fromdate)
     if isinstance(todate, datetime.datetime):
-        todate = _datetime2string(todate)
+        todate = krx.datetime2string(todate)
 
     fromdate = fromdate.replace("-", "")
     todate = todate.replace("-", "")
@@ -1924,9 +1915,9 @@ def get_shorting_value_by_date(fromdate: str, todate: str, ticker: str)  \
     """
 
     if isinstance(fromdate, datetime.datetime):
-        fromdate = _datetime2string(fromdate)
+        fromdate = krx.datetime2string(fromdate)
     if isinstance(todate, datetime.datetime):
-        todate = _datetime2string(todate)
+        todate = krx.datetime2string(todate)
 
     fromdate = fromdate.replace("-", "")
     todate = todate.replace("-", "")
@@ -1960,9 +1951,9 @@ def get_shorting_investor_volume_by_date(
             2020-01-10  5129724  141885   7849543    0  13121152
     """
     if isinstance(fromdate, datetime.datetime):
-        fromdate = _datetime2string(fromdate)
+        fromdate = krx.datetime2string(fromdate)
     if isinstance(todate, datetime.datetime):
-        todate = _datetime2string(todate)
+        todate = krx.datetime2string(todate)
 
     fromdate = fromdate.replace("-", "")
     todate = todate.replace("-", "")
@@ -1996,9 +1987,9 @@ def get_shorting_investor_value_by_date(
     """  # pylint: disable=line-too-long # noqa: E501
 
     if isinstance(fromdate, datetime.datetime):
-        fromdate = _datetime2string(fromdate)
+        fromdate = krx.datetime2string(fromdate)
     if isinstance(todate, datetime.datetime):
-        todate = _datetime2string(todate)
+        todate = krx.datetime2string(todate)
 
     fromdate = fromdate.replace("-", "")
     todate = todate.replace("-", "")
@@ -2040,7 +2031,7 @@ def get_shorting_volume_top50(date: str, market: str = "KOSPI") -> DataFrame:
     """  # pylint: disable=line-too-long # noqa: E501
 
     if isinstance(date, datetime.datetime):
-        date = _datetime2string(date)
+        date = krx.datetime2string(date)
 
     date = date.replace("-", "")
 
@@ -2081,7 +2072,7 @@ def get_shorting_balance_top50(date: str, market: str = "KOSPI") -> DataFrame:
     """  # pylint: disable=line-too-long # noqa: E501
 
     if isinstance(date, datetime.datetime):
-        date = _datetime2string(date)
+        date = krx.datetime2string(date)
 
     date = date.replace("-", "")
 
@@ -2163,7 +2154,7 @@ def get_shorting_balance_by_ticker(date: str, market: str = "KOSPI") \
     """
 
     if isinstance(date, datetime.datetime):
-        date = _datetime2string(date)
+        date = krx.datetime2string(date)
 
     date = date.replace("-", "")
 
@@ -2194,9 +2185,9 @@ def get_shorting_balance_by_date(fromdate: str, todate: str, ticker: str) \
     """  # pylint: disable=line-too-long # noqa: E501
 
     if isinstance(fromdate, datetime.datetime):
-        fromdate = _datetime2string(fromdate)
+        fromdate = krx.datetime2string(fromdate)
     if isinstance(todate, datetime.datetime):
-        todate = _datetime2string(todate)
+        todate = krx.datetime2string(todate)
 
     fromdate = fromdate.replace("-", "")
     todate = todate.replace("-", "")
@@ -2227,7 +2218,7 @@ def get_etx_ticker_list(market: str, date: str = None) -> list:
     if date is None:
         date = get_nearest_business_day_in_a_week()
     if isinstance(date, datetime.datetime):
-        date = _datetime2string(date)
+        date = krx.datetime2string(date)
 
     date = date.replace("-", "")
 
@@ -2252,7 +2243,7 @@ def get_etf_ticker_list(date: str = None) -> list:
     if date is None:
         date = get_nearest_business_day_in_a_week()
     if isinstance(date, datetime.datetime):
-        date = _datetime2string(date)
+        date = krx.datetime2string(date)
 
     date = date.replace("-", "")
 
@@ -2277,7 +2268,7 @@ def get_etn_ticker_list(date: str = None) -> list:
     if date is None:
         date = get_nearest_business_day_in_a_week()
     if isinstance(date, datetime.datetime):
-        date = _datetime2string(date)
+        date = krx.datetime2string(date)
 
     date = date.replace("-", "")
 
@@ -2302,7 +2293,7 @@ def get_elw_ticker_list(date: str = None) -> list:
     if date is None:
         date = get_nearest_business_day_in_a_week()
     if isinstance(date, datetime.datetime):
-        date = _datetime2string(date)
+        date = krx.datetime2string(date)
 
     date = date.replace("-", "")
 
@@ -2409,10 +2400,10 @@ def get_etf_ohlcv_by_date(
     """  # pylint: disable=line-too-long # noqa: E501
 
     if isinstance(fromdate, datetime.datetime):
-        fromdate = _datetime2string(fromdate)
+        fromdate = krx.datetime2string(fromdate)
 
     if isinstance(todate, datetime.datetime):
-        todate = _datetime2string(todate)
+        todate = krx.datetime2string(todate)
 
     fromdate = fromdate.replace("-", "")
     todate = todate.replace("-", "")
@@ -2459,7 +2450,7 @@ def get_etf_ohlcv_by_ticker(date: str) -> DataFrame:
     """  # pylint: disable=line-too-long # noqa: E501
 
     if isinstance(date, datetime.datetime):
-        date = _datetime2string(date)
+        date = krx.datetime2string(date)
 
     date = date.replace("-", "")
 
@@ -2492,10 +2483,10 @@ def get_etf_price_change_by_ticker(fromdate: str, todate: str) -> DataFrame:
     """
 
     if isinstance(fromdate, datetime.datetime):
-        fromdate = _datetime2string(fromdate)
+        fromdate = krx.datetime2string(fromdate)
 
     if isinstance(todate, datetime.datetime):
-        todate = _datetime2string(todate)
+        todate = krx.datetime2string(todate)
 
     fromdate = fromdate.replace("-", "")
     todate = todate.replace("-", "")
@@ -2556,9 +2547,9 @@ def get_etf_price_deviation(fromdate: str, todate: str, ticker: str) \
     """
 
     if isinstance(fromdate, datetime.datetime):
-        fromdate = _datetime2string(fromdate)
+        fromdate = krx.datetime2string(fromdate)
     if isinstance(todate, datetime.datetime):
-        todate = _datetime2string(todate)
+        todate = krx.datetime2string(todate)
 
     fromdate = fromdate.replace("-", "")
     todate = todate.replace("-", "")
@@ -2589,9 +2580,9 @@ def get_etf_tracking_error(fromdate, todate, ticker) -> DataFrame:
     """
 
     if isinstance(fromdate, datetime.datetime):
-        fromdate = _datetime2string(fromdate)
+        fromdate = krx.datetime2string(fromdate)
     if isinstance(todate, datetime.datetime):
-        todate = _datetime2string(todate)
+        todate = krx.datetime2string(todate)
 
     fromdate = fromdate.replace("-", "")
     todate = todate.replace("-", "")
@@ -2677,10 +2668,10 @@ def _get_etf_trading_volumne_and_value_by_date(
     """  # pylint: disable=line-too-long # noqa: E501
 
     if isinstance(fromdate, datetime.datetime):
-        fromdate = _datetime2string(fromdate)
+        fromdate = krx.datetime2string(fromdate)
 
     if isinstance(todate, datetime.datetime):
-        todate = _datetime2string(todate)
+        todate = krx.datetime2string(todate)
 
     str2type1 = {
         "거래대금": 1,
@@ -2723,10 +2714,10 @@ def _get_etf_trading_volumne_and_value_by_investor(fromdate: str, todate: str)\
     """  # pylint: disable=line-too-long # noqa: E501
 
     if isinstance(fromdate, datetime.datetime):
-        fromdate = _datetime2string(fromdate)
+        fromdate = krx.datetime2string(fromdate)
 
     if isinstance(todate, datetime.datetime):
-        todate = _datetime2string(todate)
+        todate = krx.datetime2string(todate)
 
     return krx.get_etf_trading_volumne_and_value_by_investor(fromdate, todate)
 
