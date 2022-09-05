@@ -7,7 +7,7 @@ from pykrx.website.krx.market.core import (
     투자자별_거래실적_개별종목_기간합계,
     투자자별_거래실적_개별종목_일별추이_일반,
     투자자별_거래실적_개별종목_일별추이_상세,
-    투자자별_거래실적_전체시장_기간합계,
+    투자자별_거래실적_전체시장_기간합계, 업종분류현황,
     투자자별_거래실적_전체시장_일별추이_일반, 개별종목_공매도_거래_전종목,
     투자자별_거래실적_전체시장_일별추이_상세, 개별종목_공매도_종합정보,
     개별종목_공매도_거래_개별추이, 투자자별_공매도_거래, 전종목_공매도_잔고,
@@ -747,6 +747,49 @@ def get_market_net_purchases_of_equities_by_ticker(
     return df.set_index('티커')
 
 
+@dataframe_empty_handler
+def get_market_sector_classifications(date: str, market: str) -> DataFrame:
+    """[12025] 업종별 분류 현황
+
+    Args:
+        date    (str ): 조회 일자 (YYYYMMDD)
+        market  (str ): 조회 시장 (KOSPI/KOSDAQ)
+
+    Returns:
+        DataFrame:
+
+            > get_market_sector_classifications("20220902", "KOSPI")
+
+                         종목명     업종명    종가    대비  등락률       시가총액
+            종목코드
+            095570   AJ네트웍스   서비스업    7280    80.0    1.11   340866307600
+            006840     AK홀딩스   기타금융   15900   150.0    0.95   210636219900
+            027410          BGF   기타금융    3990     0.0    0.00   381909996090
+            282330    BGF리테일     유통업  156000 -1500.0   -0.95  2696289336000
+            138930  BNK금융지주   기타금융    6560   -40.0   -0.61  2138135213760
+    """  # pylint: disable=line-too-long # noqa: E501
+    market2mktid = {
+        "KOSPI": "STK",
+        "KOSDAQ": "KSQ",
+    }
+    df = 업종분류현황().fetch(date, market2mktid[market])
+
+    df = df[["ISU_SRT_CD", "ISU_ABBRV", "IDX_IND_NM", "TDD_CLSPRC",
+             "CMPPREVDD_PRC", "FLUC_RT", "MKTCAP"]]
+    df.columns = ["종목코드", "종목명", "업종명", "종가", "대비", "등락률",
+                  "시가총액"]
+    df = df.replace(r'\-$', '0', regex=True)
+    df = df.replace('', '0', regex=True)
+    df = df.replace(',', '', regex=True)
+    df = df.astype({
+        "종가": np.int32,
+        "대비": np.float64,
+        "등락률": np.float64,
+        "시가총액": np.int64
+    })
+    return df.set_index("종목코드")
+
+
 # -----------------------------------------------------------------------------
 # index
 @dataframe_empty_handler
@@ -1477,6 +1520,6 @@ if __name__ == "__main__":
     # df = get_stock_major_changes("005930")
     # df = get_market_ohlcv_by_date(
     #     "20201226", "20210126", "005930")
-    df = get_index_ohlcv_by_ticker(
-        "20220602")
+    # df = get_index_ohlcv_by_ticker("20220602")
+    df = get_market_sector_classifications("20220902", "KOSPI")
     print(df)

@@ -984,6 +984,29 @@ class 지수구성종목(KrxWebIo):
         return DataFrame(result['output'])
 
 
+class 업종분류현황(KrxWebIo):
+    @property
+    def bld(self):
+        return "dbms/MDC/STAT/standard/MDCSTAT03901"
+
+    def fetch(self, trdDd: str, mktId: str) -> DataFrame:
+        """
+                ISU_SRT_CD      ISU_ABBRV MKT_TP_NM    IDX_IND_NM  TDD_CLSPRC CMPPREVDD_PRC FLUC_RT             MKTCAP FLUC_TP_CD
+            0       095570     AJ네트웍스     KOSPI       서비스업      7,280            80    1.11    340,866,307,600          1
+            1       006840       AK홀딩스     KOSPI       기타금융     15,900           150    0.95    210,636,219,900          1
+            2       027410            BGF     KOSPI       기타금융      3,990             0    0.00    381,909,996,090          3
+            3       282330      BGF리테일     KOSPI        유통업     156,000        -1,500   -0.95  2,696,289,336,000          2
+            4       138930    BNK금융지주     KOSPI       기타금융      6,560           -40   -0.61  2,138,135,213,760          2
+            ..         ...       ...       ...        ...        ...           ...     ...                ...        ...
+            934     005010         휴스틸     KOSPI       철강금속      7,430          -470   -5.95    291,167,397,250          2
+            935     000540       흥국화재     KOSPI         보험        3,295           -40   -1.20    211,679,515,275          2
+            936     000547   흥국화재2우B     KOSPI         보험       21,750           100    0.46      3,340,800,000          1
+            937     000545      흥국화재우     KOSPI         보험       7,000           -30   -0.43      5,376,000,000          2
+            938     003280        흥아해운     KOSPI      운수창고업    1,660            -5   -0.30    399,105,332,340          2
+        """
+        return DataFrame(self.read(trdDd=trdDd, mktId=mktId)['block1'])
+
+
 # -----------------------------------------------------------------------------
 # shorting
 class 개별종목_공매도_종합정보(KrxWebIo):
@@ -1354,4 +1377,5 @@ if __name__ == "__main__":
     # print(개별종목_공매도_잔고().fetch("20200106", "20200110", "KR7005930003"))
     # print(PER_PBR_배당수익률_개별지수().fetch("20211122", "20211129", 5, 300))
     # print(전체지수시세().fetch("20211126", "02"))
-    print(기업주요변동사항().fetch("KR7005930003"))
+    # print(기업주요변동사항().fetch("KR7005930003"))
+    print(업종분류현황().fetch("20220902", "STK"))

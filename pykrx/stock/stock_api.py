@@ -1678,6 +1678,17 @@ def get_index_price_change_by_ticker(
     return krx.get_index_price_change_by_ticker(fromdate, todate, market)
 
 
+def get_market_sector_classifications(date: str, market: str) -> DataFrame:
+    if isinstance(date, datetime.datetime):
+        date = krx.datetime2string(date)
+    date = date.replace("-", "")
+
+    df = krx.get_market_sector_classifications(date, market)
+    if (df["종가"] == 0).all(axis=None):
+        return DataFrame()
+    return df
+
+
 # -----------------------------------------------------------------------------
 # 공매도(SHORTING) API
 # -----------------------------------------------------------------------------
@@ -1786,7 +1797,6 @@ def get_shorting_value_by_ticker(
 
     if isinstance(date, datetime.datetime):
         date = krx.datetime2string(date)
-
     date = date.replace("-", "")
 
     if include is None:
@@ -2758,8 +2768,10 @@ if __name__ == "__main__":
     # print(get_market_ohlcv("20210122"))
     # print(get_market_price_change("20210101", "20210108"))
     # df = get_stock_major_changes("005930")
-    st_date = "20220331"
-    stock_code = "017810"
+    # st_date = "20220331"
+    # stock_code = "017810"
     # df = get_market_trading_volume_by_investor(st_date, st_date, stock_code)
-    df = get_shorting_volume_by_ticker("20220605")
+    # df = get_shorting_volume_by_ticker("20220605")
+
+    df = get_market_sector_classifications("20220903", "KOSPI")
     print(df)
