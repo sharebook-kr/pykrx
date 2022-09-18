@@ -8,7 +8,9 @@ from deprecated import deprecated
 from pandas import DataFrame
 import re
 
-yymmdd = re.compile(r"\d{4}[-/]?\d{2}[-/]?\d{2}")
+regex_yymmdd = re.compile(r"\d{4}[-/]?\d{2}[-/]?\d{2}")
+regex_ticker = re.compile(r"^\d{6}$")
+regex_hangul = re.compile(r"^[가-힣]+$")
 
 
 def market_valid_check(param=None):
@@ -182,7 +184,7 @@ def get_market_ohlcv(*args, **kwargs):
 
     """  # pylint: disable=line-too-long # noqa: E501
 
-    dates = list(filter(yymmdd.match, [str(x) for x in args]))
+    dates = list(filter(regex_yymmdd.match, [str(x) for x in args]))
     if len(dates) == 2 or ('fromdate' in kwargs and
                            'todate' in kwargs):
         return get_market_ohlcv_by_date(*args, **kwargs)
@@ -343,7 +345,7 @@ def get_market_cap(*args, **kwargs):
 
     """  # pylint: disable=line-too-long # noqa: E501
 
-    dates = list(filter(yymmdd.match, [str(x) for x in args]))
+    dates = list(filter(regex_yymmdd.match, [str(x) for x in args]))
     if len(dates) == 2 or ('fromdate' in kwargs and
                            'todate' in kwargs):
         return get_market_cap_by_date(*args, **kwargs)
@@ -478,7 +480,7 @@ def get_exhaustion_rates_of_foreign_investment(*args, **kwargs):
             020560  223235294   13871465   6.210938  111595323  12.429688
     """
 
-    dates = list(filter(yymmdd.match, [str(x) for x in args]))
+    dates = list(filter(regex_yymmdd.match, [str(x) for x in args]))
     if len(dates) == 2 or ('fromdate' in kwargs and
                            'todate' in kwargs):
         return get_exhaustion_rates_of_foreign_investment_by_date(
@@ -579,7 +581,7 @@ def get_market_price_change(*args, **kwargs):
             138930  BNK금융지주    5680    5780   100   1.76  18363844  103453756550
     """  # pylint: disable=line-too-long # noqa: E501
 
-    dates = list(filter(yymmdd.match, [str(x) for x in args]))
+    dates = list(filter(regex_yymmdd.match, [str(x) for x in args]))
     if len(dates) == 2 or ('fromdate' in kwargs and
                            'todate' in kwargs):
         return get_market_price_change_by_ticker(*args, **kwargs)
@@ -675,7 +677,7 @@ def get_market_fundamental(*args, **kwargs):
                 282330   36022  15.062500  3.660156  8763  2.050781  2700
                 138930   25415   3.380859  0.219971  1647  6.468750   360
     """
-    dates = list(filter(yymmdd.match, [str(x) for x in args]))
+    dates = list(filter(regex_yymmdd.match, [str(x) for x in args]))
     if len(dates) == 2 or ('fromdate' in kwargs and
                            'todate' in kwargs):
         return get_market_fundamental_by_date(*args, **kwargs)
@@ -1329,7 +1331,7 @@ def get_index_ohlcv(*args, **kwargs):
             코스피50             3034.99   3055.71   3008.02   3008.02   110775949  13083864634083
     """  # pylint: disable=line-too-long # noqa: E501
 
-    dates = list(filter(yymmdd.match, [str(x) for x in args]))
+    dates = list(filter(regex_yymmdd.match, [str(x) for x in args]))
     if len(dates) == 2 or ('fromdate' in kwargs and
                            'todate' in kwargs):
         return get_index_ohlcv_by_date(*args, **kwargs)
@@ -1493,7 +1495,7 @@ def get_index_fundamental(*args, **kwargs):
             코스피 200 중소형주    1264.5    0.40    62.820000    0.0   1.19       0.98
     """  # pylint: disable=line-too-long # noqa: E501
 
-    dates = list(filter(yymmdd.match, [str(x) for x in args]))
+    dates = list(filter(regex_yymmdd.match, [str(x) for x in args]))
     if len(dates) == 2 or ('fromdate' in kwargs and
                            'todate' in kwargs):
         return get_index_fundamental_by_date(*args, **kwargs)
@@ -2132,7 +2134,7 @@ def get_shorting_balance(*args, **kwargs) -> DataFrame:
             138930      596477    325935246  3340271200  1.825237e+12  0.180054
     """  # pylint: disable=line-too-long # noqa: E501
 
-    dates = list(filter(yymmdd.match, [str(x) for x in args]))
+    dates = list(filter(regex_yymmdd.match, [str(x) for x in args]))
     if len(dates) == 2 or ('fromdate' in kwargs and
                            'todate' in kwargs):
         return get_shorting_balance_by_date(*args, **kwargs)
@@ -2600,59 +2602,128 @@ def get_etf_tracking_error(fromdate, todate, ticker) -> DataFrame:
     return krx.get_etf_tracking_error(fromdate, todate, ticker)
 
 
-def get_etf_trading_volumne_and_value(*args, **kwargs):
+def get_etf_trading_volume_and_value(*args, **kwargs):
     """ETF 거래량과 거래대금 조회
     Args:
-
         1) 주어진 기간의 투자자별 거래실적 합계
 
         fromdate    (str): 조회 시작 일자 (YYMMDD)
         todate      (str): 조회 종료 일자 (YYMMDD)
 
-        > get_etf_trading_volumne_and_value("20220415", "20220422")
+    Returns:
+        DataFrame:
+            > get_etf_trading_volume_and_value("20220908", "20220916")
 
-        2) 주어진 기간의 일자별 거래 실적 조회
+                           거래량                              거래대금
+                             매도        매수    순매수            매도            매수         순매수
+            금융투자    345997085   324299496 -21697589   2837651098275   2547396695135 -290254403140
+            보험          3274320     3016380   -257940     47863677445     67629772625   19766095180
+            투신         35903044    34340340  -1562704    384044484795    442895636810   58851152015
+            사모          9280868     9421625    140757    109053819595    176660869270   67607049675
+            은행          9351480     6880644  -2470836    124954335800    120708432910   -4245902890
+            기타금융       634616     1250658    616042      9073593605     17197744015    8124150410
+            연기금 등      340847      497155    156308      5195478420      8181474870    2985996450
+            기관합계    404782260   379706298 -25075962   3517836487935   3380670625635 -137165862300
+            기타법인     16684374    16223283   -461091     78915300735     80730150250    1814849515
+            개인        697741088   719636083  21894995   5592416203015   5681592506945   89176303930
+            외국인      575071221   578396025   3324804   3210507902815   3255764637940   45256735125
+            기타외국인    1808918     2126172    317254      9761352810     10679326540     917973730
+            전체       1696087861  1696087861         0  12409437247310  12409437247310             0
+
+    Args:
+        2) 주어진 기간의 투자자별(개별종목) 거래실적 합계
+
+        fromdate    (str): 조회 시작 일자 (YYMMDD)
+        todate      (str): 조회 종료 일자 (YYMMDD)
+        ticker      (str): 조회할 종목의 티커
+
+    Returns:
+        DataFrame:
+            > get_etf_trading_volume_and_value("20220908", "20220916", "580011")
+
+                            거래량             거래대금
+                            매도  매수 순매수      매도    매수 순매수
+                INVST_NM
+                금융투자      27    25     -2    266785  243320 -23465
+                보험           0     0      0         0       0      0
+                투신           0     0      0         0       0      0
+                사모           0     0      0         0       0      0
+                은행           0     0      0         0       0      0
+                기타금융       0     0      0         0       0      0
+                연기금 등      0     0      0         0       0      0
+                기관합계      27    25     -2    266785  243320 -23465
+                기타법인       0     0      0         0       0      0
+                개인          25    27      2    243320  266785  23465
+                외국인         0     0      0         0       0      0
+                기타외국인     0     0      0         0       0      0
+                전체          52    52      0    510105  510105      0
+
+    Args:
+        3) 주어진 기간의 일자별 거래 실적 조회
 
         fromdate        (str): 조회 시작 일자 (YYMMDD)
         todate          (str): 조회 종료 일자 (YYMMDD)
         query_type1     (str): 거래대금 / 거래량
         query_type2     (str): 순매수 / 매수 / 매도
 
-        > get_etf_trading_volumne_and_value("20220415", "20220422", query_type1="거래대금", query_type2="순매수)
+    Returns:
+        DataFrame:
+            > get_etf_trading_volume_and_value("20220908", "20220916", "거래대금", "순매수")
+
+                                기관    기타법인          개인       외국인 전체
+            날짜
+            2022-09-08  -28412130855 -1347499030  -55647658015  85407287900    0
+            2022-09-13  118223887975 -6612605270 -103235389820  -8375892885    0
+            2022-09-14  -77195960615  2292937985  106496230995 -31593208365    0
+            2022-09-15  -79332799735 -1802088910   72133293405   9001595240    0
+            2022-09-16  -70448859070  9284104740   69429827365  -8265073035    0
+
+    Args:
+        4) 주어진 기간의 일자별(개별종목) 거래 실적 조회
+
+        fromdate        (str): 조회 시작 일자 (YYMMDD)
+        todate          (str): 조회 종료 일자 (YYMMDD)
+        ticker          (str): 조회할 종목의 티커
+        query_type1     (str): 거래대금 / 거래량
+        query_type2     (str): 순매수 / 매수 / 매도
 
     Returns:
         DataFrame:
 
-             > get_etf_trading_volumne_and_value("20220415", "20220422")
+            > get_etf_trading_volume_and_value("20220908", "20220916", "580011", "거래대금", "순매수")
 
-                           거래량                              거래대금
-                             매도        매수    순매수            매도            매수            순
-            매수
-            금융투자    375220036   328066683 -47153353   3559580094684   3040951626908 -518628467776
-            보험         15784738    15490448   -294290    309980189819    293227931019  -16752258800
-            투신         14415013    15265023    850010    287167721259    253185404050  -33982317209
-            사모          6795002     7546735    751733     58320840040    120956023820   62635183780
-
-            > get_etf_trading_volumne_and_value("20220415", "20220422", query_type1="거래대금", query_type2="순매수")
-
-                                기관    기타법인         개인        외국인 전체
-            날짜
-            2022-04-15   25346770535  -138921500  17104310255  -42312159290    0
-            2022-04-18 -168362290065  -871791310  88115812520   81118268855    0
-            2022-04-19  -36298873785  7555666910  -1968998025   30712204900    0
-            2022-04-20 -235935697655  8965445880  19247888605  207722363170    0
-            2022-04-21  -33385835805  2835764290  35920390975   -5370319460    0
+                             기관  기타법인     개인  외국인  전체
+                날짜
+                2022-09-08  -3570         0     3570       0     0
+                2022-09-13 -10205         0    10205       0     0
+                2022-09-14    -65         0       65       0     0
+                2022-09-15    -65         0       65       0     0
+                2022-09-16  -9560         0     9560       0     0
     """  # pylint: disable=line-too-long # noqa: E501
 
-    param_len = len(args) + len(kwargs)
-    if param_len > 2:
-        return _get_etf_trading_volumne_and_value_by_date(*args, **kwargs)
+    ticker = list(filter(regex_ticker.match, args)) + \
+             list(filter(regex_ticker.match, [kwargs[x] for x in kwargs]))
+
+    hangul = list(filter(regex_hangul.match, args)) + \
+             list(filter(regex_hangul.match, [kwargs[x] for x in kwargs]))
+
+    if len(ticker) == 0:
+        if len(hangul) == 0:
+            return _get_etf_trading_volume_and_value_by_investor(
+                *args, **kwargs)
+        else:
+            return _get_etf_trading_volume_and_value_by_date(*args, **kwargs)
     else:
-        return _get_etf_trading_volumne_and_value_by_investor(*args, **kwargs)
+        if len(hangul) == 0:
+            return _get_etf_indivisual_trading_volume_and_value_by_investor(
+                *args, **kwargs)
+        else:
+            return _get_etf_indivisual_trading_volume_and_value_by_date(
+                *args, **kwargs)
 
 
-def _get_etf_trading_volumne_and_value_by_date(
-    fromdate: str, todate: str, query_type1: bool, query_type2: str) \
+def _get_etf_trading_volume_and_value_by_date(
+    fromdate: str, todate: str, query_type1: str, query_type2: str) \
          -> DataFrame:
     """주어진 기간의 일자별 거래 실적 조회
 
@@ -2665,7 +2736,7 @@ def _get_etf_trading_volumne_and_value_by_date(
     Returns:
         DataFrame:
 
-            > get_etf_trading_volumne_and_value_by_date("20220415", "20220422", 1, 1)
+            > _get_etf_trading_volume_and_value_by_date("20220415", "20220422", "거래대금", "순매수")
 
                                 기관    기타법인         개인        외국인 전체
             날짜
@@ -2683,25 +2754,11 @@ def _get_etf_trading_volumne_and_value_by_date(
     if isinstance(todate, datetime.datetime):
         todate = krx.datetime2string(todate)
 
-    str2type1 = {
-        "거래대금": 1,
-        "거래량": 2
-    }
-
-    str2type2 = {
-        "순매수": 1,
-        "매수": 2,
-        "매도": 3
-    }
-
-    inqCondTpCd1 = str2type1[query_type1]
-    inqCondTpCd2 = str2type2[query_type2]
-
-    return krx.get_etf_trading_volumne_and_value_by_date(
-        fromdate, todate, inqCondTpCd1, inqCondTpCd2)
+    return krx.get_etf_trading_volume_and_value_by_date(
+        fromdate, todate, query_type1, query_type2)
 
 
-def _get_etf_trading_volumne_and_value_by_investor(fromdate: str, todate: str)\
+def _get_etf_trading_volume_and_value_by_investor(fromdate: str, todate: str)\
         -> DataFrame:
     """주어진 기간의 투자자별 거래실적 합계
 
@@ -2712,7 +2769,7 @@ def _get_etf_trading_volumne_and_value_by_investor(fromdate: str, todate: str)\
     Returns:
         DataFrame:
 
-            > get_etf_trading_volumne_and_value_by_investor("20220415", "20220422")
+            > _get_etf_trading_volume_and_value_by_investor("20220415", "20220422")
 
                            거래량                              거래대금
                              매도        매수    순매수            매도            매수            순
@@ -2729,7 +2786,86 @@ def _get_etf_trading_volumne_and_value_by_investor(fromdate: str, todate: str)\
     if isinstance(todate, datetime.datetime):
         todate = krx.datetime2string(todate)
 
-    return krx.get_etf_trading_volumne_and_value_by_investor(fromdate, todate)
+    return krx.get_etf_trading_volume_and_value_by_investor(
+        fromdate, todate)
+
+
+def _get_etf_indivisual_trading_volume_and_value_by_date(
+    fromdate: str, todate: str, ticker: str, query_type1: str,
+    query_type2: str) -> DataFrame:
+    """주어진 기간의 일자별 거래 실적 조회
+
+    Args:
+        fromdate        (str): 조회 시작 일자 (YYMMDD)
+        todate          (str): 조회 종료 일자 (YYMMDD)
+        ticker          (str): 조회 종목의 티커
+        query_type1     (str): 거래대금 / 거래량
+        query_type2     (str): 순매수 / 매수 / 매도
+
+    Returns:
+        DataFrame:
+
+            > _get_etf_indivisual_trading_volume_and_value_by_date("20220908", "20220916", "580011", "거래대금", "순매수")
+
+                             기관  기타법인     개인  외국인  전체
+                날짜
+                2022-09-08  -3570         0     3570       0     0
+                2022-09-13 -10205         0    10205       0     0
+                2022-09-14    -65         0       65       0     0
+                2022-09-15    -65         0       65       0     0
+                2022-09-16  -9560         0     9560       0     0
+    """  # pylint: disable=line-too-long # noqa: E501
+
+    if isinstance(fromdate, datetime.datetime):
+        fromdate = krx.datetime2string(fromdate)
+
+    if isinstance(todate, datetime.datetime):
+        todate = krx.datetime2string(todate)
+
+    return krx.get_etf_indivisual_trading_volume_and_value_by_date(
+        fromdate, todate, ticker, query_type1, query_type2)
+
+
+def _get_etf_indivisual_trading_volume_and_value_by_investor(
+    fromdate: str, todate: str, ticker: str) -> DataFrame:
+    """주어진 기간의 투자자별 거래실적 합계
+
+    Args:
+        fromdate    (str): 조회 시작 일자 (YYMMDD)
+        todate      (str): 조회 종료 일자 (YYMMDD)
+        ticker      (str): 조회 종목의 티커
+
+    Returns:
+        DataFrame:
+
+            > _get_etf_indivisual_trading_volume_and_value_by_investor("20220415", "20220422", "295820")
+
+                                   거래량                 거래대금
+                        매도  매수 순매수      매도    매수 순매수
+            INVST_NM
+            금융투자      27    25     -2    266785  243320 -23465
+            보험           0     0      0         0       0      0
+            투신           0     0      0         0       0      0
+            사모           0     0      0         0       0      0
+            은행           0     0      0         0       0      0
+            기타금융       0     0      0         0       0      0
+            연기금 등      0     0      0         0       0      0
+            기관합계      27    25     -2    266785  243320 -23465
+            기타법인       0     0      0         0       0      0
+            개인          25    27      2    243320  266785  23465
+            외국인         0     0      0         0       0      0
+            기타외국인     0     0      0         0       0      0
+            전체          52    52      0    510105  510105      0
+    """  # pylint: disable=line-too-long # noqa: E501
+
+    if isinstance(fromdate, datetime.datetime):
+        fromdate = krx.datetime2string(fromdate)
+
+    if isinstance(todate, datetime.datetime):
+        todate = krx.datetime2string(todate)
+
+    return krx.get_etf_indivisual_trading_volume_and_value_by_investor(
+        fromdate, todate, ticker)
 
 
 def get_stock_major_changes(ticker: str) -> DataFrame:
@@ -2773,5 +2909,10 @@ if __name__ == "__main__":
     # df = get_market_trading_volume_by_investor(st_date, st_date, stock_code)
     # df = get_shorting_volume_by_ticker("20220605")
 
-    df = get_market_sector_classifications("20220903", "KOSPI")
+    # df = get_market_sector_classifications("20220902", "KOSPI")
+    #
+    # df = get_etf_trading_volume_and_value("20220908", "20220916")
+    # df = get_etf_trading_volume_and_value("20220908", "20220916", "거래대금", "순매수")
+    # df = get_etf_trading_volume_and_value("20220908", "20220916", "580011")
+    df = get_etf_trading_volume_and_value("20220908", "20220916", "580011", "거래대금", "순매수")
     print(df)

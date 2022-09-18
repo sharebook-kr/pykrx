@@ -1,7 +1,8 @@
 from pykrx.website.comm import dataframe_empty_handler
 from pykrx.website.krx.etx.core import (
     개별종목시세_ETF, 전종목시세_ETF, 전종목등락률_ETF, PDF, 추적오차율추이,
-    괴리율추이, 투자자별거래실적_기간합계, 투자자별거래실적_일별추이
+    괴리율추이, 투자자별거래실적_기간합계, 투자자별거래실적_일별추이,
+    투자자별거래실적_개별종목_기간합계, 투자자별거래실적_개별종목_일별추이
 )
 from pykrx.website.krx.etx.ticker import get_etx_isin
 import numpy as np
@@ -251,7 +252,7 @@ def get_etf_tracking_error(fromdate: str, todate: str, ticker: str) \
 
 
 @dataframe_empty_handler
-def get_etf_trading_volumne_and_value_by_investor(fromdate: str, todate: str) \
+def get_etf_trading_volume_and_value_by_investor(fromdate: str, todate: str) \
         -> DataFrame:
     """주어진 기간의 투자자별 거래실적 합계
 
@@ -295,21 +296,21 @@ def get_etf_trading_volumne_and_value_by_investor(fromdate: str, todate: str) \
 
 
 @dataframe_empty_handler
-def get_etf_trading_volumne_and_value_by_date(
-    fromdate: str, todate: str, inqCondTpCd1: int, inqCondTpCd2: int) \
+def get_etf_trading_volume_and_value_by_date(
+    fromdate: str, todate: str, query_type1: str, query_type2: str) \
          -> DataFrame:
     """주어진 기간의 일자별 거래 실적 조회
 
     Args:
         fromdate        (str): 조회 시작 일자 (YYMMDD)
         todate          (str): 조회 종료 일자 (YYMMDD)
-        inqCondTpCd1    (int): 1 - 거래대금 / 2 - 거래량
-        inqCondTpCd2    (int): 1 - 순매수 / 2 - 매수 / 3 - 매도
+        query_type1     (str): 거래대금 / 거래량
+        query_type2     (str): 순매수 / 매수 / 매도
 
     Returns:
         DataFrame:
 
-            > get_etf_trading_volumne_and_value_by_date("20220415", "20220422", 1, 1)
+            > get_etf_trading_volumne_and_value_by_date("20220415", "20220422", "거래대금", "순매수")
 
                                 기관    기타법인         개인        외국인 전체
             날짜
@@ -320,9 +321,113 @@ def get_etf_trading_volumne_and_value_by_date(
             2022-04-21  -33385835805  2835764290  35920390975   -5370319460    0
             2022-04-22  -10628831870  2032673735  39477777530  -30881619395    0
     """  # pylint: disable=line-too-long # noqa: E501
+    query_type1 = {"거래대금": 1, "거래량": 2}.get(query_type1, 1)
+    query_type2 = {"순매수": 1, "매수": 2, "매도": 3}.get(query_type2, 3)
 
     df = 투자자별거래실적_일별추이().fetch(
-        fromdate, todate, inqCondTpCd1=inqCondTpCd1, inqCondTpCd2=inqCondTpCd2)
+        fromdate, todate, query_type1, query_type2)
+    df.columns = ['날짜', '기관', '기타법인', '개인', '외국인', "전체"]
+
+    df = df.set_index('날짜')
+    df.index = pd.to_datetime(df.index, format='%Y/%m/%d')
+
+    df = df.replace(',', '', regex=True)
+    df = df.astype({
+        "기관": np.int64,
+        "기타법인": np.int64,
+        "개인": np.int64,
+        "외국인": np.int64,
+        "전체": np.uint64,
+    })
+    return df.sort_index()
+
+
+def get_etf_indivisual_trading_volume_and_value_by_investor(
+        fromdate: str, todate: str, ticker: str) -> DataFrame:
+    """주어진 기간 동안 개별종목의 거래실적 합계
+
+    Args:
+        fromdate    (str): 조회 시작 일자 (YYMMDD)
+        todate      (str): 조회 종료 일자 (YYMMDD)
+        ticker      (str): 조회 종목의 티커
+
+    Returns:
+        DataFrame:
+
+            > _get_etf_indivisual_trading_volumne_and_value_by_investor("20220415", "20220422", "295820")
+
+                                   거래량                 거래대금
+                        매도  매수 순매수      매도    매수 순매수
+            INVST_NM
+            금융투자      27    25     -2    266785  243320 -23465
+            보험           0     0      0         0       0      0
+            투신           0     0      0         0       0      0
+            사모           0     0      0         0       0      0
+            은행           0     0      0         0       0      0
+            기타금융       0     0      0         0       0      0
+            연기금 등      0     0      0         0       0      0
+            기관합계      27    25     -2    266785  243320 -23465
+            기타법인       0     0      0         0       0      0
+            개인          25    27      2    243320  266785  23465
+            외국인         0     0      0         0       0      0
+            기타외국인     0     0      0         0       0      0
+            전체          52    52      0    510105  510105      0
+    """  # pylint: disable=line-too-long # noqa: E501
+
+    isin = get_etx_isin(ticker)
+    df = 투자자별거래실적_개별종목_기간합계().fetch(fromdate, todate, isin)
+
+    df = df[df.columns[1:]]
+    df = df.set_index("INVST_NM")
+    df.columns = pd.MultiIndex.from_product(
+        [["거래량", "거래대금"], ["매도", "매수", "순매수"]])
+
+    df = df.replace(',', '', regex=True)
+    df = df.astype({
+        ("거래량", "매도"): np.uint64,
+        ("거래량", "매수"): np.uint64,
+        ("거래량", "순매수"): np.int64,
+        ("거래대금", "매도"): np.uint64,
+        ("거래대금", "매수"): np.uint64,
+        ("거래대금", "순매수"): np.int64,
+    })
+    return df
+
+
+@dataframe_empty_handler
+def get_etf_indivisual_trading_volume_and_value_by_date(
+    fromdate: str, todate: str, ticker: str, query_type1: str,
+        query_type2: str) -> DataFrame:
+    """주어진 기간동안 개별 종목 일자별 거래 실적 조회
+
+    Args:
+        fromdate        (str): 조회 시작 일자 (YYMMDD)
+        todate          (str): 조회 종료 일자 (YYMMDD)
+        ticker          (str): 조회 종목의 티커
+        query_type1     (str): 거래대금 / 거래량
+        query_type2     (str): 순매수 / 매수 / 매도
+
+    Returns:
+        DataFrame:
+
+            > get_etf_indivisual_trading_volumne_and_value_by_date("20220908", "20220916", "580011", "거래대금", "순매수")
+
+                             기관  기타법인     개인  외국인  전체
+                날짜
+                2022-09-08  -3570         0     3570       0     0
+                2022-09-13 -10205         0    10205       0     0
+                2022-09-14    -65         0       65       0     0
+                2022-09-15    -65         0       65       0     0
+                2022-09-16  -9560         0     9560       0     0
+    """  # pylint: disable=line-too-long # noqa: E501
+
+    isin = get_etx_isin(ticker)
+    query_type1 = {"거래대금": 1, "거래량": 2}.get(query_type1, 1)
+    query_type2 = {"순매수": 1, "매수": 2, "매도": 3}.get(query_type2, 3)
+
+    df = 투자자별거래실적_개별종목_일별추이().fetch(
+        fromdate, todate, isin, inqCondTpCd1=query_type1,
+        inqCondTpCd2=query_type2)
     df.columns = ['날짜', '기관', '기타법인', '개인', '외국인', "전체"]
 
     df = df.set_index('날짜')
@@ -346,7 +451,9 @@ if __name__ == "__main__":
     # print( get_etf_price_deviation("20200101", "20200401", "295820"))
     # print(get_etf_tracking_error("20200101", "20200401", "295820"))
     # print(get_etf_portfolio_deposit_file("20210705", "114800"))
-    df = get_etf_trading_volumne_and_value_by_investor("20220415", "20220422")
+    # df = get_etf_trading_volumne_and_value_by_investor("20220415", "20220422")
     # df = get_etf_trading_volumne_and_value_by_date(
     #     "20220415", "20220422", 1, 1)
+    # df = get_etf_unbound_trading_volumne_and_value_by_investor("20220908", "20220916", "580011")
+    df = get_etf_indivisual_trading_volume_and_value_by_date("20220908", "20220916", "580011", "거래대금", "순매수")
     print(df)

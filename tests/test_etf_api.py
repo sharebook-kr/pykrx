@@ -38,6 +38,7 @@ class EtnTickerList(unittest.TestCase):
         self.assertIsInstance(tickers, list)
         self.assertGreater(len(tickers), 0)
 
+
 class ElwTickerList(unittest.TestCase):
     def test_ticker_list(self):
         tickers = stock.get_elw_ticker_list()
@@ -171,7 +172,7 @@ class EtfPdf(unittest.TestCase):
 
 class EtfTradingvolumeValue(unittest.TestCase):
     def test_investor_in_businessday(self):
-        df = stock.get_etf_trading_volumne_and_value("20220415", "20220422")
+        df = stock.get_etf_trading_volume_and_value("20220415", "20220422")
         #                거래량                              거래대금
         #                  매도        매수    순매수            매도            매수            순
         # 매수
@@ -182,8 +183,8 @@ class EtfTradingvolumeValue(unittest.TestCase):
         temp = df.iloc[0:4, 0] == np.array([375220036, 15784738, 14415013, 6795002])
         self.assertEqual(temp.sum(), 4)
 
-    def test_volume_with__in_businessday(self):
-        df = stock.get_etf_trading_volumne_and_value("20220415", "20220422", query_type1="거래대금", query_type2="순매수")
+    def test_volume_with_businessday(self):
+        df = stock.get_etf_trading_volume_and_value("20220415", "20220422", query_type1="거래대금", query_type2="순매수")
         #                     기관    기타법인         개인        외국인 전체
         # 날짜
         # 2022-04-15   25346770535  -138921500  17104310255  -42312159290    0
@@ -194,6 +195,38 @@ class EtfTradingvolumeValue(unittest.TestCase):
         temp = df.iloc[0:5, 0] == np.array([25346770535, -168362290065, -36298873785, -235935697655, -33385835805])
         self.assertEqual(temp.sum(), 5)
 
+    def test_indivisual_investor_in_businessday(self):
+        df = stock.get_etf_trading_volume_and_value("20220908", "20220916", "580011")
+        #           거래량               거래대금
+        #             매도  매수 순매수      매도    매수 순매수
+        # INVST_NM
+        # 금융투자      27    25     -2    266785  243320 -23465
+        # 보험           0     0      0         0       0      0
+        # 투신           0     0      0         0       0      0
+        # 사모           0     0      0         0       0      0
+        # 은행           0     0      0         0       0      0
+        # 기타금융       0     0      0         0       0      0
+        # 연기금 등      0     0      0         0       0      0
+        # 기관합계      27    25     -2    266785  243320 -23465
+        # 기타법인       0     0      0         0       0      0
+        # 개인          25    27      2    243320  266785  23465
+        # 외국인         0     0      0         0       0      0
+        # 기타외국인     0     0      0         0       0      0
+        # 전체          52    52      0    510105  510105      0
+        temp = df.iloc[0] == np.array([27, 25, -2, 266785, 243320, -23465])
+        self.assertEqual(temp.sum(), 6)
+
+    def test_indivisual_volume_with_businessday(self):
+        df = stock.get_etf_trading_volume_and_value("20220908", "20220916", "580011", "거래대금", "순매수")
+        #              기관  기타법인     개인  외국인  전체
+        # 날짜
+        # 2022-09-08  -3570         0     3570       0     0
+        # 2022-09-13 -10205         0    10205       0     0
+        # 2022-09-14    -65         0       65       0     0
+        # 2022-09-15    -65         0       65       0     0
+        # 2022-09-16  -9560         0     9560       0     0
+        temp = df.iloc[0:5, 0] == np.array([-3570, -10205, -65, -65, -9560])
+        self.assertEqual(temp.sum(), 5)
 
 if __name__ == '__main__':
     unittest.main()
