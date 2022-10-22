@@ -24,14 +24,15 @@ from pandas import Series, DataFrame
 # -----------------------------------------------------------------------------
 # stock
 @dataframe_empty_handler
-def get_market_ohlcv_by_date(fromdate: str, todate: str, ticker: str) \
+def get_market_ohlcv_by_date(fromdate: str, todate: str, ticker: str, adjusted: bool = True) \
         -> DataFrame:
     """일자별로 정렬된 특정 종목의 OHLCV
 
     Args:
-        fromdate (str): 조회 시작 일자 (YYYYMMDD)
-        todate   (str): 조회 종료 일자 (YYYYMMDD)
-        ticker   (str): 조회 종목의 ticker
+        fromdate    (str): 조회 시작 일자 (YYYYMMDD)
+        todate      (str): 조회 종료 일자 (YYYYMMDD)
+        ticker      (str): 조회 종목의 ticker
+        adjusted    (bool, optional): 수정 종가 여부 (True/False)
 
     Returns:
         DataFrame:
@@ -47,7 +48,8 @@ def get_market_ohlcv_by_date(fromdate: str, todate: str, ticker: str) \
     """  # pylint: disable=line-too-long # noqa: E501
 
     isin = get_stock_ticker_isin(ticker)
-    df = 개별종목시세().fetch(fromdate, todate, isin)
+    adjusted = 2 if adjusted else 1
+    df = 개별종목시세().fetch(fromdate, todate, isin, adjusted)
 
     df = df[['TRD_DD', 'TDD_OPNPRC', 'TDD_HGPRC', 'TDD_LWPRC', 'TDD_CLSPRC',
              'ACC_TRDVOL', 'ACC_TRDVAL', 'FLUC_RT']]

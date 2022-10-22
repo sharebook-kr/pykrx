@@ -79,13 +79,14 @@ class 개별종목시세(KrxWebIo):
     def bld(self):
         return "dbms/MDC/STAT/standard/MDCSTAT01701"
 
-    def fetch(self, strtDd: str, endDd: str, isuCd: str) -> DataFrame:
+    def fetch(self, strtDd: str, endDd: str, isuCd: str, adjStkPrc: int) -> DataFrame:
         """[12003] 개별종목 시세 추이 (수정종가 아님)
 
         Args:
-            strtDd (str): 조회 시작 일자 (YYMMDD)
-            endDd  (str): 조회 종료 일자 (YYMMDD)
-            isuCd  (str): 조회 종목 ISIN
+            strtDd     (str): 조회 시작 일자 (YYMMDD)
+            endDd      (str): 조회 종료 일자 (YYMMDD)
+            isuCd      (str): 조회 종목 ISIN
+            adjStkPrc  (int): 수정 종가 여부 (2:수정종가/1:단순종가)
 
         Returns:
             DataFrame: 일자별 시세 조회 결과
@@ -110,7 +111,7 @@ class 개별종목시세(KrxWebIo):
                 540,862,299,030,000  5,969,782,550
                 543,250,212,050,000  5,969,782,550
         """
-        result = self.read(isuCd=isuCd, strtDd=strtDd, endDd=endDd)
+        result = self.read(isuCd=isuCd, strtDd=strtDd, endDd=endDd, adjStkPrc=adjStkPrc)
         return DataFrame(result['output'])
 
 
