@@ -124,6 +124,27 @@ class StockPriceChangeByTicker(unittest.TestCase):
         temp = df.iloc[0:5, 1] == np.array([4615, 25150, 4895, 135500, 5680])
         self.assertEqual(temp.sum(), 5)
 
+    def test_with_adjusted(self):
+        df_adjusted = stock.get_market_price_change_by_ticker(fromdate="20180427", todate="20180504")
+        samsung_adjusted = df_adjusted.loc['005930']
+        # 종목명    삼성전자
+        # 시가      52140
+        # 종가      51900
+        # ...
+        self.assertEqual(samsung_adjusted['시가'], 52140)
+        self.assertEqual(samsung_adjusted['종가'], 51900)
+
+    def test_with_not_adjusted(self):
+        df_not_adjusted = stock.get_market_price_change_by_ticker(fromdate="20180427", todate="20180504", adjusted=False)
+        # 종목명    삼성전자
+        # 시가      2607000
+        # 종가      51900
+        # ...
+        samsung_not_adjusted = df_not_adjusted.loc['005930']
+        self.assertEqual(samsung_not_adjusted['시가'], 2607000)
+        self.assertEqual(samsung_not_adjusted['종가'], 51900)
+        self.assertEqual(3, 3)
+
 
 class StockFundamentalByDate(unittest.TestCase):
     def test_with_valid_business_days(self):

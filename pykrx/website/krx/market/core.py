@@ -234,7 +234,7 @@ class 전종목등락률(KrxWebIo):
     def bld(self):
         return "dbms/MDC/STAT/standard/MDCSTAT01602"
 
-    def fetch(self, strtDd: str, endDd: str, mktId: str, adj_stkprc: int) \
+    def fetch(self, strtDd: str, endDd: str, mktId: str, adjStkPrc: int) \
             -> DataFrame:
         """[12002] 전종목 등락률
 
@@ -242,7 +242,7 @@ class 전종목등락률(KrxWebIo):
             strtDd     (str): 조회 시작 일자 (YYMMDD)
             endDd      (str): 조회 종료 일자 (YYMMDD)
             mktId      (str): 조회 시장 (STK/KSQ/ALL)
-            adj_stkprc (int): 수정 종가 여부 (2:수정종가/1:단순종가)
+            adjStkPrc  (int): 수정 종가 여부 (2:수정종가/1:단순종가)
 
         Returns:
             DataFrame:
@@ -260,7 +260,7 @@ class 전종목등락률(KrxWebIo):
                    5.62   1,707,900  132,455,779,600       1
                  -15.11   7,459,926   41,447,809,620       2
         """
-        result = self.read(mktId=mktId, adj_stkprc=adj_stkprc, strtDd=strtDd,
+        result = self.read(mktId=mktId, adjStkPrc=adjStkPrc, strtDd=strtDd,
                            endDd=endDd)
         return DataFrame(result['OutBlock_1'])
 
