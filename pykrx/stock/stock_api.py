@@ -228,15 +228,7 @@ def get_market_ohlcv_by_date(
     fromdate = fromdate.replace("-", "")
     todate = todate.replace("-", "")
 
-    if adjusted:
-        df = naver.get_market_ohlcv_by_date(fromdate, todate, ticker)
-        # 상장 폐지 종목은 네이버에 데이터가 존재하지 않는다.
-        # - Empty DataFrame을 반환
-        if df.empty:
-            return df
-
-    else:
-        df = krx.get_market_ohlcv_by_date(fromdate, todate, ticker)
+    df = krx.get_market_ohlcv_by_date(fromdate, todate, ticker, adjusted)
 
     if name_display:
         df.columns.name = get_market_ticker_name(ticker)

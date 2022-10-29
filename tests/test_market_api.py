@@ -24,13 +24,13 @@ class StockBusinessDaysTest(unittest.TestCase):
 class StockOhlcvByDateTest(unittest.TestCase):
     def test_ohlcv_simple_call(self):
         df = stock.get_market_ohlcv_by_date("20210118", "20210126", "005930")
-        #              시가   고가   저가   종가    거래량
+        #               시가    고가    저가    종가      거래량         거래대금  등락률
         # 날짜
-        # 2021-01-18  86600  87300  84100  85000  43227951
-        # 2021-01-19  84500  88000  83600  87000  39895044
-        # 2021-01-20  89000  89000  86500  87200  25211127
-        # 2021-01-21  87500  88600  86500  88100  25318011
-        # 2021-01-22  89000  89700  86800  86800  30861661
+        # 2021-01-18  86600  87300  84100  85000  43227951  3715775992600 -3.41
+        # 2021-01-19  84500  88000  83600  87000  39895044  3441342754500  2.35
+        # 2021-01-20  89000  89000  86500  87200  25211127  2205739149700  0.23
+        # 2021-01-21  87500  88600  86500  88100  25318011  2211209788500  1.03
+        # 2021-01-22  89000  89700  86800  86800  30861661  2717635251520 -1.48
         temp = df.iloc[0:5, 0] == np.array([86600, 84500, 89000, 87500, 89000])
         self.assertEqual(temp.sum(), 5)
         self.assertIsInstance(df.index   , pd.core.indexes.datetimes.DatetimeIndex)
@@ -41,6 +41,30 @@ class StockOhlcvByDateTest(unittest.TestCase):
         df = stock.get_market_ohlcv_by_date("20210118", "20210118", "005930")
         self.assertIsInstance(df, pd.DataFrame)
         self.assertEqual(len(df), 1)
+
+    def test_ohlcv_with_adjusted(self):
+        df = stock.get_market_ohlcv_by_date("20180427", "20180504", "005930")
+        #               시가     고가    저가    종가     거래량         거래대금   등락률
+        # 날짜
+        # 2018-04-27  53380  53640  52440  53000    606216  1611240055340  1.65
+        # 2018-04-30      0      0      0  53000         0              0  0.00
+        # 2018-05-02      0      0      0  53000         0              0  0.00
+        # 2018-05-03      0      0      0  53000         0              0  0.00
+        # 2018-05-04  53000  53900  51800  51900  39565391  2078017927600 -2.08
+        self.assertEqual(df.loc['2018-04-27']['시가'], 53380)
+        self.assertEqual(df.loc['2018-05-04']['시가'], 53000)
+
+    def test_ohlcv_with_not_adjusted(self):
+        df = stock.get_market_ohlcv_by_date("20180427", "20180504", "005930", adjusted=False)
+        #                 시가       고가      저가      종가     거래량         거래대금   등락률
+        # 날짜
+        # 2018-04-27  2669000  2682000  2622000  2650000    606216  1611240055340  1.65
+        # 2018-04-30        0        0        0  2650000         0              0  0.00
+        # 2018-05-02        0        0        0  2650000         0              0  0.00
+        # 2018-05-03        0        0        0  2650000         0              0  0.00
+        # 2018-05-04    53000    53900    51800    51900  39565391  2078017927600 -2.08
+        self.assertEqual(df.loc['2018-04-27']['시가'], 2669000)
+        self.assertEqual(df.loc['2018-05-04']['시가'], 53000)
 
 
 class StockOhlcvByTickerTest(unittest.TestCase):
@@ -123,6 +147,26 @@ class StockPriceChangeByTicker(unittest.TestCase):
         df = stock.get_market_price_change_by_ticker(fromdate="2021-01-04", todate="2021-01-11")
         temp = df.iloc[0:5, 1] == np.array([4615, 25150, 4895, 135500, 5680])
         self.assertEqual(temp.sum(), 5)
+
+    def test_with_adjusted(self):
+        df_adjusted = stock.get_market_price_change_by_ticker(fromdate="20180427", todate="20180504")
+        samsung_adjusted = df_adjusted.loc['005930']
+        # 종목명    삼성전자
+        # 시가      52140
+        # 종가      51900
+        # ...
+        self.assertEqual(samsung_adjusted['시가'], 52140)
+        self.assertEqual(samsung_adjusted['종가'], 51900)
+
+    def test_with_not_adjusted(self):
+        df_not_adjusted = stock.get_market_price_change_by_ticker(fromdate="20180427", todate="20180504", adjusted=False)
+        # 종목명    삼성전자
+        # 시가      2607000
+        # 종가      51900
+        # ...
+        samsung_not_adjusted = df_not_adjusted.loc['005930']
+        self.assertEqual(samsung_not_adjusted['시가'], 2607000)
+        self.assertEqual(samsung_not_adjusted['종가'], 51900)
 
 
 class StockFundamentalByDate(unittest.TestCase):

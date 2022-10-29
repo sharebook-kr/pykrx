@@ -79,13 +79,14 @@ class 개별종목시세(KrxWebIo):
     def bld(self):
         return "dbms/MDC/STAT/standard/MDCSTAT01701"
 
-    def fetch(self, strtDd: str, endDd: str, isuCd: str) -> DataFrame:
+    def fetch(self, strtDd: str, endDd: str, isuCd: str, adjStkPrc: int) -> DataFrame:
         """[12003] 개별종목 시세 추이 (수정종가 아님)
 
         Args:
-            strtDd (str): 조회 시작 일자 (YYMMDD)
-            endDd  (str): 조회 종료 일자 (YYMMDD)
-            isuCd  (str): 조회 종목 ISIN
+            strtDd     (str): 조회 시작 일자 (YYMMDD)
+            endDd      (str): 조회 종료 일자 (YYMMDD)
+            isuCd      (str): 조회 종목 ISIN
+            adjStkPrc  (int): 수정 종가 여부 (2:수정종가/1:단순종가)
 
         Returns:
             DataFrame: 일자별 시세 조회 결과
@@ -110,7 +111,7 @@ class 개별종목시세(KrxWebIo):
                 540,862,299,030,000  5,969,782,550
                 543,250,212,050,000  5,969,782,550
         """
-        result = self.read(isuCd=isuCd, strtDd=strtDd, endDd=endDd)
+        result = self.read(isuCd=isuCd, strtDd=strtDd, endDd=endDd, adjStkPrc=adjStkPrc)
         return DataFrame(result['output'])
 
 
@@ -234,7 +235,7 @@ class 전종목등락률(KrxWebIo):
     def bld(self):
         return "dbms/MDC/STAT/standard/MDCSTAT01602"
 
-    def fetch(self, strtDd: str, endDd: str, mktId: str, adj_stkprc: int) \
+    def fetch(self, strtDd: str, endDd: str, mktId: str, adjStkPrc: int) \
             -> DataFrame:
         """[12002] 전종목 등락률
 
@@ -242,7 +243,7 @@ class 전종목등락률(KrxWebIo):
             strtDd     (str): 조회 시작 일자 (YYMMDD)
             endDd      (str): 조회 종료 일자 (YYMMDD)
             mktId      (str): 조회 시장 (STK/KSQ/ALL)
-            adj_stkprc (int): 수정 종가 여부 (2:수정종가/1:단순종가)
+            adjStkPrc  (int): 수정 종가 여부 (2:수정종가/1:단순종가)
 
         Returns:
             DataFrame:
@@ -260,7 +261,7 @@ class 전종목등락률(KrxWebIo):
                    5.62   1,707,900  132,455,779,600       1
                  -15.11   7,459,926   41,447,809,620       2
         """
-        result = self.read(mktId=mktId, adj_stkprc=adj_stkprc, strtDd=strtDd,
+        result = self.read(mktId=mktId, adjStkPrc=adjStkPrc, strtDd=strtDd,
                            endDd=endDd)
         return DataFrame(result['OutBlock_1'])
 
