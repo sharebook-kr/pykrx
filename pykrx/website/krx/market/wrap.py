@@ -964,6 +964,7 @@ def get_index_price_change_by_ticker(fromdate: str, todate: str, market: str) \
     df = df.set_index('지수명')
     df = df.replace(r'[^\w\.-]', '', regex=True)
     df = df.replace('', 0)
+    df = df.replace('-', 0)
     df = df.astype({
         "시가": np.float64,
         "종가": np.float64,
