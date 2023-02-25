@@ -1,4 +1,4 @@
-from m_pykrx.website import krx
+from mpykrx.website import krx
 import datetime
 from pandas import DataFrame
 import re

@@ -10,7 +10,7 @@ if os == "Darwin":
 
 else:
     fe = fm.FontEntry(
-        fname="m_pykrx/NanumBarunGothic.ttf",
+        fname="mpykrx/NanumBarunGothic.ttf",
         name='NanumBarunGothic'
     )
     fm.fontManager.ttflist.insert(0, fe)

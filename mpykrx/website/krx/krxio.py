@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from m_pykrx.website.comm.webio import Get, Post
+from mpykrx.website.comm.webio import Get, Post
 
 
 class KrxFutureIo(Get):

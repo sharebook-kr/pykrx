@@ -1,5 +1,5 @@
-from m_pykrx.website.comm import dataframe_empty_handler, singleton
-from m_pykrx.website.krx.market.core import (
+from mpykrx.website.comm import dataframe_empty_handler, singleton
+from mpykrx.website.krx.market.core import (
     상장종목검색, 상폐종목검색, 전체지수기본정보
 )
 from pandas import DataFrame

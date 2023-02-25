@@ -1,5 +1,5 @@
-from m_pykrx.website.comm import dataframe_empty_handler
-from m_pykrx.website.krx.bond.core import (
+from mpykrx.website.comm import dataframe_empty_handler
+from mpykrx.website.krx.bond.core import (
     전종목_장외채권수익률, 개별추이_장외채권수익률
 )
 from pandas import DataFrame

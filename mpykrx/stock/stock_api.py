@@ -1,5 +1,5 @@
-from m_pykrx.website import krx
-from m_pykrx.website import naver
+from mpykrx.website import krx
+from mpykrx.website import naver
 import datetime
 import inspect
 import functools

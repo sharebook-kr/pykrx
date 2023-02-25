@@ -1,5 +1,5 @@
-from m_pykrx.website.comm import dataframe_empty_handler, singleton
-from m_pykrx.website.krx.etx.core import (
+from mpykrx.website.comm import dataframe_empty_handler, singleton
+from mpykrx.website.krx.etx.core import (
     ETF_전종목기본종목, ETN_전종목기본종목, ELW_전종목기본종목
 )
 import pandas as pd

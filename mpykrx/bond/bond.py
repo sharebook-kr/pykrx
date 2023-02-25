@@ -1,5 +1,5 @@
 from sqlite3 import NotSupportedError
-from m_pykrx.website import krx
+from mpykrx.website import krx
 from pandas import DataFrame
 
 

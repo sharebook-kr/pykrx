@@ -1,5 +1,5 @@
 import unittest
-from m_pykrx import stock
+from mpykrx import stock
 import pandas as pd
 import numpy as np
 # pylint: disable-all
