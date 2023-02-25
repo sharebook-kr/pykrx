@@ -10,10 +10,10 @@ with open("README.md", "r", encoding='UTF-8') as fh:
     long_description = fh.read()
 
 setup(
-    name            = 'pykrx',
+    name            = 'm_pykrx',
     version         = main_ns['__version__'],
     description     = 'KRX data scraping',
-    url             = 'https://github.com/sharebook-kr/pykrx',
+    url             = 'https://github.com/HyuntaMansei/pykrx',
     author          = 'Brayden Jo, Jonghun Yoo',
     author_email    = 'brayden.jo@outlook.com, jonghun.yoo@outlook.com, pystock@outlook.com',
     long_description=long_description,

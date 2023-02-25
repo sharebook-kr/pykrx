@@ -14,12 +14,13 @@
 # # df = pd.concat(low_list, axis=1)
 # # print(df)
 import pykrx
-print(pykrx.__version__)
+# print(pykrx.__version__)
 
 from pykrx import stock
 
 # df = stock.get_market_price_change_by_ticker(fromdate="20210104", todate="20210111")
 # print(df)
 
-print(stock.get_market_net_purchases_of_equities_by_ticker('20210801', '20210831', 'ALL', '기관합계'))
-
+# print(stock.get_market_net_purchases_of_equities_by_ticker('20210801', '20210831', 'ALL', '기관합계'))
+df = stock.get_market_ohlcv_by_ticker('20230224')
+print(df.sample(10))
