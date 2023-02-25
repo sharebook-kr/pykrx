@@ -1,4 +1,4 @@
-from pykrx.website.comm.webio import Get
+from m_pykrx.website.comm.webio import Get
 
 
 class NaverWebIo(Get):

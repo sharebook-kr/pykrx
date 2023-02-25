@@ -1,4 +1,4 @@
-# from pykrx import stock
+# from m_pykrx import stock
 # import pandas as pd
 
 # df = stock.get_market_trading_volume_by_investor("20210115", "20210122", "005930")
@@ -13,10 +13,10 @@
 
 # # df = pd.concat(low_list, axis=1)
 # # print(df)
-import pykrx
-# print(pykrx.__version__)
+import m_pykrx
+# print(m_pykrx.__version__)
 
-from pykrx import stock
+from m_pykrx import stock
 
 # df = stock.get_market_price_change_by_ticker(fromdate="20210104", todate="20210111")
 # print(df)

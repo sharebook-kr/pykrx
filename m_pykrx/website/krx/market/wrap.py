@@ -1,6 +1,6 @@
-from pykrx.website.comm import dataframe_empty_handler
-from pykrx.website.krx.market.ticker import get_stock_ticker_isin
-from pykrx.website.krx.market.core import (
+from m_pykrx.website.comm import dataframe_empty_handler
+from m_pykrx.website.krx.market.ticker import get_stock_ticker_isin
+from m_pykrx.website.krx.market.core import (
     개별종목시세, 전종목등락률, PER_PBR_배당수익률_전종목,
     PER_PBR_배당수익률_개별, 전종목시세, 외국인보유량_개별추이,
     외국인보유량_전종목, 투자자별_순매수상위종목,

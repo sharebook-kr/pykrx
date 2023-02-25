@@ -1,4 +1,4 @@
-from pykrx.website.naver.core import Sise
+from m_pykrx.website.naver.core import Sise
 import xml.etree.ElementTree as et
 from pandas import DataFrame
 import pandas as pd

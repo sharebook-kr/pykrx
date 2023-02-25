@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 from distutils.util import convert_path
 
 main_ns = {}
-ver_path = convert_path('pykrx/version.py')
+ver_path = convert_path('m_pykrx/version.py')
 with open(ver_path) as ver_file:
     exec(ver_file.read(), main_ns)
 
@@ -20,7 +20,7 @@ setup(
     long_description_content_type="text/markdown",
     install_requires= ['requests', 'pandas', 'datetime', 'numpy', 'xlrd', 'deprecated'],
     license         = 'MIT',
-    packages        = find_packages(include=['pykrx', 'pykrx.*', 'pykrx.stock.*']),
+    packages        = find_packages(include=['m_pykrx', 'm_pykrx.*', 'm_pykrx.stock.*']),
     python_requires = '>=3',
     zip_safe        = False
 )
