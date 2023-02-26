@@ -65,6 +65,52 @@ def get_market_ohlcv_by_date(fromdate: str, todate: str, ticker: str, adjusted: 
                     "등락률": np.float32})
     return df.sort_index()
 
+@dataframe_empty_handler
+def get_modified_market_ohlcv_by_ticker(date: str, market: str = "KOSPI") -> DataFrame:
+    """티커별로 정리된 전종목 OHLCV
+
+    Args:
+        date   (str): 조회 일자 (YYYYMMDD)
+        market (str): 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
+
+    Returns:
+        DataFrame:
+                     시가   고가   저가   종가  거래량    거래대금
+            티커
+            060310   2150   2390   2150   2190  981348  2209370985
+            095570   3135   3200   3100   3130   89871   282007385
+            006840  17050  17200  16500  16500   30567   512403000
+            054620   8550   8740   8400   8650  647596  5525789290
+            265520  22150  23100  22050  22400  255846  5798313650
+    """
+
+    market2mktid = {
+        "ALL": "ALL",
+        "KOSPI": "STK",
+        "KOSDAQ": "KSQ",
+        "KONEX": "KNX"
+    }
+
+    df = 전종목시세().fetch(date, market2mktid[market])
+    df = df[['ISU_SRT_CD', 'ISU_ABBRV', 'MKT_NM', 'SECT_TP_NM', 'TDD_OPNPRC', 'TDD_HGPRC', 'TDD_LWPRC',
+             'TDD_CLSPRC', 'CMPPREVDD_PRC', 'FLUC_RT', 'ACC_TRDVOL', 'ACC_TRDVAL', 'LIST_SHRS']]
+    df.columns = ['티커', '종목명', '시장이름', '소속부', '시가', '고가', '저가', '종가', '전일대비', '등락률', '거래량', '거래대금', '상장주식수']
+    df = df.replace(r'[^-\w\.]', '', regex=True)
+    df = df.replace(r'\-$', '0', regex=True)
+    df = df.replace('', '0')
+    df = df.set_index('티커')
+    df = df.astype({
+        "시가": np.int32,
+        "고가": np.int32,
+        "저가": np.int32,
+        "종가": np.int32,
+        "거래량": np.int32,
+        "거래대금": np.int64,
+        "등락률": np.float32,
+        "전일대비": np.int32,
+        "상장주식수": np.int64
+    })
+    return df
 
 @dataframe_empty_handler
 def get_market_ohlcv_by_ticker(date: str, market: str = "KOSPI") -> DataFrame:
@@ -94,9 +140,9 @@ def get_market_ohlcv_by_ticker(date: str, market: str = "KOSPI") -> DataFrame:
 
     df = 전종목시세().fetch(date, market2mktid[market])
     df = df[['ISU_SRT_CD', 'TDD_OPNPRC', 'TDD_HGPRC', 'TDD_LWPRC',
-             'TDD_CLSPRC', 'ACC_TRDVOL', 'ACC_TRDVAL', 'FLUC_RT', 'CMPPREVDD_PRC']]
+             'TDD_CLSPRC', 'ACC_TRDVOL', 'ACC_TRDVAL', 'FLUC_RT']]
     df.columns = ['티커', '시가', '고가', '저가', '종가', '거래량', '거래대금',
-                  '등락률', '전일대비']
+                  '등락률']
     df = df.replace(r'[^-\w\.]', '', regex=True)
     df = df.replace(r'\-$', '0', regex=True)
     df = df.replace('', '0')
@@ -109,7 +155,6 @@ def get_market_ohlcv_by_ticker(date: str, market: str = "KOSPI") -> DataFrame:
         "거래량": np.int32,
         "거래대금": np.int64,
         "등락률": np.float32,
-        "전일대비": np.int32
     })
     return df
 

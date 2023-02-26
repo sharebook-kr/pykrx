@@ -12,7 +12,6 @@ regex_yymmdd = re.compile(r"\d{4}[-/]?\d{2}[-/]?\d{2}")
 regex_ticker = re.compile(r"^\d{6}$")
 regex_hangul = re.compile(r"^[가-힣]+$")
 
-
 def market_valid_check(param=None):
     def _market_valid_check(func):
         sig = inspect.signature(func)
@@ -243,6 +242,52 @@ def get_market_ohlcv_by_date(
 
     return resample_ohlcv(df, freq, how)
 
+@market_valid_check()
+def get_modified_market_ohlcv_by_ticker(
+        date, market: str = "KOSPI", alternative: bool = False) -> DataFrame:
+    """티커별로 정리된 전종목 OHLCV
+
+    Args:
+        date        (str           ): 조회 일자 (YYYYMMDD)
+        market      (str           ): 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
+        alternative (bool, optional): 휴일일 경우 이전 영업일 선택 여부
+
+    Returns:
+        DataFrame:
+
+            >> get_market_ohlcv_by_ticker("20210122")
+
+                      시가    고가    저가    종가   거래량     거래대금     등락률
+            티커
+            095570    4190    4245    4160    4210   216835    910274405   0.839844
+            006840   25750   29550   25600   29100   727088  20462325950  12.570312
+            027410    5020    5250    4955    5220  1547629   7990770515   4.191406
+            282330  156500  156500  151500  152000    62510   9555364000  -2.560547
+
+            >> get_market_ohlcv_by_ticker("20210122", "KOSDAQ")
+
+                      시가    고가    저가    종가   거래량     거래대금    등락률
+            티커
+            060310    2265    2290    2225    2255   275425    619653305 -0.219971
+            054620    7210    7250    7030    7120   124636    883893780 -1.110352
+            265520   25850   25850   25200   25400   196384   4994644750 -0.779785
+            211270   10250   10950   10050   10350  1664154  17351956900  1.469727
+            035760  165200  166900  162600  163800   179018  29574003100  0.429932
+
+        NOTE: 거래정지 종목은 종가만 존재하며 나머지는 0으로 채워진다.
+    """  # pylint: disable=line-too-long # noqa: E501
+
+    if isinstance(date, datetime.datetime):
+        date = krx.datetime2string(date)
+
+    date = date.replace("-", "")
+
+    df = krx.get_modified_market_ohlcv_by_ticker(date, market)
+    holiday = (df[['시가', '고가', '저가', '종가']] == 0).all(axis=None)
+    if holiday and alternative:
+        target_date = get_nearest_business_day_in_a_week(date=date, prev=True)
+        df = krx.get_modified_market_ohlcv_by_ticker(target_date, market)
+    return df
 
 @market_valid_check()
 def get_market_ohlcv_by_ticker(
@@ -290,7 +335,6 @@ def get_market_ohlcv_by_ticker(
         target_date = get_nearest_business_day_in_a_week(date=date, prev=True)
         df = krx.get_market_ohlcv_by_ticker(target_date, market)
     return df
-
 
 def get_market_cap(*args, **kwargs):
     """시가총액 조회
@@ -2887,13 +2931,15 @@ def get_stock_major_changes(ticker: str) -> DataFrame:
 
 if __name__ == "__main__":
     pd.set_option('display.expand_frame_repr', False)
+    df = get_market_ohlcv_by_ticker('20230224')
+    print(df)
     # print(get_market_price_change_by_ticker(
     #       fromdate="20210101", todate="20210111"))
     # print(get_etf_ohlcv_by_ticker("20210321"))
     # print(get_market_ohlcv_by_date("19991220", "20191231", "008480"))
     # print(get_market_cap_by_ticker("20210101"))
     # print(get_market_ohlcv("20150720", "20150810", "005930", adjusted=False))
-    # print(get_market_ohlcv("20210122"))
+    # df = get_market_ohlcv("20230224")
     # print(get_market_price_change("20210101", "20210108"))
     # df = get_stock_major_changes("005930")
     # st_date = "20220331"
@@ -2906,5 +2952,5 @@ if __name__ == "__main__":
     # df = get_etf_trading_volume_and_value("20220908", "20220916")
     # df = get_etf_trading_volume_and_value("20220908", "20220916", "거래대금", "순매수")
     # df = get_etf_trading_volume_and_value("20220908", "20220916", "580011")
-    df = get_etf_trading_volume_and_value("20220908", "20220916", "580011", "거래대금", "순매수")
-    print(df)
+    # df = get_etf_trading_volume_and_value("20220908", "20220916", "580011", "거래대금", "순매수")
+    # print(df)

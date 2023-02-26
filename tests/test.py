@@ -1,5 +1,9 @@
-# from mpykrx import stock
-# import pandas as pd
+from mpykrx import stock
+import pandas as pd
+
+df = stock.get_modified_market_ohlcv_by_ticker('20230224', market='ALL')
+print(df.sample(5))
+
 
 # df = stock.get_market_trading_volume_by_investor("20210115", "20210122", "005930")
 # print(df.head())
@@ -16,11 +20,11 @@
 import mpykrx
 # print(mpykrx.__version__)
 
-from mpykrx import stock
-
 # df = stock.get_market_price_change_by_ticker(fromdate="20210104", todate="20210111")
 # print(df)
 
 # print(stock.get_market_net_purchases_of_equities_by_ticker('20210801', '20210831', 'ALL', '기관합계'))
-df = stock.get_market_ohlcv_by_ticker('20230224')
-print(df.sample(10))
+# df = stock.get_modified_market_ohlcv_by_ticker('20230224')
+# print(len(df.sample()))
+# print(df.sample(3))
+# print(stock.is_holiday_df(df))
