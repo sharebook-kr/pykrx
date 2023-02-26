@@ -13,7 +13,7 @@ setup(
     name            = 'mpykrx',
     version         = main_ns['__version__'],
     description     = 'KRX data scraping',
-    url             = 'https://github.com/HyuntaMansei/pykrx',
+    url             = 'https://github.com/HyuntaMansei/mpykrx',
     author          = 'Brayden Jo, Jonghun Yoo',
     author_email    = 'brayden.jo@outlook.com, jonghun.yoo@outlook.com, pystock@outlook.com',
     long_description=long_description,
