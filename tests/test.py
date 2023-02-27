@@ -1,7 +1,8 @@
 from mpykrx import stock
 import pandas as pd
 
-df = stock.get_modified_market_ohlcv_by_ticker('20230224', market='ALL')
+# df = stock.get_modified_market_ohlcv_by_ticker('20230224', market='ALL')
+df = stock.get_market_ohlcv_by_ticker('20230224')
 print(df.sample(5))
 
 
