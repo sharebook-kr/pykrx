@@ -24,8 +24,8 @@ from pandas import Series, DataFrame
 # -----------------------------------------------------------------------------
 # stock
 @dataframe_empty_handler
-def get_market_ohlcv_by_date(fromdate: str, todate: str, ticker: str, adjusted: bool = True) \
-        -> DataFrame:
+def get_market_ohlcv_by_date(fromdate: str, todate: str, ticker: str,
+                             adjusted: bool = True) -> DataFrame:
     """일자별로 정렬된 특정 종목의 OHLCV
 
     Args:
@@ -114,8 +114,8 @@ def get_market_ohlcv_by_ticker(date: str, market: str = "KOSPI") -> DataFrame:
 
 
 @dataframe_empty_handler
-def get_market_cap_by_date(fromdate: str, todate: str, ticker: str) \
-        -> DataFrame:
+def get_market_cap_by_date(fromdate: str, todate: str, ticker: str,
+                           adjusted: bool = True) -> DataFrame:
     """일자별로 정렬된 시가총액
 
     Args:
@@ -135,7 +135,8 @@ def get_market_cap_by_date(fromdate: str, todate: str, ticker: str) \
     """
 
     isin = get_stock_ticker_isin(ticker)
-    df = 개별종목시세().fetch(fromdate, todate, isin)
+    adjusted = 2 if adjusted else 1
+    df = 개별종목시세().fetch(fromdate, todate, isin, adjusted)
     df = df[['TRD_DD', 'MKTCAP', 'ACC_TRDVOL', 'ACC_TRDVAL', 'LIST_SHRS']]
     df.columns = ['날짜', '시가총액', '거래량', '거래대금', '상장주식수']
 

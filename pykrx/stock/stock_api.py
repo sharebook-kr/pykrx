@@ -2906,5 +2906,7 @@ if __name__ == "__main__":
     # df = get_etf_trading_volume_and_value("20220908", "20220916")
     # df = get_etf_trading_volume_and_value("20220908", "20220916", "거래대금", "순매수")
     # df = get_etf_trading_volume_and_value("20220908", "20220916", "580011")
-    df = get_etf_trading_volume_and_value("20220908", "20220916", "580011", "거래대금", "순매수")
+    # df = get_etf_trading_volume_and_value("20220908", "20220916", "580011",
+    #                                       "거래대금", "순매수")
+    df = get_market_cap("20210104", "20210108", "005930")
     print(df)
