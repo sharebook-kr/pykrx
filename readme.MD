@@ -1262,7 +1262,7 @@ INVST_NM
 - `query_type2`는 `순매수`, `매수`, `매도` 중 하나를 입력합니다.
 
 ```python
-df = get_etf_trading_volumne_and_value("20220415", "20220422", query_type1="거래대금", query_type2="순매수")
+df = get_etf_trading_volume_and_value("20220415", "20220422", "거래대금", "순매수")
 print(df.head())
 ```
 

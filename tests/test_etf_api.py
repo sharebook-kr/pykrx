@@ -184,7 +184,7 @@ class EtfTradingvolumeValue(unittest.TestCase):
         self.assertEqual(temp.sum(), 4)
 
     def test_volume_with_businessday(self):
-        df = stock.get_etf_trading_volume_and_value("20220415", "20220422", query_type1="거래대금", query_type2="순매수")
+        df = stock.get_etf_trading_volume_and_value("20220415", "20220422", "거래대금", "순매수")
         #                     기관    기타법인         개인        외국인 전체
         # 날짜
         # 2022-04-15   25346770535  -138921500  17104310255  -42312159290    0

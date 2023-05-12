@@ -254,7 +254,7 @@ class 괴리율추이(KrxWebIo):
         return DataFrame(result['output'])
 
 
-class 투자자별거래실적_기간합계(KrxWebIo):
+class ETF_투자자별거래실적_기간합계(KrxWebIo):
     @property
     def bld(self):
         return "dbms/MDC/STAT/standard/MDCSTAT04801"
@@ -288,7 +288,7 @@ class 투자자별거래실적_기간합계(KrxWebIo):
         return DataFrame(result['output'])
 
 
-class 투자자별거래실적_일별추이(KrxWebIo):
+class ETF_투자자별거래실적_일별추이(KrxWebIo):
     @property
     def bld(self):
         return "dbms/MDC/STAT/standard/MDCSTAT04802"
@@ -321,7 +321,82 @@ class 투자자별거래실적_일별추이(KrxWebIo):
         return DataFrame(result['output'])
 
 
-class 투자자별거래실적_개별종목_기간합계(KrxWebIo):
+class ETF_투자자별거래실적_개별종목_기간합계(KrxWebIo):
+    @property
+    def bld(self):
+        return "dbms/MDC/STAT/standard/MDCSTAT04901"
+
+    def fetch(self, strtDd: str, endDd: str, isuCd: str) -> DataFrame:
+        """[13207] 투자자별 거래실적(개별종목)
+
+        Args:
+            strtDd   (str): 조회 시작 일자 (YYMMDD)
+            endDd    (str): 조회 종료 일자 (YYMMDD)
+            isuCd    (str): 조회할 종목의 ISIN 번호
+
+        Returns:
+            DataFrame:
+
+            > ETF_투자자별거래실적_개별종목_기간합계().fetch("20230421", "20230428", "KR7069500007")
+
+                   CONV_OBJ_TP_CD     INVST_NM  ASK_TRDVOL  BID_TRDVOL NETBID_TRDVOL         ASK_TRDVAL         BID_TRDVAL    NETBID_TRDVAL
+                0                     금융투자  13,453,041  11,123,937    -2,329,104    444,469,514,445    365,724,346,362  -78,745,168,083
+                1                         보험   1,260,497     345,498      -914,999     41,472,479,252     11,310,518,250  -30,161,961,002
+                2                         투신   3,342,071   7,782,039     4,439,968    108,944,563,190    258,175,090,550  149,230,527,360
+                3                         사모      45,740     770,704       724,964      1,504,460,550     25,202,532,050   23,698,071,500
+                4                         은행      68,385     298,436       230,051      2,262,720,980      9,795,886,410    7,533,165,430
+                5                     기타금융     187,880     154,684       -33,196      6,139,349,970      5,092,411,005   -1,046,938,965
+                6                    연기금 등     697,475     616,932       -80,543     22,792,327,650     20,070,873,780   -2,721,453,870
+                7              TS     기관합계  19,055,089  21,092,230     2,037,141    627,585,416,037    695,371,658,407   67,786,242,370
+                8                     기타법인     120,080       6,390      -113,690      3,898,307,805        209,841,125   -3,688,466,680
+                9                         개인   4,791,437   4,806,978        15,541    158,063,728,290    158,360,713,095      296,984,805
+                10                      외국인   7,637,514   5,699,037    -1,938,477    252,228,793,405    187,851,734,035  -64,377,059,370
+                11                  기타외국인       3,213       2,698          -515        106,815,950         89,114,825      -17,701,125
+                12             TS         전체  31,607,333  31,607,333             0  1,041,883,061,487  1,041,883,061,487                0
+        """  # pylint: disable=line-too-long # noqa: E501
+
+        result = self.read(strtDd=strtDd, endDd=endDd, isuCd=isuCd)
+        return DataFrame(result['output'])
+
+
+class ETF_투자자별거래실적_개별종목_일별추이(KrxWebIo):
+    @property
+    def bld(self):
+        return "dbms/MDC/STAT/standard/MDCSTAT04902"
+
+    def fetch(self, strtDd: str, endDd: str, isuCd: str, inqCondTpCd1: int,
+              inqCondTpCd2: int) -> DataFrame:
+        """[13207] 투자자별 거래실적(개별종목)
+           당일자 최종 매매내역은 오후 6시 이후에 제공됩니다.
+
+        Args:
+            strtDd          (str): 조회 시작 일자 (YYMMDD)
+            endDd           (str): 조회 종료 일자 (YYMMDD)
+            isuCd           (str): 조회할 종목의 ISIN 번호
+            inqCondTpCd1    (int): 1 - 거래대금 / 2 - 거래량
+            inqCondTpCd2    (int): 1 - 순매수 / 2 - 매수 / 3 - 매도
+
+        Returns:
+
+           > ETF_투자자별거래실적_개별종목_일별추이().fetch("20230421", "20230428", "KR7069500007", 1, 1)
+
+            DataFrame:
+                       TRD_DD     NUM_ITM_VAL21   NUM_ITM_VAL22   NUM_ITM_VAL23    NUM_ITM_VAL24 NUM_ITM_VAL25
+                0  2023/04/28    10,477,685,545     -50,433,690   3,821,622,460  -14,248,874,315             0
+                1  2023/04/27     5,193,885,065  -3,021,189,345   2,319,333,145   -4,492,028,865             0
+                2  2023/04/26     4,380,096,075    -346,222,120  -1,034,965,685   -2,998,908,270             0
+                3  2023/04/25     5,704,378,590     -19,479,320   3,507,386,490   -9,192,285,760             0
+                4  2023/04/24    31,985,801,385    -139,497,015  -2,374,485,250  -29,471,819,120             0
+                5  2023/04/21    10,044,395,710    -111,645,190  -5,941,906,355   -3,990,844,165             0
+        """  # pylint: disable=line-too-long # noqa: E501
+
+        result = self.read(
+            inqCondTpCd1=inqCondTpCd1, inqCondTpCd2=inqCondTpCd2,
+            isuCd=isuCd, strtDd=strtDd, endDd=endDd)
+        return DataFrame(result['output'])
+
+
+class ETN_투자자별거래실적_개별종목_기간합계(KrxWebIo):
     @property
     def bld(self):
         return "dbms/MDC/STAT/standard/MDCSTAT07001"
@@ -359,7 +434,7 @@ class 투자자별거래실적_개별종목_기간합계(KrxWebIo):
         return DataFrame(result['output'])
 
 
-class 투자자별거래실적_개별종목_일별추이(KrxWebIo):
+class ETN_투자자별거래실적_개별종목_일별추이(KrxWebIo):
     @property
     def bld(self):
         return "dbms/MDC/STAT/standard/MDCSTAT07002"
@@ -400,7 +475,9 @@ if __name__ == "__main__":
     # print(전종목등락률_ETF().fetch("20210325", "20210402"))
     # print(투자자별거래실적_기간합계().fetch("20220415", "20220422"))
     # print(투자자별거래실적_개별종목_기간합계().fetch("20220908", "20220916", "KRG580000112"))
-    print(투자자별거래실적_개별종목_일별추이().fetch("20220908", "20220916", "KRG580000112", 1, 1))
+    # print(ETN_투자자별거래실적_개별종목_일별추이().fetch("20220908", "20220916", "KRG580000112", 1, 1))
+    # print(ETF_투자자별거래실적_개별종목_일별추이().fetch("20230421", "20230428", "KR7069500007", 1, 1))
+    print(ETF_투자자별거래실적_개별종목_기간합계().fetch("20230421", "20230428", "KR7069500007"))
     # print(개별종목시세_ETF().fetch("20210111", "20210119", "KR7152100004"))
     # print(전종목시세_ETF().fetch("20210119"))
     # print(PDF().fetch("20210119", "KR7152100004"))

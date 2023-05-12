@@ -60,15 +60,28 @@ def get_etx_ticker_list(date: str, market: str) -> list:
     return EtxTicker().get_ticker(market.upper(), date)
 
 
+def is_etf(ticker):
+    return EtxTicker().df.loc[ticker, '시장'] == 'ETF'
+
+
+def is_etn(ticker):
+    return EtxTicker().df.loc[ticker, '시장'] == 'ETN'
+
+
+def is_elw(ticker):
+    return EtxTicker().df.loc[ticker, '시장'] == 'ELW'
+
+
 def get_etx_isin(ticker):
     return EtxTicker().df.loc[ticker, 'isin']
 
 
 if __name__ == "__main__":
     pd.set_option('display.width', None)
-    df = get_etx_ticker_list("ETF", "20021014")
-    print(df)
-    print(len(df))
+    # df = get_etx_ticker_list("ETF", "20021014")
+    # print(df)
+    # print(len(df))
+    print(is_etn("580011"))
     # print(get_etf_ticker_list("20200717"))
     # print(get_etf_isin("346000"))
     # print(get_etf_name("346000"))
