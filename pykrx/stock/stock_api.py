@@ -2825,6 +2825,14 @@ if __name__ == "__main__":
     # df = get_etf_trading_volume_and_value("20220908", "20220916")
     # df = get_etf_trading_volume_and_value("20220908", "20220916", "069500")
     # df = get_etf_trading_volume_and_value("20220908", "20220916", "069500", "거래대금", "순매수")
-    df = get_etf_trading_volume_and_value("20220908", "20220916", "거래대금", "순매수")
+    # df = get_etf_trading_volume_and_value("20220908", "20220916", "거래대금", "순매수")
     # df = get_etf_trading_volume_and_value("20220908", "20220916", "069500")
-    print(df.head())
+    # print(df.head())
+
+    start = "20000101"
+    end = "20230512"
+    ticker = "005930"
+
+    # df = get_market_ohlcv(start, end, ticker, adjusted=True)
+    df = get_market_ohlcv_by_date("20210118", "20210118", "005930")
+    print(df)
