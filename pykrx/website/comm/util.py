@@ -6,7 +6,7 @@ def dataframe_empty_handler(func):
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except (AttributeError, KeyError, TypeError) as e:
+        except (AttributeError, KeyError, TypeError, ValueError) as e:
             logging.info(args, kwargs)
             logging.info(e)
             return DataFrame()
