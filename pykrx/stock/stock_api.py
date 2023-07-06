@@ -614,7 +614,8 @@ def get_market_price_change_by_ticker(
         df_1.loc[cond, '거래량'] = 0
         df_1.loc[cond, '거래대금'] = 0
         # 조회 정보에 상장 폐지 정보를 추가한다.
-        df_0 = df_0.append(df_1[cond])
+        df_0 = pd.concat([df_0, df_1[cond]])
+        
 
     # - 상장폐지 옵션을 부여하면 상장폐지된 종목들만 출력
     if delist:
