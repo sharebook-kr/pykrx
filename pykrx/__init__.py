@@ -23,3 +23,5 @@ __all__ = [
     'bond',
     'stock'
 ]
+
+__version__ = '1.0.43'
