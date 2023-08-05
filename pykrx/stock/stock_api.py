@@ -1,6 +1,6 @@
 from multipledispatch import dispatch
 from typing import overload
-from pykrx.website import krx
+from pykrx.website import krx, naver
 import datetime
 import inspect
 import functools
@@ -227,7 +227,10 @@ def get_market_ohlcv_by_date(
     fromdate = fromdate.replace("-", "")
     todate = todate.replace("-", "")
 
-    df = krx.get_market_ohlcv_by_date(fromdate, todate, ticker, adjusted)
+    if adjusted:
+        df = naver.get_market_ohlcv_by_date(fromdate , todate, ticker)
+    else:
+        df = krx.get_market_ohlcv_by_date(fromdate, todate, ticker, False)
 
     if name_display:
         df.columns.name = get_market_ticker_name(ticker)
@@ -2835,5 +2838,8 @@ if __name__ == "__main__":
     ticker = "005930"
 
     # df = get_market_ohlcv(start, end, ticker, adjusted=True)
-    df = get_market_ohlcv_by_date("20210118", "20210118", "005930")
+    # df = get_market_ohlcv_by_date("20210118", "20210118", "005930")
+    # df = get_index_ohlcv("20180101", "20210130", "1001")
+    df = get_market_ohlcv('20100101', '20230731', '005930', adjusted=True)
+
     print(df)
