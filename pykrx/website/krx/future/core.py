@@ -72,7 +72,18 @@ class 전종목기본정보(KrxWebIo):
                 11  KR4401S9V6S0   401S9V6S  코스피200 SP 2209-2406  SP 2209-2406  KOSPI 200 SP 2209-2406  2022/06/10  2022/09/08  2022/09/13  지수(Index)  250,000          -      .00
                 12  KR4401S9VCS2   401S9VCS  코스피200 SP 2209-2412  SP 2209-2412  KOSPI 200 SP 2209-2412  2022/06/10  2022/09/08  2022/09/13  지수(Index)  250,000          -      .00
         """  # pylint: disable=line-too-long # noqa: E501
-        result = self.read(prodId=prodId, csvslx_isNo=False)
+        if (prodId == "KRDRVFUEQU") or (prodId == "KRDRVOPEQU") or (prodId == "KRDRVFUXAT"):
+            # Single Stock Futures
+            # Single Stock Options
+            # Secotr Index Futures
+            subProdId = str(prodId)           
+        
+            result = self.read(
+                prodId=prodId, 
+                subProdId=subProdId,
+                csvslx_isNo=False)
+        else:
+            result = self.read(prodId=prodId, csvslx_isNo=False)
         return DataFrame(result["output"])
 
 
@@ -114,7 +125,4 @@ class 전종목시세(KrxWebIo):
 
 if __name__ == "__main__":
     pd.set_option("display.width", None)
-    # df = 전종목기본정보().fetch(prodId="KRDRVFUK2I")
-    # print(df)
-    df = 전종목시세().fetch("20220902", "KRDRVFUK2I")
-    print(df.head(2))
+    print(전종목기본정보().fetch(prodId="KRDRVFUEQU"))
