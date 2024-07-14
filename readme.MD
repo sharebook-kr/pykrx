@@ -212,7 +212,7 @@ print(df.head(2))
 - KOSPI / KOSDAQ / KONEX / ALL 을 사용할 수 있습니다.
 
 ```python
-df = get_market_fundamental("20210104", market="KOSDAQ")
+df = stock.get_market_fundamental("20210104", market="KOSDAQ")
 print(df.head(2))
 ```
 ```text
