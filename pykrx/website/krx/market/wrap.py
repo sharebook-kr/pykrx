@@ -1053,8 +1053,8 @@ def get_index_fundamental_by_date(fromdate: str, todate: str, ticker: str) \
     df = PER_PBR_배당수익률_개별지수().fetch(
         fromdate, todate, ticker[0], ticker[1:])
     df = df[['TRD_DD', 'CLSPRC_IDX', 'FLUC_RT', 'WT_PER',
-             'FWD_PER', 'WT_STKPRC_NETASST_RTO', 'DIV_YD']]
-    df.columns = ['날짜', '종가', '등락률', 'PER', '선행PER', 'PBR',
+             'WT_STKPRC_NETASST_RTO', 'DIV_YD']]
+    df.columns = ['날짜', '종가', '등락률', 'PER', 'PBR',
                   '배당수익률']
     df = df.set_index('날짜')
     df.index = pd.to_datetime(df.index)
@@ -1065,7 +1065,6 @@ def get_index_fundamental_by_date(fromdate: str, todate: str, ticker: str) \
         "종가": np.float64,
         "등락률": np.float64,
         "PER": np.float32,
-        "선행PER": np.float32,
         "PBR": np.float32,
         "배당수익률": np.float32
     })
