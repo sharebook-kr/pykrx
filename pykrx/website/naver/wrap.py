@@ -25,7 +25,7 @@ def get_market_ohlcv_by_date(fromdate, todate, ticker):
         df = DataFrame(result, columns=cols)
         df = df.set_index('날짜')
         df.index = pd.to_datetime(df.index, format='%Y%m%d')
-        df = df.astype(np.int32)
+        df = df.astype(np.int64)
         close_1d = df['종가'].shift(1)
         df['등락률'] = (df['종가'] - close_1d) / close_1d * 100
         return df.loc[(strtd <= df.index) & (df.index <= lastd)]
