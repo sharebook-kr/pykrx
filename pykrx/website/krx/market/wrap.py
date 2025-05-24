@@ -94,9 +94,9 @@ def get_market_ohlcv_by_ticker(date: str, market: str = "KOSPI") -> DataFrame:
 
     df = 전종목시세().fetch(date, market2mktid[market])
     df = df[['ISU_SRT_CD', 'TDD_OPNPRC', 'TDD_HGPRC', 'TDD_LWPRC',
-             'TDD_CLSPRC', 'ACC_TRDVOL', 'ACC_TRDVAL', 'FLUC_RT']]
+             'TDD_CLSPRC', 'ACC_TRDVOL', 'ACC_TRDVAL', 'FLUC_RT', 'MKTCAP']]
     df.columns = ['티커', '시가', '고가', '저가', '종가', '거래량', '거래대금',
-                  '등락률']
+                  '등락률', '시가총액']
     df = df.replace(r'[^-\w\.]', '', regex=True)
     df = df.replace(r'\-$', '0', regex=True)
     df = df.replace('', '0')
@@ -108,7 +108,8 @@ def get_market_ohlcv_by_ticker(date: str, market: str = "KOSPI") -> DataFrame:
         "종가": np.int32,
         "거래량": np.int32,
         "거래대금": np.int64,
-        "등락률": np.float32
+        "등락률": np.float32,
+        "시가총액": np.int64
     })
     return df
 
