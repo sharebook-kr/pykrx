@@ -741,8 +741,8 @@ def get_market_net_purchases_of_equities_by_ticker(
     df = df.replace('/', '', regex=True)
     df = df.replace(',', '', regex=True)
     df = df.astype({
-        '티커': str, '종목명': str, '매수거래량': np.int32,
-        '매도거래량': np.int32, '순매수거래량': np.int32,
+        '티커': str, '종목명': str, '매수거래량': np.int64,
+        '매도거래량': np.int64, '순매수거래량': np.int64,
         '매수거래대금': np.int64, '매도거래대금': np.int64,
         '순매수거래대금': np.int64
     })
