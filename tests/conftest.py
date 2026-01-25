@@ -145,5 +145,6 @@ def use_cassette(vcr_config, request):
         return
 
     cassette_name = marker.args[0]
-    with custom_vcr.use_cassette(cassette_name):
+    vcr_instance = vcr.VCR(**vcr_config)
+    with vcr_instance.use_cassette(cassette_name):
         yield
