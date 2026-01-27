@@ -148,13 +148,13 @@ class TestEtfPdf:
     @pytest.mark.vcr
     def test_with_business_day(self):
         df = stock.get_etf_portfolio_deposit_file("152100", "20210402")
-        temp = df.iloc[0:5, 0] == np.array([8140.0, 968.0, 218.0, 79.0, 89.0])
+        temp = df.iloc[0:5, 1] == np.array([8140.0, 968.0, 218.0, 79.0, 89.0])
         assert temp.sum() == 5
 
     @pytest.mark.vcr
     def test_with_negative_value(self):
         df = stock.get_etf_portfolio_deposit_file("114800", "20210402")
-        assert df.iloc[1, 0] == pytest.approx(-3.58)
+        assert df.iloc[1, 1] == pytest.approx(-3.58)
 
 
 class TestEtfTradingvolumeValue:
