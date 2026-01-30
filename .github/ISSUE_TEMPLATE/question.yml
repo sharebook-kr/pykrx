@@ -1,0 +1,84 @@
+name: 질문
+description: pykrx 사용법이나 기능에 대해 질문해주세요
+title: "[Question]: "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        pykrx에 대해 궁금한 점이 있으시군요!
+        질문하시기 전에 [README](https://github.com/sharebook-kr/pykrx#readme)와 [기존 이슈](https://github.com/sharebook-kr/pykrx/issues?q=label%3Aquestion)를 먼저 확인해주세요.
+
+  - type: checkboxes
+    id: existing-check
+    attributes:
+      label: 사전 확인
+      description: 질문하시기 전에 확인해주세요.
+      options:
+        - label: README 문서를 확인했습니다.
+          required: true
+        - label: 기존 이슈에서 비슷한 질문을 검색해보았습니다.
+          required: true
+
+  - type: dropdown
+    id: question-type
+    attributes:
+      label: 질문 유형
+      description: 질문의 유형을 선택해주세요.
+      options:
+        - 사용법 문의
+        - 특정 데이터 조회 방법
+        - 오류 해결 방법
+        - 기능 지원 여부
+        - 기타
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: 질문 내용
+      description: 궁금한 점을 자세히 설명해주세요.
+      placeholder: |
+        무엇이 궁금하신가요?
+        구체적으로 설명해주시면 더 정확한 답변을 드릴 수 있습니다.
+    validations:
+      required: true
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: 시도해본 것
+      description: 이미 시도해본 방법이 있다면 알려주세요.
+      placeholder: |
+        어떤 코드를 실행해보셨나요?
+        어떤 문서를 참고하셨나요?
+    validations:
+      required: false
+
+  - type: textarea
+    id: code
+    attributes:
+      label: 관련 코드 (선택사항)
+      description: 질문과 관련된 코드가 있다면 공유해주세요.
+      render: python
+    validations:
+      required: false
+
+  - type: input
+    id: pykrx-version
+    attributes:
+      label: pykrx 버전
+      description: 사용 중인 pykrx 버전을 알려주세요.
+      placeholder: "예: 1.0.45"
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 추가 정보
+      description: 질문과 관련된 추가 정보가 있다면 작성해주세요.
+      placeholder: 스크린샷, 참고 링크 등
+    validations:
+      required: false

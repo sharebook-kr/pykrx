@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: README 문서
+    url: https://github.com/sharebook-kr/pykrx#readme
+    about: pykrx 사용법과 예제를 확인하세요.
+  - name: 기존 이슈 검색
+    url: https://github.com/sharebook-kr/pykrx/issues?q=is%3Aissue
+    about: 비슷한 문제나 질문이 이미 있는지 검색해보세요.

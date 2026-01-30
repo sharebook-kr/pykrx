@@ -1,0 +1,104 @@
+name: 버그 리포트
+description: 버그나 오류를 신고해주세요
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        버그 리포트를 작성해주셔서 감사합니다.
+        가능한 한 자세히 작성해주시면 문제 해결에 큰 도움이 됩니다.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 버그 설명
+      description: 어떤 버그가 발생했는지 설명해주세요.
+      placeholder: 버그에 대해 명확하고 간결하게 설명해주세요.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 재현 방법
+      description: 버그를 재현하는 방법을 단계별로 알려주세요.
+      placeholder: |
+        1. '...'를 실행
+        2. '...'를 입력
+        3. 오류 발생
+    validations:
+      required: true
+
+  - type: textarea
+    id: code
+    attributes:
+      label: 재현 코드
+      description: 버그를 재현할 수 있는 최소한의 코드를 작성해주세요.
+      render: python
+      placeholder: |
+        from pykrx import stock
+
+        df = stock.get_market_ohlcv("20240101", "20240131", "005930")
+        print(df)
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 예상 결과
+      description: 어떤 결과를 기대하셨나요?
+      placeholder: 정상적으로 동작했다면 어떤 결과가 나와야 하는지 설명해주세요.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 실제 결과
+      description: 실제로 어떤 결과가 나왔나요?
+      placeholder: 오류 메시지가 있다면 전체 traceback을 포함해주세요.
+      render: shell
+    validations:
+      required: true
+
+  - type: input
+    id: pykrx-version
+    attributes:
+      label: pykrx 버전
+      description: 사용 중인 pykrx 버전을 알려주세요. (`pip show pykrx`로 확인 가능)
+      placeholder: "예: 1.0.45"
+    validations:
+      required: true
+
+  - type: input
+    id: python-version
+    attributes:
+      label: Python 버전
+      description: 사용 중인 Python 버전을 알려주세요. (`python --version`으로 확인 가능)
+      placeholder: "예: 3.10.12"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: 운영체제
+      description: 사용 중인 운영체제를 선택해주세요.
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - 기타
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 추가 정보
+      description: 문제 해결에 도움이 될 수 있는 추가 정보가 있다면 작성해주세요.
+      placeholder: 스크린샷, 관련 링크, 환경 정보 등
+    validations:
+      required: false

@@ -1,0 +1,94 @@
+name: 기능 요청
+description: 새로운 기능이나 개선사항을 제안해주세요
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        기능 제안을 해주셔서 감사합니다!
+        pykrx를 더 좋게 만들 수 있는 아이디어를 공유해주세요.
+
+  - type: checkboxes
+    id: existing-check
+    attributes:
+      label: 기존 이슈 확인
+      description: 제안하시기 전에 확인해주세요.
+      options:
+        - label: 이 기능이 이미 요청되었는지 [기존 이슈](https://github.com/sharebook-kr/pykrx/issues)를 검색해보았습니다.
+          required: true
+
+  - type: dropdown
+    id: feature-type
+    attributes:
+      label: 기능 유형
+      description: 요청하시는 기능의 유형을 선택해주세요.
+      options:
+        - 새로운 데이터 조회 기능 (지수, 종목 등)
+        - 기존 기능 개선
+        - 성능 개선
+        - 문서화 개선
+        - 기타
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 해결하려는 문제
+      description: 이 기능이 필요한 이유나 해결하려는 문제를 설명해주세요.
+      placeholder: "예: 현재 VKOSPI(코스피 200 변동성지수) 데이터를 조회할 수 없어서 변동성 분석에 어려움이 있습니다."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: 제안하는 해결책
+      description: 원하시는 기능이나 해결책을 설명해주세요.
+      placeholder: |
+        어떤 방식으로 동작하면 좋을지 설명해주세요.
+        가능하다면 예시 코드나 API 형태를 제안해주세요.
+    validations:
+      required: true
+
+  - type: textarea
+    id: api-example
+    attributes:
+      label: 희망하는 API 형태 (선택사항)
+      description: 원하시는 함수/API 형태가 있다면 예시를 작성해주세요.
+      render: python
+      placeholder: |
+        # 예시
+        from pykrx import stock
+
+        # VKOSPI 조회
+        df = stock.get_vkospi("20240101", "20240131")
+    validations:
+      required: false
+
+  - type: textarea
+    id: data-source
+    attributes:
+      label: 데이터 소스 (선택사항)
+      description: 해당 데이터를 조회할 수 있는 KRX 페이지나 다른 소스가 있다면 알려주세요.
+      placeholder: "예: http://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201"
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 대안
+      description: 고려해본 대안이 있다면 설명해주세요.
+      placeholder: 현재 우회 방법이나 다른 라이브러리 사용 경험 등
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 추가 정보
+      description: 기능 요청과 관련된 추가 정보나 참고 자료가 있다면 작성해주세요.
+    validations:
+      required: false
