@@ -210,18 +210,27 @@ def get_etf_portfolio_deposit_file(date: str, ticker: str) -> DataFrame:
 
     Returns:
         DataFrame:
-                     계약수       금액       비중
+                구성종목명	계약수	금액	시가총액	비중
             티커
-            005930   8175.0  694875000  16.531250
-            000660    972.0  126360000   2.949219
-            051910     80.0   77120000   1.849609
-            035420    219.0   65809500   1.570312
+            0724F1	ADOBE SYSTEMS INC	12.22	0	0	0.0
+            2079K3	ALPHABET INC-CL A	61.55	0	0	0.0
+            2079K1	ALPHABET INC-CL C	57.21	0	0	0.0
+            255371	AMERICAN ELECTRIC POWER	15.61	0	0	0.0
     """
 
     isin = get_etx_isin(ticker)
     df = PDF().fetch(date, isin)
-    df = df[["COMPST_ISU_CD", "COMPST_ISU_CU1_SHRS", "VALU_AMT", "COMPST_RTO"]]
-    df.columns = ["티커", "계약수", "금액", "비중"]
+    df = df[
+        [
+            "COMPST_ISU_CD",
+            "COMPST_ISU_NM",
+            "COMPST_ISU_CU1_SHRS",
+            "VALU_AMT",
+            "COMPST_AMT",
+            "COMPST_RTO",
+        ]
+    ]
+    df.columns = ["티커", "구성종목명", "계약수", "금액", "시가총액", "비중"]
 
     # NOTE: 웹 서버가 COMPST_ISU_CD에 ISIN과 축향형을 혼합해서 반환한다. Why?
     df["티커"] = df["티커"].apply(lambda x: x[3:9] if len(x) > 6 else x)
@@ -231,7 +240,14 @@ def get_etf_portfolio_deposit_file(date: str, ticker: str) -> DataFrame:
     # - empty string은 int, float로 형변환 불가
     #  -> 이 문제를 해결하기 위해 '-' 문자는 0으로 치환
     df = df.replace(r"\-$", "0", regex=True)
-    df = df.astype({"계약수": np.float64, "금액": np.int64, "비중": np.float32})
+    df = df.astype(
+        {
+            "계약수": np.float64,
+            "금액": np.int64,
+            "시가총액": np.int64,
+            "비중": np.float32,
+        }
+    )
     df = df[(df.T != 0).any()]
     return df
 
