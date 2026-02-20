@@ -693,5 +693,31 @@ class TestStockExhaustionRatesOfForeignInvestmentByDateTest:
         assert len(df) == 1
 
 
+class TestMarketOhlcvByMarket:
+    @pytest.mark.vcr
+    def test_all_market(self):
+        df = stock.get_market_ohlcv_by_market("ALL")
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) > 0
+        assert df.index.name == "티커"
+        expected_columns = [
+            "표준코드",
+            "한글종목명",
+            "한글종목약명",
+            "영문종목명",
+            "상장일",
+            "시장구분",
+            "증권구분",
+            "소속부",
+            "주식종류",
+            "액면가",
+            "상장주식수",
+        ]
+        assert list(df.columns) == expected_columns
+        assert pd.api.types.is_datetime64_any_dtype(df["상장일"])
+        assert df["상장주식수"].dtype == np.int64
+        assert (df.index == df.index.sort_values()).all()
+
+
 if __name__ == "__main__":
     pytest.main([__file__])

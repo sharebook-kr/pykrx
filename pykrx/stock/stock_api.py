@@ -2858,6 +2858,26 @@ def get_stock_major_changes(ticker: str) -> DataFrame:
     return krx.get_stock_major_changes(ticker)
 
 
+def get_market_ohlcv_by_market(market: str):
+    """티커별로 정리된 전종목 OHLCV
+
+    Args:
+        date   (str): 조회 일자 (YYYYMMDD)
+        market (str): 조회 시장 (KOSPI/KOSDAQ/KONEX/ALL)
+
+    Returns:
+        DataFrame:
+                     시가   고가   저가   종가  거래량    거래대금
+            티커
+            060310   2150   2390   2150   2190  981348  2209370985
+            095570   3135   3200   3100   3130   89871   282007385
+            006840  17050  17200  16500  16500   30567   512403000
+            054620   8550   8740   8400   8650  647596  5525789290
+            265520  22150  23100  22050  22400  255846  5798313650
+    """
+    return krx.get_market_ohlcv_by_market(market)
+
+
 if __name__ == "__main__":
     pd.set_option("display.expand_frame_repr", False)
     # print(get_market_price_change_by_ticker(

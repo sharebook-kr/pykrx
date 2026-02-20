@@ -21,6 +21,7 @@ from pykrx.website.krx.market.core import (
     외국인보유량_개별추이,
     외국인보유량_전종목,
     전종목_공매도_잔고,
+    전종목기본정보,
     전종목등락률,
     전종목시세,
     전체지수기본정보,
@@ -1740,6 +1741,48 @@ def get_stock_major_changes(ticker: str) -> DataFrame:
     df = df.replace("", "-")
     df.index = pd.to_datetime(df.index, format="%Y/%m/%d")
     df = df.astype({"액면변경전": np.int16})
+    return df.sort_index()
+
+
+@dataframe_empty_handler
+def get_market_ohlcv_by_market(market: str = "ALL") -> DataFrame:
+    """[12005] 전종목 기본정보
+
+    Args:
+        market (str): 검색 시장 (ALL/KOSPI/KOSDAQ/KONEX)
+    Returns:
+        DataFrame:
+
+            >> get_market_ohlcv_by_market(market="ALL")
+                        표준코드         한글종목명   한글종목약명                            영문종목명        상장일           시장구분 증권구분    소속부 주식종류   액면가     상장주식수
+            티커
+            098120  KR7098120009  (주)마이크로컨텍솔루션  마이크로컨텍솔  Micro Contact Solution Co.,Ltd. 2008-09-23         KOSDAQ   주권  중견기업부  보통주   500   8312766
+            009520  KR7009520008      (주)포스코엠텍    포스코엠텍            POSCO M-TECH CO.,LTD. 1997-11-10  KOSDAQ GLOBAL   주권  우량기업부  보통주   500  41642703
+            095570  KR7095570008     AJ네트웍스보통주   AJ네트웍스             AJ Networks Co.,Ltd. 2015-08-21          KOSPI   주권         보통주  1000  45252759
+    """
+
+    market2mktid = {"ALL": "ALL", "KOSPI": "STK", "KOSDAQ": "KSQ", "KONEX": "KNX"}
+
+    df = 전종목기본정보().fetch(market2mktid[market])
+    df.columns = [
+        "표준코드",
+        "티커",
+        "한글종목명",
+        "한글종목약명",
+        "영문종목명",
+        "상장일",
+        "시장구분",
+        "증권구분",
+        "소속부",
+        "주식종류",
+        "액면가",
+        "상장주식수",
+    ]
+    df = df.set_index("티커")
+    df["액면가"] = df["액면가"].replace(r"[^-\w\.]", "", regex=True)
+    df["상장주식수"] = df["상장주식수"].replace(r"[^-\w\.]", "", regex=True)
+    df["상장일"] = pd.to_datetime(df["상장일"], format="%Y/%m/%d")  # 상장일
+    df = df.astype({"상장주식수": np.int64})
     return df.sort_index()
 
 

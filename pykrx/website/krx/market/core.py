@@ -1419,6 +1419,47 @@ class 기업주요변동사항(KrxWebIo):
         return DataFrame(result["block1"])
 
 
+class 전종목기본정보(KrxWebIo):
+    @property
+    def bld(self):
+        return "dbms/MDC/STAT/standard/MDCSTAT01901"
+
+    def fetch(
+        self,
+        mktId: str = "ALL",
+        segTpCd: str = "ALL",
+    ) -> DataFrame:
+        """[12005] 전종목 기본정보
+
+        Args:
+            mktId   (str): 시장구분
+             - ALL: 전체
+             - STK: KOSPI
+             - KSQ: KOSDAQ
+             - KNX: KONEX
+            segTpCd (str): KOSDAQ 검색 구분
+                - ALL: 전체
+                - 1 : KOSDAQ GLOBAL
+
+        Returns:
+            DataFrame:
+                >> 전종목기본정보().fetch(mktId="ALL", segTpCd="ALL").head()
+                        ISU_CD ISU_SRT_CD        ISU_NM ISU_ABBRV                       ISU_ENG_NM     LIST_DD      MKT_TP_NM SECUGRP_NM SECT_TP_NM KIND_STKCERT_TP_NM PARVAL   LIST_SHRS
+                0  KR7098120009     098120  (주)마이크로컨텍솔루션   마이크로컨텍솔  Micro Contact Solution Co.,Ltd.  2008/09/23         KOSDAQ         주권      중견기업부                보통주    500   8,312,766
+                1  KR7009520008     009520      (주)포스코엠텍     포스코엠텍            POSCO M-TECH CO.,LTD.  1997/11/10  KOSDAQ GLOBAL         주권      우량기업부                보통주    500  41,642,703
+                2  KR7095570008     095570     AJ네트웍스보통주    AJ네트웍스             AJ Networks Co.,Ltd.  2015/08/21          KOSPI         주권                           보통주  1,000  45,252,759
+                3  KR7006840003     006840      AK홀딩스보통주     AK홀딩스                AK Holdings, Inc.  1999/08/11          KOSPI         주권                           보통주  5,000  13,247,561
+                4  KR7282330000     282330     BGF리테일보통주    BGF리테일                       BGF Retail  2017/12/08          KOSPI         주권                           보통주  1,000  17,283,906
+        """
+        if mktId == "KSQ":
+            result = self.read(mktId=mktId, segTpCd=segTpCd)
+            return DataFrame(result["OutBlock_1"])
+
+        else:
+            result = self.read(mktId=mktId)
+            return DataFrame(result["OutBlock_1"])
+
+
 if __name__ == "__main__":
     pd.set_option("display.width", None)
     # print(개별종목_공매도_잔고().fetch("20200106", "20200110", "KR7005930003"))
