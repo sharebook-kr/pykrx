@@ -3,7 +3,9 @@ import requests
 
 def login_krx(session: requests.Session, login_id: str, login_pw: str) -> bool:
     login_page = "https://data.krx.co.kr/contents/MDC/COMS/client/MDCCOMS001.cmd"
-    login_jsp = "https://data.krx.co.kr/contents/MDC/COMS/client/view/login.jsp?site=mdc"
+    login_jsp = (
+        "https://data.krx.co.kr/contents/MDC/COMS/client/view/login.jsp?site=mdc"
+    )
     login_url = "https://data.krx.co.kr/contents/MDC/COMS/client/MDCCOMS001D1.cmd"
     user_agent = (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -11,7 +13,9 @@ def login_krx(session: requests.Session, login_id: str, login_pw: str) -> bool:
     )
 
     session.get(login_page, headers={"User-Agent": user_agent}, timeout=15)
-    session.get(login_jsp, headers={"User-Agent": user_agent, "Referer": login_page}, timeout=15)
+    session.get(
+        login_jsp, headers={"User-Agent": user_agent, "Referer": login_page}, timeout=15
+    )
 
     payload = {
         "mbrNm": "",
