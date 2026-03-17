@@ -2,6 +2,17 @@ from abc import abstractmethod
 
 import requests
 
+_session = None
+
+
+def set_session(session):
+    global _session
+    _session = session
+
+
+def get_session():
+    return _session
+
 
 class Get:
     def __init__(self):
@@ -11,7 +22,11 @@ class Get:
         }
 
     def read(self, **params):
-        resp = requests.get(self.url, headers=self.headers, params=params)
+        session = get_session()
+        if session is None:
+            resp = requests.get(self.url, headers=self.headers, params=params)
+        else:
+            resp = session.get(self.url, headers=self.headers, params=params)
         return resp
 
     @property
@@ -30,7 +45,11 @@ class Post:
             self.headers.update(headers)
 
     def read(self, **params):
-        resp = requests.post(self.url, headers=self.headers, data=params)
+        session = get_session()
+        if session is None:
+            resp = requests.post(self.url, headers=self.headers, data=params)
+        else:
+            resp = session.post(self.url, headers=self.headers, data=params)
         return resp
 
     @property
