@@ -102,8 +102,8 @@ if __name__ == "__main__":
     # tickers = get_future_ticker_list()
     # print(tickers)
 
-    # names = get_future_ticker_name('KRDRVFUEST')
-    # print(names)
+    names = get_future_ticker_name("KRDRVFUEST")
+    print(names)
 
     df = get_future_ohlcv("20220902", "KRDRVFUEST")
     print(df)

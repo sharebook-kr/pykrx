@@ -4,7 +4,10 @@ from contextlib import ExitStack
 from pathlib import Path
 
 import pytest
-import vcr
+import vcr as vcrpy
+import yaml
+
+from pykrx.website.comm import webio as _webio
 
 IGNORED_DATE_KEYS = {
     "strtDd",
@@ -126,9 +129,55 @@ COMMON_CASSETTE_DIR = str(Path(__file__).parent / "cassettes" / "common")
 
 # Register custom matchers globally for ALL VCR instances
 # This needs to be done at module level before pytest-vcr creates VCR instances
-_global_vcr = vcr.VCR()
+_global_vcr = vcrpy.VCR()
 _global_vcr.register_matcher("uri_ignore_dates", uri_without_dates)
 _global_vcr.register_matcher("body_ignore_dates", form_body_matcher)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def init_singletons(tmp_path_factory):
+    """세션 시작 시 singleton을 common cassette로 미리 초기화.
+
+    VCR은 중첩 카세트에서 가장 안쪽(innermost) 카세트만 사용하므로
+    모든 common cassette를 하나의 YAML 파일로 합쳐서 단일 컨텍스트를 사용한다.
+    singleton이 미리 초기화되면 개별 테스트에서 HTTP 요청이 불필요하다.
+    """
+    # Merge all common cassette interactions into one file
+    all_interactions = []
+    for fname in ["etx_ticker_init.yaml", "finder_init.yaml", "index_kind_init.yaml"]:
+        path = Path(COMMON_CASSETTE_DIR) / fname
+        if path.exists():
+            data = yaml.safe_load(path.read_text(encoding="utf-8"))
+            all_interactions.extend(data.get("interactions", []))
+
+    combined_path = tmp_path_factory.mktemp("vcr") / "combined_init.yaml"
+    combined_path.write_text(
+        yaml.dump({"interactions": all_interactions, "version": 1}, allow_unicode=True),
+        encoding="utf-8",
+    )
+
+    _vcr = vcrpy.VCR()
+    _vcr.register_matcher("uri_ignore_dates", uri_without_dates)
+    _vcr.register_matcher("body_ignore_dates", form_body_matcher)
+
+    # Use plain requests inside VCR context so cassettes (recorded without auth)
+    # match correctly on all platforms including Windows.
+    original_session = _webio.get_session()
+    _webio.set_session(None)
+    try:
+        with _vcr.use_cassette(
+            str(combined_path),
+            record_mode="none",
+            allow_playback_repeats=True,
+            match_on=["uri_ignore_dates", "method", "body_ignore_dates"],
+        ):
+            from pykrx.website.krx.etx.ticker import EtxTicker
+            from pykrx.website.krx.market.ticker import StockTicker
+
+            EtxTicker()
+            StockTicker()
+    finally:
+        _webio.set_session(original_session)
 
 
 @pytest.fixture(scope="module")
