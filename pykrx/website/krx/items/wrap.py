@@ -51,6 +51,7 @@ if __name__ == "__main__":
         strtDd="20251107",
         endDd="20251125",
     )
+    print(df_gold_price)
     #     get_item_gold_price("KRD040200002", "20251107", "20251125")
     #     TRD_DD	TDD_CLSPRC	FLUC_TP_CD	CMPPREVDD_PRC	FLUC_RT	TDD_OPNPRC	TDD_HGPRC	TDD_LWPRC	ACC_TRDVOL	ACC_TRDVAL
     # 0	2025/11/25	197,300	1	3,850	1.99	196,960	197,500	196,290	574,628	112,714,602,040

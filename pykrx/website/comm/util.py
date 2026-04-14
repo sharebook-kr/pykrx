@@ -1,3 +1,4 @@
+import json
 import logging
 
 from pandas import DataFrame
@@ -7,7 +8,14 @@ def dataframe_empty_handler(func):
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except (AttributeError, KeyError, TypeError, ValueError) as e:
+        except (
+            AttributeError,
+            KeyError,
+            TypeError,
+            ValueError,
+            json.JSONDecodeError,
+        ) as e:
+            print(f"Error occurred in {func.__name__}: {e}")
             logging.info(args, kwargs)
             logging.info(e)
             return DataFrame()
