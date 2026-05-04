@@ -60,6 +60,33 @@ pytest -v
 - 모든 설정은 `pyproject.toml`에서 관리됩니다
 - VS Code 사용 시: `ruff` 익스텐션 설치하면 저장 시 자동 포맷 적용
 
+### 1.3 환경변수 설정 (Required Environment Variables)
+
+KRX 로그인이 필요한 API를 사용하려면 아래 두 환경변수를 **반드시** 설정해야 합니다.
+
+| 변수명 | 필수 여부 | 설명 |
+|--------|-----------|------|
+| `KRX_ID` | **필수** | KRX(한국거래소) 회원 로그인 ID |
+| `KRX_PW` | **필수** | KRX(한국거래소) 회원 로그인 비밀번호 |
+
+환경변수가 설정되지 않으면 KRX 로그인이 실패하고 인증이 필요한 데이터를 조회할 수 없습니다.
+
+```bash
+# macOS / Linux
+export KRX_ID="your_krx_id"
+export KRX_PW="your_krx_password"
+
+# Windows (PowerShell)
+$env:KRX_ID="your_krx_id"
+$env:KRX_PW="your_krx_password"
+
+# Windows (Command Prompt)
+set KRX_ID=your_krx_id
+set KRX_PW=your_krx_password
+```
+
+> **참고:** `.env` 파일을 사용하는 경우 `python-dotenv` 등을 활용해 로드하세요. `.env` 파일은 절대 버전 관리(git)에 포함하지 마세요.
+
 ### 지원 Python 버전
 
 이 프로젝트는 다음 Python 버전을 지원합니다:
