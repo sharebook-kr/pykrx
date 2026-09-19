@@ -144,8 +144,8 @@ print(tickers)
 `get_market_ticker_name` 함수에 티커를 입력하면 종목이름을 반환합니다.
 ```python
 for ticker in stock.get_market_ticker_list():
-        종목 = stock.get_market_ticker_name(ticker)
-        print(종목)
+    종목 = stock.get_market_ticker_name(ticker)
+    print(종목)
 ```
 ```text
 SK하이닉스
@@ -198,6 +198,7 @@ df = stock.get_market_ohlcv("20180427", "20180504", "005930", adjusted=False)
 get_stock_ticker_list() 함수와 함께 사용하면 전종목의 OHLCV를 가져올 수 있습니다. 한 번에 너무 많은 정보를 요청하면 KRX 서버가 차단할 수 있으므로 time 모듈을 사용해서 1초 지연 후 요청하도록 코드를 작성했습니다.
 ```python
 import time
+
 for ticker in stock.get_stock_ticker_list():
     df = stock.get_market_ohlcv("20181210", "20181212", ticker)
     print(df.head())
@@ -353,7 +354,7 @@ print(df.head())
 `매수` 혹은 `매도` 금액을 조회하고 싶다면 `on` 파라미터에 입력할 수 있습니다. 입력하지 않는다면 `순매수` 금액이 조회됩니다.
 
 ```python
-df = stock.get_market_trading_value_by_date("20210115", "20210122", "005930", on='매도')
+df = stock.get_market_trading_value_by_date("20210115", "20210122", "005930", on="매도")
 print(df.head())
 ```
 
@@ -389,7 +390,9 @@ print(df.head())
 시장의 거래대금을 조회할 때는 `ETF`, `ETN` `ELW`의 포함 여부를 지정할 수 있습니다. 만약 값을 지정하지 않는다면 해당 데이터를 제외한 값을을 반환합니다. 옵션은 `KOSPI`, `KOSDAQ`, `KONEX` 조회할 때만 유효합니다.
 
 ```python
-df = stock.get_market_trading_value_by_date("20210115", "20210122", "KOSPI", etf=True, etn=True, elw=True)
+df = stock.get_market_trading_value_by_date(
+    "20210115", "20210122", "KOSPI", etf=True, etn=True, elw=True
+)
 print(df.head())
 ```
 
@@ -406,7 +409,9 @@ print(df.head())
 
 `detail` 옵션을 추가하면 상세한 정보를 얻을 수 있습니다. 옵션은 `KOSPI`, `KOSDAQ`, `KONEX` 조회할 때만 유효합니다.
 ```python
-df = stock.get_market_trading_value_by_date("20210115", "20210122", "KOSPI", etf=True, etn=True, elw=True, detail=True)
+df = stock.get_market_trading_value_by_date(
+    "20210115", "20210122", "KOSPI", etf=True, etn=True, elw=True, detail=True
+)
 print(df.head())
 ```
 
@@ -443,7 +448,9 @@ print(df.head())
 `매수` 혹은 `매도` 거래량만을 조회하고 싶다면 `on` 파라미터에 입력할 수 있습니다. 입력하지 않는다면 `순매수` 수량이 조회됩니다.
 
 ```python
-df = stock.get_market_trading_volume_by_date("20210115", "20210122", "005930", on='매도')
+df = stock.get_market_trading_volume_by_date(
+    "20210115", "20210122", "005930", on="매도"
+)
 print(df.head())
 ```
 
@@ -479,7 +486,9 @@ print(df.head())
 시장의 거래량을 조회할 때는 `ETF`, `ETN` `ELW`의 포함 여부를 지정할 수 있습니다. 만약 값을 지정하지 않는다면 해당 데이터를 제외한 값을을 반환합니다. 옵션은 `KOSPI`, `KOSDAQ`, `KONEX` 조회할 때만 유효합니다.
 
 ```python
-df = stock.get_market_trading_volume_by_date("20210115", "20210122", "KOSPI", etf=True, etn=True, elw=True)
+df = stock.get_market_trading_volume_by_date(
+    "20210115", "20210122", "KOSPI", etf=True, etn=True, elw=True
+)
 print(df.head())
 ```
 
@@ -496,7 +505,9 @@ print(df.head())
 
 `detail` 옵션을 추가하면 상세한 정보를 얻을 수 있습니다. 옵션은 `KOSPI`, `KOSDAQ`, `KONEX` 조회할 때만 유효합니다.
 ```python
-df = stock.get_market_trading_volume_by_date("20210115", "20210122", "KOSPI", etf=True, etn=True, elw=True, detail=True)
+df = stock.get_market_trading_volume_by_date(
+    "20210115", "20210122", "KOSPI", etf=True, etn=True, elw=True, detail=True
+)
 print(df.head())
 ```
 
@@ -550,7 +561,9 @@ print(df.head())
 시장의 거래대금을 조회할 때는 `ETF`, `ETN` `ELW`의 포함 여부를 지정할 수 있습니다. 만약 값을 지정하지 않는다면 해당 데이터를 제외한 값을을 반환합니다. 옵션은 `KOSPI`, `KOSDAQ`, `KONEX` 조회할 때만 유효합니다.
 
 ```python
-df = stock.get_market_trading_value_by_investor("20210115", "20210122", "KOSPI", etf=True, etn=True, elw=True)
+df = stock.get_market_trading_value_by_investor(
+    "20210115", "20210122", "KOSPI", etf=True, etn=True, elw=True
+)
 print(df.head())
 ```
 
@@ -602,7 +615,9 @@ print(df.head())
 시장의 거래량을 조회할 때는 `ETF`, `ETN` `ELW`의 포함 여부를 지정할 수 있습니다. 만약 값을 지정하지 않는다면 해당 데이터를 제외한 값을을 반환합니다. 옵션은 `KOSPI`, `KOSDAQ`, `KONEX` 조회할 때만 유효합니다.
 
 ```python
-df = stock.get_market_trading_volume_by_investor("20210115", "20210122", "KOSPI", etf=True, etn=True, elw=True)
+df = stock.get_market_trading_volume_by_investor(
+    "20210115", "20210122", "KOSPI", etf=True, etn=True, elw=True
+)
 print(df.head())
 ```
 
@@ -694,7 +709,7 @@ print(df.head())
 조회합니다. 외국인 보유수량 및 한도소진율은 장개시 시점 기준(금융감독원 외국인투자 관리시스템 제공 전일자 확정치)입니다.
 
 ```python
-df = stock.get_exhaustion_rates_of_foreign_investment('20200703')
+df = stock.get_exhaustion_rates_of_foreign_investment("20200703")
 print(df.head())
 ```
 
@@ -710,15 +725,16 @@ print(df.head())
 
 두 번째 파라미터 `market`은 코스피(KOSPI)/코스닥(KOSDAQ)/코넥스(KONEX) 시장을 지정해서 조회할 수 있습니다.
 ```python
-df = stock.get_exhaustion_rates_of_foreign_investment('20200703', "KOSPI")
+df = stock.get_exhaustion_rates_of_foreign_investment("20200703", "KOSPI")
 print(df.head())
 ```
 
 세 번째 파라미터 `balance_limit`을 `True`로 지정하면 외국인 보유한도의 제한 종목만 검색할 수 있습니다. 지정하지 않으면 `False` 입니다.
  ```python
-df = stock.get_exhaustion_rates_of_foreign_investment('20200703', "KOSPI",
-balance_limit=True)
-print(df.head())
+ df = stock.get_exhaustion_rates_of_foreign_investment(
+     "20200703", "KOSPI", balance_limit=True
+ )
+ print(df.head())
 ```
 
 #### 2.1.1.15 일자별 외국인 보유량 및 외국인 한도소진률
@@ -750,7 +766,7 @@ tickers = stock.get_index_ticker_list("19800104")
 
 코스닥 인덱스를 조회할 때는 `market` 옵션을 추가합니다.
 ```python
-tickers = stock.get_index_ticker_list(market='KOSDAQ')
+tickers = stock.get_index_ticker_list(market="KOSDAQ")
 ```
 
 `get_index_name` 함수를 사용해서 티커의 이름을 얻을 수 있습니다.
@@ -1186,7 +1202,7 @@ print(df.head())
 get_etf_ohlcv_by_date() 함수에 frequency 파라미터(d/m/y)를 추가할 수 있습니다.
 d는 일자, m은 월, y는 연도를 의미합니다. 다음은 20200101부터 20200531까지의 월별 OHLCV를 출력합니다.
 ```python
-df = stock.get_etf_ohlcv_by_date("20200101", "20200531", "292340", 'm')
+df = stock.get_etf_ohlcv_by_date("20200101", "20200531", "292340", "m")
 print(df.head())
 ```
 ```text
@@ -1364,7 +1380,9 @@ print(df.head())
 티커를 추가하면 개별종목의 일자별 데이터를 조회할 수 있습니다.
 
 ```python
-df = get_etf_trading_volume_and_value("20220908", "20220916", "580011", "거래대금", "순매수")
+df = get_etf_trading_volume_and_value(
+    "20220908", "20220916", "580011", "거래대금", "순매수"
+)
 print(df.head())
 ```
 

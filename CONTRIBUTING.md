@@ -39,8 +39,9 @@ Integration 테스트는 `vcrpy`를 사용하여 HTTP 요청을 녹화/재생합
 import pytest
 from pykrx import stock
 
+
 class TestStockApi:
-    @pytest.mark.cassette('stock/ohlcv_20210104.yaml')
+    @pytest.mark.cassette("stock/ohlcv_20210104.yaml")
     def test_get_ohlcv(self, use_cassette):
         df = stock.get_market_ohlcv_by_date("20210104", "20210108", "005930")
         assert len(df) > 0
@@ -78,7 +79,8 @@ ruff format --config pyproject.toml .          # 포맷 적용
 
 ```python
 import matplotlib
-matplotlib.use('Agg')
+
+matplotlib.use("Agg")
 ```
 
 8) 브랜치 및 PR 규칙

@@ -223,5 +223,6 @@ def vcr_config():
         "record_mode": "once",  # [User Requirement] External requests must be 0
         "match_on": ["uri_ignore_dates", "method", "body_ignore_dates"],
         "before_record_request": before_record_request,
+        "filter_headers": ["authorization", "cookie"],
         "decode_compressed_response": False,  # 응답을 압축된 상태(gzip)로 저장해 파일 크기 감소
     }

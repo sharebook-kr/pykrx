@@ -1,3 +1,5 @@
+import urllib.parse
+
 import pandas as pd
 from pandas import DataFrame
 
@@ -995,18 +997,90 @@ class PER_PBR_배당수익률_개별지수(KrxWebIo):
         return DataFrame(result["output"])
 
 
+class 지수이름조회(KrxWebIo):
+    KRX_INDIDX = None  # cache
+
+    @property
+    def bld(self):
+        return "dbms/comm/finder/finder_equidx"
+
+    def fetch(self, search_text: str = None) -> DataFrame:
+        """[11006] 지수이름조회
+
+        Args:
+            search_text (str, optional): 검색할 지수명
+
+        Returns:
+            >> 지수이름조회().fetch()
+
+            DataFrame:
+
+                    full_code short_code marketCode marketName
+                codeName
+                코리아 밸류업 지수    5 302      KRX      KRX
+                KRX TMI              5 447      KRX      KRX
+                KRX 300              5 300      KRX      KRX
+                KRX 중대형 TMI       5 921      KRX      KRX
+                KRX 중형 TMI         5 922      KRX      KRX
+                ...
+                KRX K-AI 반도체TOP2+ 지수  5 453      KRX      테마
+                KRX K-AI 2차전지 지수      5 454      KRX      테마
+                KRX K-AI 바이오테크코스닥 지수  5 455      KRX      테마
+        """
+        if 지수이름조회.KRX_INDIDX is None:
+            result = self.read(mktsel="1", searchText=None)
+            if result and "block1" in result:
+                지수이름조회.KRX_INDIDX = DataFrame(result["block1"]).set_index(
+                    "codeName"
+                )
+        if search_text and 지수이름조회.KRX_INDIDX is not None:
+            index = 지수이름조회.KRX_INDIDX.index.astype(str)
+            return 지수이름조회.KRX_INDIDX[index.str.contains(search_text, regex=False)]
+        return 지수이름조회.KRX_INDIDX
+
+    def get_indidx(self, name, market=None):
+        df = self.fetch()
+        if df is not None and name in df.index:
+            info = df.loc[name]
+            if isinstance(info, DataFrame):
+                if market is None:
+                    markets = ", ".join(info["marketName"].unique())
+                    raise ValueError(
+                        f"{name} 지수는 여러 시장에 존재합니다: {markets}. "
+                        "market을 지정하세요."
+                    )
+                info = info[
+                    (info["marketName"] == market) | (info["marketCode"] == market)
+                ]
+                if info.empty:
+                    return None, None
+                info = info.iloc[0]
+            return info["short_code"], info["full_code"]
+        else:
+            return None, None
+
+
 class 지수구성종목(KrxWebIo):
     @property
     def bld(self):
         return "dbms/MDC/STAT/standard/MDCSTAT00601"
 
-    def fetch(self, date: str, ticker: str, group_id: str) -> DataFrame:
+    def fetch(
+        self,
+        date: str,
+        ticker: str,
+        group_id: str = None,
+        market: str = None,
+    ) -> DataFrame:
         """[11006] 지수구성종목
 
         Args:
-            ticker   (str): index ticker
-            group_id (str): index group id
             date     (str): 조회 일자 (YYMMDD)
+            ticker   (str): index ticker (group_id 포함 2자리 숫자)
+            group_id (str, optional): index group id (1:KRX, 2:KOSPI,
+                3:KOSDAQ, 4:테마). None 이면 ticker 이름 기반 조회
+            market   (str, optional): 동일한 지수명이 여러 시장에 존재할 때
+                시장명(KOSPI/KOSDAQ) 또는 시장 코드(STK/KSQ)
 
         Returns:
 
@@ -1023,11 +1097,34 @@ class 지수구성종목(KrxWebIo):
                      FLUC_RT               MKTCAP
                         3.00  533,698,559,970,000
                         5.06   98,280,319,275,000
-                        1.54   69,886,419,570,000
-                        1.60   57,327,924,855,000
+                        1.54  69,886,419,570,000
+                        1.60  57,327,924,855,000
+
+        Name-based lookup (group_id=None):
+
+            >> 지수구성종목().fetch("20210125", "코스피 200"))
+
         """
-        result = self.read(indIdx2=ticker, indIdx=group_id, trdDd=date)
-        return DataFrame(result["output"])
+        if group_id is None:
+            # name-based lookup
+            obj = 지수이름조회()
+            indIdx2, indIdx = obj.get_indidx(ticker, market)
+            if indIdx2:
+                url_name = urllib.parse.quote_plus(ticker)
+                result = self.read(
+                    indIdx2=indIdx2,
+                    indIdx=indIdx,
+                    trdDd=date,
+                    tboxindIdx_finder_equidx0_0=url_name,
+                    codeNmindIdx_finder_equidx0_0=url_name,
+                )
+                return DataFrame(result["output"])
+            else:
+                print(f"{ticker}은 조회가능한 이름이 아닙니다.")
+                return pd.DataFrame()
+        else:
+            result = self.read(indIdx2=ticker, indIdx=group_id, trdDd=date)
+            return DataFrame(result["output"])
 
 
 class 업종분류현황(KrxWebIo):

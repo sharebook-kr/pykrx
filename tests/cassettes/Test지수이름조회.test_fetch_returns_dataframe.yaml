@@ -1,0 +1,172 @@
+interactions:
+- request:
+    body: mktsel=1&bld=dbms%2Fcomm%2Ffinder%2Ffinder_equidx
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '49'
+      Content-Type:
+      - application/x-www-form-urlencoded
+
+      Referer:
+      - https://data.krx.co.kr/contents/MDC/MDI/outerLoader/index.cmd
+      User-Agent:
+      - Mozilla/5.0
+      X-Requested-With:
+      - XMLHttpRequest
+    method: POST
+    uri: https://data.krx.co.kr/comm/bldAttendant/getJsonData.cmd
+  response:
+    body:
+      string: "{\"block1\":[{\"full_code\":\"5\",\"short_code\":\"302\",\"codeName\":\"\uCF54\uB9AC\uC544
+        \uBC38\uB958\uC5C5 \uC9C0\uC218\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"447\",\"codeName\":\"KRX
+        TMI\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"300\",\"codeName\":\"KRX
+        300\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"921\",\"codeName\":\"KRX
+        \uC911\uB300\uD615 TMI\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"922\",\"codeName\":\"KRX
+        \uC911\uD615 TMI\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"923\",\"codeName\":\"KRX
+        \uC18C\uD615 TMI\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"924\",\"codeName\":\"KRX
+        \uCD08\uC18C\uD615 TMI\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"600\",\"codeName\":\"KTOP
+        30\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"042\",\"codeName\":\"KRX
+        100\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"043\",\"codeName\":\"KRX
+        \uC790\uB3D9\uCC28\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"044\",\"codeName\":\"KRX
+        \uBC18\uB3C4\uCCB4\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"045\",\"codeName\":\"KRX
+        \uD5EC\uC2A4\uCF00\uC5B4\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"046\",\"codeName\":\"KRX
+        \uC740\uD589\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"048\",\"codeName\":\"KRX
+        \uC5D0\uB108\uC9C0\uD654\uD559\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"049\",\"codeName\":\"KRX
+        \uCCA0\uAC15\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"051\",\"codeName\":\"KRX
+        \uBC29\uC1A1\uD1B5\uC2E0\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"052\",\"codeName\":\"KRX
+        \uAC74\uC124\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"054\",\"codeName\":\"KRX
+        \uC99D\uAD8C\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"055\",\"codeName\":\"KRX
+        \uAE30\uACC4\uC7A5\uBE44\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"056\",\"codeName\":\"KRX
+        \uBCF4\uD5D8\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"057\",\"codeName\":\"KRX
+        \uC6B4\uC1A1\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"061\",\"codeName\":\"KRX
+        \uACBD\uAE30\uC18C\uBE44\uC7AC\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"062\",\"codeName\":\"KRX
+        \uD544\uC218\uC18C\uBE44\uC7AC\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"063\",\"codeName\":\"KRX
+        K\uCF58\uD150\uCE20\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"064\",\"codeName\":\"KRX
+        \uC815\uBCF4\uAE30\uC220\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"065\",\"codeName\":\"KRX
+        \uC720\uD2F8\uB9AC\uD2F0\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"351\",\"codeName\":\"KRX
+        300 \uC815\uBCF4\uAE30\uC220\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"352\",\"codeName\":\"KRX
+        300 \uAE08\uC735\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"353\",\"codeName\":\"KRX
+        300 \uC790\uC720\uC18C\uBE44\uC7AC\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"354\",\"codeName\":\"KRX
+        300 \uC0B0\uC5C5\uC7AC\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"355\",\"codeName\":\"KRX
+        300 \uD5EC\uC2A4\uCF00\uC5B4\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"356\",\"codeName\":\"KRX
+        300 \uCEE4\uBBA4\uB2C8\uCF00\uC774\uC158\uC11C\uBE44\uC2A4\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"357\",\"codeName\":\"KRX
+        300 \uC18C\uC7AC\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"5\",\"short_code\":\"358\",\"codeName\":\"KRX
+        300 \uD544\uC218\uC18C\uBE44\uC7AC\",\"marketCode\":\"KRX\",\"marketName\":\"KRX\"},{\"full_code\":\"1\",\"short_code\":\"001\",\"codeName\":\"\uCF54\uC2A4\uD53C\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"028\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        200\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"034\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        100\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"035\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        50\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"167\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        200 \uC911\uC18C\uD615\uC8FC\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"182\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        200 \uCD08\uB300\uD615\uC81C\uC678 \uC9C0\uC218\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"244\",\"codeName\":\"\uCF54\uC2A4\uD53C200\uC81C\uC678
+        \uCF54\uC2A4\uD53C\uC9C0\uC218\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"150\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        200 \uCEE4\uBBA4\uB2C8\uCF00\uC774\uC158\uC11C\uBE44\uC2A4\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"151\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        200 \uAC74\uC124\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"152\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        200 \uC911\uACF5\uC5C5\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"153\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        200 \uCCA0\uAC15/\uC18C\uC7AC\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"154\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        200 \uC5D0\uB108\uC9C0/\uD654\uD559\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"155\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        200 \uC815\uBCF4\uAE30\uC220\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"156\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        200 \uAE08\uC735\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"157\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        200 \uC0DD\uD65C\uC18C\uBE44\uC7AC\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"158\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        200 \uACBD\uAE30\uC18C\uBE44\uC7AC\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"159\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        200 \uC0B0\uC5C5\uC7AC\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"160\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        200 \uD5EC\uC2A4\uCF00\uC5B4\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"005\",\"codeName\":\"\uC74C\uC2DD\uB8CC\xB7\uB2F4\uBC30\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"006\",\"codeName\":\"\uC12C\uC720\xB7\uC758\uB958\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"007\",\"codeName\":\"\uC885\uC774\xB7\uBAA9\uC7AC\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"008\",\"codeName\":\"\uD654\uD559\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"009\",\"codeName\":\"\uC81C\uC57D\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"010\",\"codeName\":\"\uBE44\uAE08\uC18D\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"011\",\"codeName\":\"\uAE08\uC18D\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"012\",\"codeName\":\"\uAE30\uACC4\xB7\uC7A5\uBE44\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"013\",\"codeName\":\"\uC804\uAE30\uC804\uC790\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"014\",\"codeName\":\"\uC758\uB8CC\xB7\uC815\uBC00\uAE30\uAE30\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"015\",\"codeName\":\"\uC6B4\uC1A1\uC7A5\uBE44\xB7\uBD80\uD488\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"016\",\"codeName\":\"\uC720\uD1B5\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"017\",\"codeName\":\"\uC804\uAE30\xB7\uAC00\uC2A4\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"018\",\"codeName\":\"\uAC74\uC124\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"019\",\"codeName\":\"\uC6B4\uC1A1\xB7\uCC3D\uACE0\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"020\",\"codeName\":\"\uD1B5\uC2E0\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"021\",\"codeName\":\"\uAE08\uC735\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"024\",\"codeName\":\"\uC99D\uAD8C\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"025\",\"codeName\":\"\uBCF4\uD5D8\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"026\",\"codeName\":\"\uC77C\uBC18\uC11C\uBE44\uC2A4\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"027\",\"codeName\":\"\uC81C\uC870\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"002\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        \uB300\uD615\uC8FC\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"003\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        \uC911\uD615\uC8FC\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"004\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        \uC18C\uD615\uC8FC\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"224\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        200 \uBE44\uC911\uC0C1\uD55C 30%\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"227\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        200 \uBE44\uC911\uC0C1\uD55C 25%\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"232\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        200 \uBE44\uC911\uC0C1\uD55C 20%\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"2\",\"short_code\":\"001\",\"codeName\":\"\uCF54\uC2A4\uB2E5\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"203\",\"codeName\":\"\uCF54\uC2A4\uB2E5
+        150\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"189\",\"codeName\":\"\uCF54\uC2A4\uB2E5
+        \uAE00\uB85C\uBC8C\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"216\",\"codeName\":\"\uCF54\uC2A4\uB2E5
+        150 \uC815\uBCF4\uAE30\uC220\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"217\",\"codeName\":\"\uCF54\uC2A4\uB2E5
+        150 \uD5EC\uC2A4\uCF00\uC5B4\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"218\",\"codeName\":\"\uCF54\uC2A4\uB2E5
+        150 \uCEE4\uBBA4\uB2C8\uCF00\uC774\uC158\uC11C\uBE44\uC2A4\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"212\",\"codeName\":\"\uCF54\uC2A4\uB2E5
+        150 \uC18C\uC7AC\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"213\",\"codeName\":\"\uCF54\uC2A4\uB2E5
+        150 \uC0B0\uC5C5\uC7AC\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"214\",\"codeName\":\"\uCF54\uC2A4\uB2E5
+        150 \uD544\uC218\uC18C\uBE44\uC7AC\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"215\",\"codeName\":\"\uCF54\uC2A4\uB2E5
+        150 \uC790\uC720\uC18C\uBE44\uC7AC\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"012\",\"codeName\":\"\uC77C\uBC18\uC11C\uBE44\uC2A4\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"024\",\"codeName\":\"\uC81C\uC870\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"026\",\"codeName\":\"\uAC74\uC124\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"027\",\"codeName\":\"\uC720\uD1B5\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"029\",\"codeName\":\"\uC6B4\uC1A1\xB7\uCC3D\uACE0\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"031\",\"codeName\":\"\uAE08\uC735\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"037\",\"codeName\":\"\uC624\uB77D\xB7\uBB38\uD654\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"056\",\"codeName\":\"\uC74C\uC2DD\uB8CC\xB7\uB2F4\uBC30\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"058\",\"codeName\":\"\uC12C\uC720\xB7\uC758\uB958\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"062\",\"codeName\":\"\uC885\uC774\xB7\uBAA9\uC7AC\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"063\",\"codeName\":\"\uCD9C\uD310\xB7\uB9E4\uCCB4\uBCF5\uC81C\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"065\",\"codeName\":\"\uD654\uD559\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"066\",\"codeName\":\"\uC81C\uC57D\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"067\",\"codeName\":\"\uBE44\uAE08\uC18D\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"068\",\"codeName\":\"\uAE08\uC18D\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"070\",\"codeName\":\"\uAE30\uACC4\xB7\uC7A5\uBE44\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"072\",\"codeName\":\"\uC804\uAE30\uC804\uC790\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"074\",\"codeName\":\"\uC758\uB8CC\xB7\uC815\uBC00\uAE30\uAE30\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"075\",\"codeName\":\"\uC6B4\uC1A1\uC7A5\uBE44\xB7\uBD80\uD488\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"077\",\"codeName\":\"\uAE30\uD0C0\uC81C\uC870\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"002\",\"codeName\":\"\uCF54\uC2A4\uB2E5
+        \uB300\uD615\uC8FC\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"003\",\"codeName\":\"\uCF54\uC2A4\uB2E5
+        \uC911\uD615\uC8FC\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"004\",\"codeName\":\"\uCF54\uC2A4\uB2E5
+        \uC18C\uD615\uC8FC\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"181\",\"codeName\":\"\uCF54\uC2A4\uB2E5
+        \uC6B0\uB7C9\uAE30\uC5C5\uBD80\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"182\",\"codeName\":\"\uCF54\uC2A4\uB2E5
+        \uBCA4\uCC98\uAE30\uC5C5\uBD80\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"183\",\"codeName\":\"\uCF54\uC2A4\uB2E5
+        \uC911\uACAC\uAE30\uC5C5\uBD80\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"184\",\"codeName\":\"\uCF54\uC2A4\uB2E5
+        \uAE30\uC220\uC131\uC7A5\uAE30\uC5C5\uBD80\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"1\",\"short_code\":\"163\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        \uACE0\uBC30\uB2F9 50\",\"marketCode\":\"STK\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"1\",\"short_code\":\"164\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        \uBC30\uB2F9\uC131\uC7A5 50\",\"marketCode\":\"STK\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"1\",\"short_code\":\"165\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        \uC6B0\uC120\uC8FC \uC9C0\uC218\",\"marketCode\":\"STK\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"G\",\"short_code\":\"004\",\"codeName\":\"KRX/S&P
+        \uD0C4\uC18C\uD6A8\uC728 \uADF8\uB9B0\uB274\uB51C\uC9C0\uC218\",\"marketCode\":\"GBL\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"5\",\"short_code\":\"106\",\"codeName\":\"KRX
+        ESG Leaders 150\",\"marketCode\":\"KRX\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"5\",\"short_code\":\"107\",\"codeName\":\"KRX
+        Governance Leaders 100\",\"marketCode\":\"KRX\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"5\",\"short_code\":\"108\",\"codeName\":\"KRX
+        Eco Leaders 100\",\"marketCode\":\"KRX\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"5\",\"short_code\":\"136\",\"codeName\":\"KRX
+        ESG \uC0AC\uD68C\uCC45\uC784\uACBD\uC601\uC9C0\uC218(S)\",\"marketCode\":\"KRX\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"1\",\"short_code\":\"180\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        200 ESG \uC9C0\uC218\",\"marketCode\":\"STK\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"1\",\"short_code\":\"243\",\"codeName\":\"KRX
+        \uBD80\uB3D9\uC0B0\uB9AC\uCE20\uC778\uD504\uB77C \uC9C0\uC218\",\"marketCode\":\"STK\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"2\",\"short_code\":\"331\",\"codeName\":\"\uCF54\uC2A4\uB2E5
+        150 \uAC70\uBC84\uB10C\uC2A4 \uC9C0\uC218\",\"marketCode\":\"KSQ\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"5\",\"short_code\":\"411\",\"codeName\":\"KRX
+        BBIG \uC9C0\uC218\",\"marketCode\":\"KRX\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"5\",\"short_code\":\"412\",\"codeName\":\"KRX
+        2\uCC28\uC804\uC9C0 TOP 10 \uC9C0\uC218\",\"marketCode\":\"KRX\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"5\",\"short_code\":\"413\",\"codeName\":\"KRX
+        \uBC14\uC774\uC624 TOP 10 \uC9C0\uC218\",\"marketCode\":\"KRX\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"5\",\"short_code\":\"414\",\"codeName\":\"KRX
+        \uC778\uD130\uB137 TOP 10 \uC9C0\uC218\",\"marketCode\":\"KRX\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"5\",\"short_code\":\"415\",\"codeName\":\"KRX
+        \uAC8C\uC784 TOP 10 \uC9C0\uC218\",\"marketCode\":\"KRX\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"1\",\"short_code\":\"283\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        200 \uAE30\uD6C4\uBCC0\uD654\uC9C0\uC218\",\"marketCode\":\"STK\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"5\",\"short_code\":\"418\",\"codeName\":\"KRX
+        300 \uAE30\uD6C4\uBCC0\uD654\uC9C0\uC218\",\"marketCode\":\"KRX\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"5\",\"short_code\":\"419\",\"codeName\":\"KRX
+        \uAE30\uD6C4\uBCC0\uD654 \uC194\uB8E8\uC158\uC9C0\uC218\",\"marketCode\":\"KRX\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"2\",\"short_code\":\"118\",\"codeName\":\"IT
+        \uC11C\uBE44\uC2A4\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"2\",\"short_code\":\"114\",\"codeName\":\"\uD1B5\uC2E0\",\"marketCode\":\"KSQ\",\"marketName\":\"KOSDAQ\"},{\"full_code\":\"1\",\"short_code\":\"047\",\"codeName\":\"\uC624\uB77D\xB7\uBB38\uD654\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"046\",\"codeName\":\"IT
+        \uC11C\uBE44\uC2A4\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"045\",\"codeName\":\"\uBD80\uB3D9\uC0B0\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"G\",\"short_code\":\"005\",\"codeName\":\"KRX/S&P
+        ESG \uACE0\uBC30\uB2F9\uC9C0\uC218\",\"marketCode\":\"GBL\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"1\",\"short_code\":\"359\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        200 \uAE08\uC735 \uACE0\uBC30\uB2F9 TOP 10 \uC9C0\uC218\",\"marketCode\":\"STK\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"1\",\"short_code\":\"292\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        200 25/50\uC9C0\uC218\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"293\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        200 25/50 NTR \uC9C0\uC218\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"294\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        200 25/50 NTR USD \uC9C0\uC218\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"168\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        200 \uACBD\uAE30\uBC29\uC5B4\uC18C\uBE44\uC7AC\uC9C0\uC218\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"894\",\"codeName\":\"\uCF54\uC2A4\uD53C
+        200 TOP 10\",\"marketCode\":\"STK\",\"marketName\":\"KOSPI\"},{\"full_code\":\"1\",\"short_code\":\"170\",\"codeName\":\"KRX-Akros
+        \uACE0\uBC30\uB2F9\uC8FC 20 \uC9C0\uC218\",\"marketCode\":\"STK\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"1\",\"short_code\":\"925\",\"codeName\":\"KRX
+        \uC0BC\uC131\uC804\uC790 \uC9C0\uC218\",\"marketCode\":\"STK\",\"marketName\":\"KRX\"},{\"full_code\":\"1\",\"short_code\":\"932\",\"codeName\":\"KRX
+        SK\uD558\uC774\uB2C9\uC2A4 \uC9C0\uC218\",\"marketCode\":\"STK\",\"marketName\":\"KRX\"},{\"full_code\":\"1\",\"short_code\":\"939\",\"codeName\":\"K-\uC0E4\uD504\uC9C0\uC218(1\uB144)\",\"marketCode\":\"STK\",\"marketName\":\"KRX\"},{\"full_code\":\"1\",\"short_code\":\"940\",\"codeName\":\"K-\uC0E4\uD504\uC9C0\uC218(3\uB144)\",\"marketCode\":\"STK\",\"marketName\":\"KRX\"},{\"full_code\":\"1\",\"short_code\":\"941\",\"codeName\":\"K-\uC0E4\uD504\uC9C0\uC218(5\uB144)\",\"marketCode\":\"STK\",\"marketName\":\"KRX\"},{\"full_code\":\"1\",\"short_code\":\"942\",\"codeName\":\"
+        K-\uC0E4\uD504\uC9C0\uC218(10\uB144)\",\"marketCode\":\"STK\",\"marketName\":\"KRX\"},{\"full_code\":\"1\",\"short_code\":\"917\",\"codeName\":\"KRX
+        \uD504\uB77C\uC784 \uC624\uD53C\uC2A4 \uB9AC\uCE20 \uC9C0\uC218\",\"marketCode\":\"STK\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"1\",\"short_code\":\"921\",\"codeName\":\"KRX-Akros
+        \uAE08\uC735 & \uC9C0\uC8FC \uACE0\uBC30\uB2F9 \uC9C0\uC218\",\"marketCode\":\"STK\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"2\",\"short_code\":\"431\",\"codeName\":\"\uCF54\uC2A4\uB2E5
+        TOP 10 \uC9C0\uC218\",\"marketCode\":\"KSQ\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"2\",\"short_code\":\"432\",\"codeName\":\"\uCF54\uC2A4\uB2E5
+        TOP 15 \uC9C0\uC218\",\"marketCode\":\"KSQ\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"5\",\"short_code\":\"420\",\"codeName\":\"KRX
+        \uBE14\uB8E8\uCE69 25\",\"marketCode\":\"KRX\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"5\",\"short_code\":\"421\",\"codeName\":\"KRX
+        \uC804\uAE30\uCC28 Top 15\",\"marketCode\":\"KRX\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"5\",\"short_code\":\"422\",\"codeName\":\"KRX
+        \uBC18\uB3C4\uCCB4 Top 15\",\"marketCode\":\"KRX\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"5\",\"short_code\":\"448\",\"codeName\":\"KRX-Akros
+        AI \uC804\uB825\uC778\uD504\uB77C \uC9C0\uC218\",\"marketCode\":\"KRX\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"5\",\"short_code\":\"449\",\"codeName\":\"KRX
+        \uCF54\uB9AC\uC544 \uC18C\uBC84\uB9B0 AI \uC9C0\uC218\",\"marketCode\":\"KRX\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"5\",\"short_code\":\"450\",\"codeName\":\"KRX
+        AI \uBC18\uB3C4\uCCB4 \uC9C0\uC218\",\"marketCode\":\"KRX\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"5\",\"short_code\":\"451\",\"codeName\":\"KRX
+        \uC870\uC120 TOP10 \uC9C0\uC218\",\"marketCode\":\"KRX\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"5\",\"short_code\":\"452\",\"codeName\":\"KRX
+        \uAE30\uC220\uC774\uC804 \uBC14\uC774\uC624 \uC9C0\uC218\",\"marketCode\":\"KRX\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"5\",\"short_code\":\"453\",\"codeName\":\"KRX
+        K-AI \uBC18\uB3C4\uCCB4TOP2+ \uC9C0\uC218\",\"marketCode\":\"KRX\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"5\",\"short_code\":\"454\",\"codeName\":\"KRX
+        K-AI 2\uCC28\uC804\uC9C0 \uC9C0\uC218\",\"marketCode\":\"KRX\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"5\",\"short_code\":\"455\",\"codeName\":\"KRX
+        K-AI \uBC14\uC774\uC624\uD14C\uD06C\uCF54\uC2A4\uB2E5 \uC9C0\uC218\",\"marketCode\":\"KRX\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"5\",\"short_code\":\"456\",\"codeName\":\"KRX
+        K-AI \uBC29\uC0B0TOP5+ \uC9C0\uC218\",\"marketCode\":\"KRX\",\"marketName\":\"\uD14C\uB9C8\"},{\"full_code\":\"5\",\"short_code\":\"457\",\"codeName\":\"KRX
+        \uC0BC\uC131\uC804\uC790 SK\uD558\uC774\uB2C9\uC2A4 \uBBF8\uAD6D\uCC44 \uD63C\uD569\uC9C0\uC218\",\"marketCode\":\"KRX\",\"marketName\":\"\uD14C\uB9C8\"}],\"CURRENT_DATETIME\":\"2026.09.18
+        PM 05:54:09\"}"
+    headers:
+      Cache-Control:
+      - max-age=0, no-cache, no-store
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Length:
+      - '2254'
+      Content-Type:
+      - text/html; charset=utf-8
+      Date:
+      - Fri, 18 Sep 2026 08:54:09 GMT
+      Expires:
+      - Fri, 18 Sep 2026 08:54:09 GMT
+      Pragma:
+      - no-cache
+      Vary:
+      - Accept-Encoding
+    status:
+      code: 200
+      message: OK
+version: 1

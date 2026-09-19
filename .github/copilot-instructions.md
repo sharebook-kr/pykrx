@@ -59,15 +59,16 @@ pytest -m "not slow"         # Skip slow tests
 ### API Design
 ```python
 # Standard function signature pattern
-def get_market_ohlcv_by_date(fromdate: str, todate: str, ticker: str, 
-                             adjusted: bool = True) -> DataFrame:
+def get_market_ohlcv_by_date(
+    fromdate: str, todate: str, ticker: str, adjusted: bool = True
+) -> DataFrame:
     """
     Args:
         fromdate (str): YYYYMMDD format
         todate   (str): YYYYMMDD format
         ticker   (str): Stock ticker (6-digit code)
         adjusted (bool): Return adjusted price
-    
+
     Returns:
         DataFrame: Index as datetime, Korean column names
     """
@@ -79,12 +80,11 @@ class 개별종목시세(KrxWebIo):
     @property
     def bld(self):
         return "dbms/MDC/STAT/standard/MDCSTAT01701"
-    
+
     def fetch(self, strtDd: str, endDd: str, isuCd: str, adjStkPrc: int) -> DataFrame:
         # KrxWebIo.read() handles POST with bld parameter injection
-        result = self.read(strtDd=strtDd, endDd=endDd, isuCd=isuCd, 
-                          adjStkPrc=adjStkPrc)
-        return DataFrame(result['output'])
+        result = self.read(strtDd=strtDd, endDd=endDd, isuCd=isuCd, adjStkPrc=adjStkPrc)
+        return DataFrame(result["output"])
 ```
 
 ### Ticker Handling

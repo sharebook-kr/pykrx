@@ -80,6 +80,7 @@ PyKrx는 날짜 파라미터가 매일 변하더라도 기존 Cassette를 재사
 def uri_without_dates(r1, r2):
     """날짜 파라미터(strtDd, endDd 등)를 무시하고 URI 비교"""
 
+
 def form_body_matcher(r1, r2):
     """POST Body에서 날짜 파라미터를 무시하고 비교"""
 ```
