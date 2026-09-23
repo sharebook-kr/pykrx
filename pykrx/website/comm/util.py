@@ -3,6 +3,8 @@ import logging
 
 from pandas import DataFrame
 
+logger = logging.getLogger(__name__)
+
 
 def dataframe_empty_handler(func):
     def wrapper(*args, **kwargs):
@@ -15,9 +17,22 @@ def dataframe_empty_handler(func):
             ValueError,
             json.JSONDecodeError,
         ) as e:
-            print(f"Error occurred in {func.__name__}: {e}")
-            logging.info(args, kwargs)
-            logging.info(e)
+            # KRX intermittently returns an empty payload (e.g. under request
+            # load or rate limiting). Building the DataFrame then fails --
+            # most commonly a "Length mismatch" ValueError when column names
+            # are assigned to an empty frame. Treat this as an empty result:
+            # emit a single, suppressible warning (instead of printing to
+            # stdout) and return an empty DataFrame so callers do not crash.
+            # See issues #150 and #294.
+            logger.warning(
+                "%s returned no data (%s: %s); returning an empty DataFrame "
+                "[args=%r kwargs=%r]",
+                func.__name__,
+                type(e).__name__,
+                e,
+                args,
+                kwargs,
+            )
             return DataFrame()
 
     return wrapper
