@@ -16,7 +16,7 @@ def dataframe_empty_handler(func):
             json.JSONDecodeError,
         ) as e:
             print(f"Error occurred in {func.__name__}: {e}")
-            logging.info(args, kwargs)
+            logging.info("args=%r kwargs=%r", args, kwargs)
             logging.info(e)
             return DataFrame()
 
