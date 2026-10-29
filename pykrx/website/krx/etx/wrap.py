@@ -327,7 +327,7 @@ def get_trading_volume_and_value_by_investor(fromdate: str, todate: str) -> Data
     Returns:
         DataFrame:
 
-            > get_etf_trading_volumne_and_value_by_investor("20220415", "20220422")
+            > get_etf_trading_volume_and_value_by_investor("20220415", "20220422")
 
                            거래량                              거래대금
                              매도        매수    순매수            매도            매수            순
@@ -377,7 +377,7 @@ def get_trading_volume_and_value_by_date(
     Returns:
         DataFrame:
 
-            > get_etf_trading_volumne_and_value_by_date("20220415", "20220422", "거래대금", "순매수")
+            > get_etf_trading_volume_and_value_by_date("20220415", "20220422", "거래대금", "순매수")
 
                                 기관    기타법인         개인        외국인 전체
             날짜
@@ -536,10 +536,10 @@ if __name__ == "__main__":
     # print( get_etf_price_deviation("20200101", "20200401", "295820"))
     # print(get_etf_tracking_error("20200101", "20200401", "295820"))
     # print(get_etf_portfolio_deposit_file("20210705", "114800"))
-    # df = get_etf_trading_volumne_and_value_by_investor("20220415", "20220422")
-    # df = get_etf_trading_volumne_and_value_by_date(
+    # df = get_etf_trading_volume_and_value_by_investor("20220415", "20220422")
+    # df = get_etf_trading_volume_and_value_by_date(
     #     "20220415", "20220422", 1, 1)
-    # df = get_etf_unbound_trading_volumne_and_value_by_investor("20220908", "20220916", "580011")
+    # df = get_etf_unbound_trading_volume_and_value_by_investor("20220908", "20220916", "580011")
     # df = get_indivisual_trading_volume_and_value_by_date("20230421", "20230428", "069500", "거래대금", "순매수")
     # df = get_indivisual_trading_volume_and_value_by_investor("20230421", "20230428", "069500")
     # df = get_indivisual_trading_volume_and_value_by_date("20230421", "20230428", "580011", "거래대금", "순매수")

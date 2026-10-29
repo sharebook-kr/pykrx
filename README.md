@@ -1318,9 +1318,9 @@ print(df.head())
 ```
 
 #### 2.2.1.7 ETF 거래 실적 조회
-`get_etf_trading_volumne_and_value` 함수는 거래량과 거래대금 정보를 조회합니다. 시작일자와 종료일자를 입력하면 투자자별 거래 실적이 조회됩니다.
+`get_etf_trading_volume_and_value` 함수는 거래량과 거래대금 정보를 조회합니다. 시작일자와 종료일자를 입력하면 투자자별 거래 실적이 조회됩니다.
 ```python
-df = stock.get_etf_trading_volumne_and_value("20220415", "20220422")
+df = stock.get_etf_trading_volume_and_value("20220415", "20220422")
 print(df.head())
 ```
 ```
