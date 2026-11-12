@@ -39,6 +39,12 @@ def market_valid_check(param=None):
     return _market_valid_check
 
 
+def _is_date_range(args, kwargs):
+    # 날짜를 위치 인자와 키워드로 섞어 넘겨도 기간 조회로 본다.
+    dates = list(filter(regex_yymmdd.match, [str(x) for x in args]))
+    return len(dates) + ("fromdate" in kwargs) + ("todate" in kwargs) >= 2
+
+
 def resample_ohlcv(df, freq, how):
     """
     :param df   : KRX OLCV format의 DataFrame
@@ -185,8 +191,7 @@ def get_market_ohlcv(*args, **kwargs):
 
     """  # pylint: disable=line-too-long # noqa: E501
 
-    dates = list(filter(regex_yymmdd.match, [str(x) for x in args]))
-    if len(dates) == 2 or ("fromdate" in kwargs and "todate" in kwargs):
+    if _is_date_range(args, kwargs):
         return get_market_ohlcv_by_date(*args, **kwargs)
     else:
         return get_market_ohlcv_by_ticker(*args, **kwargs)
@@ -346,8 +351,7 @@ def get_market_cap(*args, **kwargs):
 
     """  # pylint: disable=line-too-long # noqa: E501
 
-    dates = list(filter(regex_yymmdd.match, [str(x) for x in args]))
-    if len(dates) == 2 or ("fromdate" in kwargs and "todate" in kwargs):
+    if _is_date_range(args, kwargs):
         return get_market_cap_by_date(*args, **kwargs)
     else:
         return get_market_cap_by_ticker(*args, **kwargs)
@@ -475,8 +479,7 @@ def get_exhaustion_rates_of_foreign_investment(*args, **kwargs):
             020560  223235294   13871465   6.210938  111595323  12.429688
     """
 
-    dates = list(filter(regex_yymmdd.match, [str(x) for x in args]))
-    if len(dates) == 2 or ("fromdate" in kwargs and "todate" in kwargs):
+    if _is_date_range(args, kwargs):
         return get_exhaustion_rates_of_foreign_investment_by_date(*args, **kwargs)
     else:
         return get_exhaustion_rates_of_foreign_investment_by_ticker(*args, **kwargs)
@@ -576,8 +579,7 @@ def get_market_price_change(*args, **kwargs):
             138930  BNK금융지주    5680    5780   100   1.76  18363844  103453756550
     """  # pylint: disable=line-too-long # noqa: E501
 
-    dates = list(filter(regex_yymmdd.match, [str(x) for x in args]))
-    if len(dates) == 2 or ("fromdate" in kwargs and "todate" in kwargs):
+    if _is_date_range(args, kwargs):
         return get_market_price_change_by_ticker(*args, **kwargs)
     else:
         raise NotImplementedError
@@ -673,8 +675,7 @@ def get_market_fundamental(*args, **kwargs):
                 282330   36022  15.062500  3.660156  8763  2.050781  2700
                 138930   25415   3.380859  0.219971  1647  6.468750   360
     """
-    dates = list(filter(regex_yymmdd.match, [str(x) for x in args]))
-    if len(dates) == 2 or ("fromdate" in kwargs and "todate" in kwargs):
+    if _is_date_range(args, kwargs):
         return get_market_fundamental_by_date(*args, **kwargs)
     else:
         return get_market_fundamental_by_ticker(*args, **kwargs)
@@ -1364,8 +1365,7 @@ def get_index_ohlcv(*args, **kwargs):
             코스피50             3034.99   3055.71   3008.02   3008.02   110775949  13083864634083
     """  # pylint: disable=line-too-long # noqa: E501
 
-    dates = list(filter(regex_yymmdd.match, [str(x) for x in args]))
-    if len(dates) == 2 or ("fromdate" in kwargs and "todate" in kwargs):
+    if _is_date_range(args, kwargs):
         return get_index_ohlcv_by_date(*args, **kwargs)
     else:
         return get_index_ohlcv_by_ticker(*args, **kwargs)
@@ -1526,8 +1526,7 @@ def get_index_fundamental(*args, **kwargs):
             코스피 200 중소형주    1264.5    0.40    62.820000    0.0   1.19       0.98
     """  # pylint: disable=line-too-long # noqa: E501
 
-    dates = list(filter(regex_yymmdd.match, [str(x) for x in args]))
-    if len(dates) == 2 or ("fromdate" in kwargs and "todate" in kwargs):
+    if _is_date_range(args, kwargs):
         return get_index_fundamental_by_date(*args, **kwargs)
     else:
         return get_index_fundamental_by_ticker(*args, **kwargs)
@@ -2162,8 +2161,7 @@ def get_shorting_balance(*args, **kwargs) -> DataFrame:
             138930      596477    325935246  3340271200  1.825237e+12  0.180054
     """  # pylint: disable=line-too-long # noqa: E501
 
-    dates = list(filter(regex_yymmdd.match, [str(x) for x in args]))
-    if len(dates) == 2 or ("fromdate" in kwargs and "todate" in kwargs):
+    if _is_date_range(args, kwargs):
         return get_shorting_balance_by_date(*args, **kwargs)
     else:
         return get_shorting_balance_by_ticker(*args, **kwargs)
