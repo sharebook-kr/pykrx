@@ -1300,14 +1300,14 @@ def get_index_portfolio_deposit_file(
     else:
         target_date = date
 
-    if target_date <= "20140501":
-        print("KRX web server does NOT provide data prior to 2014/05/01.")
-        return []
-
     if isinstance(target_date, datetime.date):
         target_date = krx.datetime2string(target_date)
 
     target_date = target_date.replace("-", "")
+
+    if target_date <= "20140501":
+        print("KRX web server does NOT provide data prior to 2014/05/01.")
+        return []
 
     pdf = krx.get_index_portfolio_deposit_file(target_date, ticker)
     # 주말 or 비영업일 여부를 확인하는 것 자체가 상대적으로 오랜 시간 걸려 lazy 판단
@@ -1455,7 +1455,7 @@ def get_index_ohlcv_by_date(
     """  # pylint: disable=line-too-long # noqa: E501
 
     if isinstance(fromdate, datetime.date):
-        fromdate = krx.datetime2string(fromdate, freq)
+        fromdate = krx.datetime2string(fromdate)
 
     if isinstance(todate, datetime.date):
         todate = krx.datetime2string(todate)
@@ -1597,7 +1597,7 @@ def get_index_fundamental_by_date(
     """
 
     if isinstance(fromdate, datetime.date):
-        fromdate = krx.datetime2string(fromdate, prev)
+        fromdate = krx.datetime2string(fromdate)
 
     if isinstance(todate, datetime.date):
         todate = krx.datetime2string(todate)
@@ -2656,7 +2656,7 @@ def get_etf_trading_volume_and_value(
 ) -> DataFrame: ...
 
 
-@dispatch(str, str)
+@dispatch((str, datetime.date), (str, datetime.date))
 def get_etf_trading_volume_and_value(fromdate: str, todate: str) -> DataFrame:  # pylint: disable=function-redefined  # noqa
     """주어진 기간의 투자자별 거래실적 합계
 
@@ -2695,7 +2695,7 @@ def get_etf_trading_volume_and_value(fromdate: str, todate: str) -> DataFrame:  
     return krx.get_trading_volume_and_value_by_investor(fromdate, todate)
 
 
-@dispatch(str, str, str)
+@dispatch((str, datetime.date), (str, datetime.date), str)
 def get_etf_trading_volume_and_value(
     fromdate: str,
     todate: str,  # pylint: disable=function-redefined  # noqa
@@ -2739,7 +2739,7 @@ def get_etf_trading_volume_and_value(
     )
 
 
-@dispatch(str, str, str, str)
+@dispatch((str, datetime.date), (str, datetime.date), str, str)
 def get_etf_trading_volume_and_value(
     fromdate: str,
     todate: str,  # pylint: disable=function-redefined  # noqa
@@ -2779,7 +2779,7 @@ def get_etf_trading_volume_and_value(
     )
 
 
-@dispatch(str, str, str, str, str)
+@dispatch((str, datetime.date), (str, datetime.date), str, str, str)
 def get_etf_trading_volume_and_value(
     fromdate: str,
     todate: str,
