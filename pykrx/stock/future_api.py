@@ -86,7 +86,7 @@ def get_future_ohlcv(*args, **kwargs):
 def get_future_ohlcv_by_ticker(
     date: str, prod: str, alternative: bool = False, prev: bool = True
 ) -> DataFrame:
-    if isinstance(date, datetime.datetime):
+    if isinstance(date, datetime.date):
         date = krx.datetime2string(date)
 
     date = date.replace("-", "")

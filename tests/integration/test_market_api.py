@@ -1,3 +1,5 @@
+import datetime
+
 import pytest
 from pykrx import stock
 import pandas as pd
@@ -40,6 +42,14 @@ class TestStockOhlcvByDateTest:
         assert isinstance(df.index, pd.core.indexes.datetimes.DatetimeIndex)
         assert isinstance(df.index[0], pd._libs.tslibs.timestamps.Timestamp)
         assert df.index[0] < df.index[-1]
+
+    @pytest.mark.vcr
+    def test_ohlcv_with_date_objects(self):
+        df = stock.get_market_ohlcv_by_date(
+            datetime.date(2021, 1, 18), datetime.date(2021, 1, 26), "005930"
+        )
+        temp = df.iloc[0:5, 0] == np.array([86600, 84500, 89000, 87500, 89000])
+        assert temp.sum() == 5
 
     @pytest.mark.vcr
     def test_ohlcv_for_a_day(self):
